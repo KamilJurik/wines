@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KamiWines – Moje vína</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="header-brand">🍷 KamiWines</div>
+    <div class="header-right">
+      <span class="header-user" id="headerUser"></span>
+      <button class="btn-logout" onclick="odhlasit()">Odhlásit</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="search-bar">
+      <input type="text" class="search-input" id="searchInput"
+             placeholder="Hledat víno, vinařství, odrůdu…" oninput="zobrazitVina()">
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" id="tabMoje"    onclick="prepnoutTab('moje')">Moje vína</button>
+      <button class="tab"        id="tabVsechna" onclick="prepnoutTab('vsechna')">Všechna vína</button>
+    </div>
+
+    <div id="loadingState" class="state-box"><span class="icon">⏳</span>Načítám vína…</div>
+    <div id="emptyState"   class="state-box" style="display:none">
+      <span class="icon">🍾</span>
+      <span id="emptyText"></span>
+    </div>
+    <div id="winesGrid" class="wines-grid"></div>
+  </div>
+
+  <button class="fab" onclick="window.location.href='vino.html'" title="Přidat víno">+</button>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="js/config.js"></script>
+  <script>
+    let vsechnaVina  = [];
+    let aktualniTab  = 'moje';
+    let aktualniUser = null;
+
+    // ── Auth guard ────────────────────────────────────────────
+    auth.onAuthStateChanged(user => {
+      if (!user) { window.location.href = 'index.html'; return; }
+      aktualniUser = user;
+      document.getElementById('headerUser').textContent = user.displayName || user.email;
+      nacistVina();
+    });
+
+    // ── Firestore realtime listener ───────────────────────────
+    function nacistVina() {
+      db.collection('vina')
+        .orderBy('datumPridani', 'desc')
+        .onSnapshot(snapshot => {
+          vsechnaVina = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+          document.getElementById('loadingState').style.display = 'none';
+          zobrazitVina();
+        }, err => {
+          console.error(err);
+          document.getElementById('loadingState').innerHTML =
+            '<span class="icon">⚠️</span>Nepodařilo se načíst vína.';
+        });
+    }
+
+    // ── Render ────────────────────────────────────────────────
+    function zobrazitVina() {
+      const hledani = (document.getElementById('searchInput').value || '').toLowerCase();
+
+      let seznam = vsechnaVina;
+
+      if (aktualniTab === 'moje') {
+        seznam = seznam.filter(v => v.userId === aktualniUser.uid);
+      }
+
+      if (hledani) {
+        seznam = seznam.filter(v =>
+          hledatV(v.nazev,              hledani) ||
+          hledatV(v.vinarstvi,          hledani) ||
+          hledatV(v.odruda,             hledani) ||
+          hledatV(v.typVina,            hledani) ||
+          hledatV(v.privlastek,         hledani) ||
+          hledatV(v.zemePouvodu,        hledani) ||
+          hledatV(v.vinarskaOblast,     hledani) ||
+          hledatV(v.vinarskaPodoblast,  hledani) ||
+          hledatV(v.vinacniTrat,        hledani) ||
+          hledatV(String(v.rocnik||''), hledani)
+        );
+      }
+
+      const grid  = document.getElementById('winesGrid');
+      const empty = document.getElementById('emptyState');
+
+      if (seznam.length === 0) {
+        grid.innerHTML = '';
+        document.getElementById('emptyText').textContent = hledani
+          ? `Žádné výsledky pro „${hledani}"`
+          : aktualniTab === 'moje'
+            ? 'Zatím žádná vína. Přidejte první kliknutím na +!'
+            : 'Žádná vína v databázi.';
+        empty.style.display = 'block';
+      } else {
+        empty.style.display = 'none';
+        grid.innerHTML = seznam.map(kartaHtml).join('');
+      }
+    }
+
+    function kartaHtml(v) {
+      const hvezdy = [1,2,3,4,5].map(i =>
+        `<span class="star${i <= (v.hodnoceni||0) ? ' on' : ''}">★</span>`
+      ).join('');
+
+      const barvaCls = barvaTridaNazev(v.barva);
+      const meta = [v.rocnik, v.odruda].filter(Boolean).join(' · ');
+      const owner = aktualniTab === 'vsechna'
+        ? `<div class="wine-owner">👤 ${esc(v.uzivatelJmeno || '—')}</div>`
+        : '';
+
+      return `
+        <a class="wine-card" href="vino.html?id=${v.id}">
+          <div class="wine-card-top">
+            <div class="wine-name">${esc(v.nazev || 'Bez názvu')}</div>
+            ${barvaCls ? `<div class="color-dot ${barvaCls}"></div>` : ''}
+          </div>
+          ${v.vinarstvi ? `<div class="wine-winery">${esc(v.vinarstvi)}</div>` : ''}
+          ${meta        ? `<div class="wine-meta">${esc(meta)}</div>` : ''}
+          <div class="stars-row">${hvezdy}</div>
+          ${owner}
+        </a>`;
+    }
+
+    // ── Helpers ───────────────────────────────────────────────
+    function prepnoutTab(tab) {
+      aktualniTab = tab;
+      document.getElementById('tabMoje').classList.toggle('active',    tab === 'moje');
+      document.getElementById('tabVsechna').classList.toggle('active', tab === 'vsechna');
+      zobrazitVina();
+    }
+
+    function odhlasit() {
+      auth.signOut().then(() => window.location.href = 'index.html');
+    }
+
+    function hledatV(hodnota, hledani) {
+      return (hodnota || '').toLowerCase().includes(hledani);
+    }
+
+    function barvaTridaNazev(barva) {
+      return { 'červené': 'cervene', 'bílé': 'bile', 'rosé': 'rose', 'šumivé': 'sumive' }[barva] || '';
+    }
+
+    function esc(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+  </script>
+</body>
+</html>

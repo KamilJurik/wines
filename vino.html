@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KamiWines – Víno</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="header-brand">🍷 KamiWines</div>
+    <div class="header-right">
+      <span class="header-user" id="headerUser"></span>
+      <button class="btn-logout" onclick="odhlasit()">Odhlásit</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="page-header">
+      <button class="back-btn" onclick="window.location.href='vina.html'">←</button>
+      <h1 class="page-title" id="pageTitle">Přidat víno</h1>
+    </div>
+
+    <div id="appMsg" class="msg error"></div>
+
+    <!-- ── Online vyhledávání ──────────────────────────────── -->
+    <div class="online-panel" id="onlinePanel">
+      <h3>🔍 Vyhledat víno online</h3>
+      <div class="online-row">
+        <input type="text" class="search-input" id="onlineQuery"
+               placeholder="Název vína nebo vinařství…"
+               onkeydown="if(event.key==='Enter') hledatOnline()">
+        <button class="btn btn-primary btn-sm" id="onlineBtn" onclick="hledatOnline()">Hledat</button>
+      </div>
+      <div id="onlineResults"></div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         FORMULÁŘ
+         ══════════════════════════════════════════════════════ -->
+
+    <!-- Základní informace -->
+    <div class="section-title">Základní informace</div>
+
+    <div class="form-group">
+      <label for="f_nazev">Název vína *</label>
+      <input type="text" id="f_nazev" placeholder="např. Ryzlink rýnský Nechory">
+    </div>
+
+    <div class="grid2">
+      <div class="form-group">
+        <label for="f_vinarstvi">Vinařství</label>
+        <input type="text" id="f_vinarstvi" placeholder="např. Sonberk">
+      </div>
+      <div class="form-group">
+        <label for="f_odruda">Odrůda</label>
+        <input type="text" id="f_odruda" placeholder="např. Ryzlink rýnský">
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="form-group">
+        <label for="f_rocnik">Ročník</label>
+        <input type="number" id="f_rocnik" placeholder="např. 2022" min="1900" max="2100">
+      </div>
+      <div class="form-group">
+        <label for="f_barva">Barva</label>
+        <select id="f_barva">
+          <option value="">— vyberte —</option>
+          <option value="červené">Červené</option>
+          <option value="bílé">Bílé</option>
+          <option value="rosé">Rosé</option>
+          <option value="šumivé">Šumivé</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="form-group">
+        <label for="f_privlastek">Přívlastek</label>
+        <input type="text" id="f_privlastek" placeholder="např. Pozdní sběr"
+               list="privlastek-list">
+        <datalist id="privlastek-list">
+          <option value="Kabinet">
+          <option value="Pozdní sběr">
+          <option value="Výběr z hroznů">
+          <option value="Výběr z bobulí">
+          <option value="Výběr z cibéb">
+          <option value="Ledové víno">
+          <option value="Slámové víno">
+        </datalist>
+      </div>
+      <div class="form-group">
+        <label for="f_typVina">Typ vína</label>
+        <input type="text" id="f_typVina" placeholder="např. Suché"
+               list="typ-list">
+        <datalist id="typ-list">
+          <option value="Suché">
+          <option value="Polosuché">
+          <option value="Polosladké">
+          <option value="Sladké">
+          <option value="Naturální">
+          <option value="Oranžové">
+        </datalist>
+      </div>
+    </div>
+
+    <!-- Původ -->
+    <div class="section-title">Původ</div>
+
+    <div class="grid2">
+      <div class="form-group">
+        <label for="f_zeme">Země původu</label>
+        <input type="text" id="f_zeme" placeholder="např. Česká republika">
+      </div>
+      <div class="form-group">
+        <label for="f_oblast">Vinařská oblast</label>
+        <input type="text" id="f_oblast" placeholder="např. Morava">
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="form-group">
+        <label for="f_podoblast">Vinařská podoblast</label>
+        <input type="text" id="f_podoblast" placeholder="např. Slovácká">
+      </div>
+      <div class="form-group">
+        <label for="f_trat">Viniční trať</label>
+        <input type="text" id="f_trat" placeholder="např. Nechory">
+      </div>
+    </div>
+
+    <!-- Technické parametry -->
+    <div class="section-title">Technické parametry</div>
+
+    <div class="grid2">
+      <div class="form-group">
+        <label for="f_alkohol">Obsah alkoholu (%)</label>
+        <input type="number" id="f_alkohol" placeholder="např. 12.5" step="0.1" min="0" max="25">
+      </div>
+      <div class="form-group">
+        <label for="f_cukr">Zbytkový cukr (g/l)</label>
+        <input type="number" id="f_cukr" placeholder="např. 4.2" step="0.1" min="0">
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="form-group">
+        <label for="f_kyseliny">Kyseliny (g/l)</label>
+        <input type="number" id="f_kyseliny" placeholder="např. 6.8" step="0.1" min="0">
+      </div>
+      <div class="form-group">
+        <label for="f_objem">Objem láhve (l)</label>
+        <input type="number" id="f_objem" placeholder="0.75" step="0.01" min="0" value="0.75">
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="form-group">
+        <label for="f_sarze">Číslo šarže</label>
+        <input type="text" id="f_sarze" placeholder="např. L2302">
+      </div>
+      <div class="form-group">
+        <label for="f_cena">Cena (Kč)</label>
+        <input type="number" id="f_cena" placeholder="např. 320" min="0">
+      </div>
+    </div>
+
+    <!-- Moje hodnocení -->
+    <div class="section-title">Moje hodnocení</div>
+
+    <div class="form-group">
+      <label>Hodnocení</label>
+      <div class="star-input-row" id="starRow">
+        <button class="star-btn" data-val="1" onclick="nastavHodnoceni(1)">★</button>
+        <button class="star-btn" data-val="2" onclick="nastavHodnoceni(2)">★</button>
+        <button class="star-btn" data-val="3" onclick="nastavHodnoceni(3)">★</button>
+        <button class="star-btn" data-val="4" onclick="nastavHodnoceni(4)">★</button>
+        <button class="star-btn" data-val="5" onclick="nastavHodnoceni(5)">★</button>
+        <span class="star-label" id="starLabel">— bez hodnocení</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="f_degustace">Datum degustace</label>
+      <input type="date" id="f_degustace">
+    </div>
+
+    <div class="form-group">
+      <label for="f_komentar">Komentář</label>
+      <textarea id="f_komentar" placeholder="Vaše poznámky, chuťový profil, doporučení k jídlu…"></textarea>
+    </div>
+
+    <!-- Akce -->
+    <div class="form-actions" id="formActions">
+      <button class="btn btn-primary" id="saveBtn" onclick="ulozit()">Uložit víno</button>
+      <button class="btn btn-secondary" onclick="window.location.href='vina.html'">Zrušit</button>
+      <button class="btn btn-danger" id="deleteBtn" onclick="smazat()" style="display:none; margin-left:auto">Smazat</button>
+    </div>
+
+    <!-- Zpráva pro readonly režim -->
+    <div id="readonlyMsg" class="msg info" style="margin-top:16px">
+      Toto víno přidal(a) jiný uživatel — nelze upravovat.
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="js/config.js"></script>
+  <script>
+    let aktualniUser = null;
+    let vinoId       = null;
+    let hodnoceni    = 0;
+    let jeVlastnik   = false;
+
+    const POPISKY_HVEZD = ['— bez hodnocení', '★ Slabé', '★★ Průměrné', '★★★ Dobré', '★★★★ Velmi dobré', '★★★★★ Vynikající'];
+
+    // ── Auth guard ────────────────────────────────────────────
+    auth.onAuthStateChanged(user => {
+      if (!user) { window.location.href = 'index.html'; return; }
+      aktualniUser = user;
+      document.getElementById('headerUser').textContent = user.displayName || user.email;
+
+      vinoId = new URLSearchParams(location.search).get('id');
+      if (vinoId) {
+        nacistVino(vinoId);
+      } else {
+        // Výchozí hodnoty pro nové víno
+        document.getElementById('f_oblast').value     = 'Morava';
+        document.getElementById('f_podoblast').value  = 'Slovácká';
+        document.getElementById('f_trat').value       = 'Nechory';
+      }
+    });
+
+    // ── Načtení existujícího vína ─────────────────────────────
+    async function nacistVino(id) {
+      try {
+        const doc = await db.collection('vina').doc(id).get();
+        if (!doc.exists) {
+          zobrazMsg('Víno nenalezeno.', 'error');
+          return;
+        }
+        const v = doc.data();
+        naplnitFormular(v);
+
+        jeVlastnik = v.userId === aktualniUser.uid;
+        if (jeVlastnik) {
+          document.getElementById('pageTitle').textContent = 'Upravit víno';
+          document.getElementById('saveBtn').textContent   = 'Uložit změny';
+          document.getElementById('deleteBtn').style.display = 'inline-flex';
+          document.getElementById('onlinePanel').style.display = 'none';
+        } else {
+          // Readonly
+          document.getElementById('pageTitle').textContent = v.nazev || 'Víno';
+          document.getElementById('onlinePanel').style.display = 'none';
+          document.getElementById('formActions').style.display = 'none';
+          document.getElementById('readonlyMsg').style.display = 'block';
+          setReadonly(true);
+        }
+      } catch (err) {
+        console.error(err);
+        zobrazMsg('Nepodařilo se načíst víno.', 'error');
+      }
+    }
+
+    function naplnitFormular(v) {
+      pole('f_nazev').value      = v.nazev        || '';
+      pole('f_vinarstvi').value  = v.vinarstvi    || '';
+      pole('f_odruda').value     = v.odruda       || '';
+      pole('f_rocnik').value     = v.rocnik       || '';
+      pole('f_barva').value      = v.barva        || '';
+      pole('f_privlastek').value = v.privlastek   || '';
+      pole('f_typVina').value    = v.typVina      || '';
+      pole('f_zeme').value       = v.zemePouvodu  || '';
+      pole('f_oblast').value     = v.vinarskaOblast    || '';
+      pole('f_podoblast').value  = v.vinarskaPodoblast || '';
+      pole('f_trat').value       = v.vinacniTrat  || '';
+      pole('f_alkohol').value    = v.alkohol != null ? v.alkohol : '';
+      pole('f_cukr').value       = v.zbytkCukr   != null ? v.zbytkCukr   : '';
+      pole('f_kyseliny').value   = v.kyseliny    != null ? v.kyseliny    : '';
+      pole('f_objem').value      = v.objem        != null ? v.objem : '0.75';
+      pole('f_sarze').value      = v.cisloSarze  || '';
+      pole('f_cena').value       = v.cena        != null ? v.cena : '';
+      pole('f_degustace').value  = v.datumDegustace || '';
+      pole('f_komentar').value   = v.komentar    || '';
+      if (v.hodnoceni) nastavHodnoceni(v.hodnoceni);
+    }
+
+    function setReadonly(stav) {
+      document.querySelectorAll('input, select, textarea').forEach(el => {
+        el.disabled = stav;
+      });
+      document.querySelectorAll('.star-btn').forEach(b => b.disabled = stav);
+    }
+
+    // ── Uložení ───────────────────────────────────────────────
+    async function ulozit() {
+      const nazev = pole('f_nazev').value.trim();
+      if (!nazev) { zobrazMsg('Vyplňte prosím název vína.', 'error'); return; }
+
+      const btn = document.getElementById('saveBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Ukládám…';
+
+      const data = {
+        nazev:               nazev,
+        vinarstvi:           pole('f_vinarstvi').value.trim(),
+        odruda:              pole('f_odruda').value.trim(),
+        rocnik:              cislo(pole('f_rocnik').value),
+        barva:               pole('f_barva').value,
+        privlastek:          pole('f_privlastek').value.trim(),
+        typVina:             pole('f_typVina').value.trim(),
+        zemePouvodu:         pole('f_zeme').value.trim(),
+        vinarskaOblast:      pole('f_oblast').value.trim(),
+        vinarskaPodoblast:   pole('f_podoblast').value.trim(),
+        vinacniTrat:         pole('f_trat').value.trim(),
+        alkohol:             desetCislo(pole('f_alkohol').value),
+        zbytkCukr:           desetCislo(pole('f_cukr').value),
+        kyseliny:            desetCislo(pole('f_kyseliny').value),
+        objem:               desetCislo(pole('f_objem').value),
+        cisloSarze:          pole('f_sarze').value.trim(),
+        cena:                cislo(pole('f_cena').value),
+        hodnoceni:           hodnoceni || null,
+        datumDegustace:      pole('f_degustace').value || null,
+        komentar:            pole('f_komentar').value.trim(),
+      };
+
+      try {
+        if (vinoId) {
+          await db.collection('vina').doc(vinoId).update(data);
+        } else {
+          data.userId        = aktualniUser.uid;
+          data.uzivatelJmeno = aktualniUser.displayName || aktualniUser.email;
+          data.datumPridani  = firebase.firestore.FieldValue.serverTimestamp();
+          await db.collection('vina').add(data);
+        }
+        window.location.href = 'vina.html';
+      } catch (err) {
+        console.error(err);
+        zobrazMsg('Nepodařilo se uložit víno: ' + err.message, 'error');
+        btn.disabled = false;
+        btn.textContent = vinoId ? 'Uložit změny' : 'Uložit víno';
+      }
+    }
+
+    // ── Smazání ───────────────────────────────────────────────
+    async function smazat() {
+      if (!confirm('Opravdu smazat toto víno? Akci nelze vrátit.')) return;
+      try {
+        await db.collection('vina').doc(vinoId).delete();
+        window.location.href = 'vina.html';
+      } catch (err) {
+        console.error(err);
+        zobrazMsg('Nepodařilo se smazat víno.', 'error');
+      }
+    }
+
+    // ── Hodnocení hvězdičkami ─────────────────────────────────
+    function nastavHodnoceni(val) {
+      hodnoceni = val;
+      document.querySelectorAll('.star-btn').forEach(b => {
+        b.classList.toggle('on', parseInt(b.dataset.val) <= val);
+      });
+      document.getElementById('starLabel').textContent = POPISKY_HVEZD[val] || '';
+    }
+
+    // ── Online hledání (Open Food Facts) ─────────────────────
+    async function hledatOnline() {
+      const query = document.getElementById('onlineQuery').value.trim();
+      if (!query) return;
+
+      const btn = document.getElementById('onlineBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>';
+
+      try {
+        const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&categories_tags=wines&action=process&json=1&page_size=8&fields=product_name,brands,origins,quantity,nutriments,labels_tags,categories_tags,countries_tags`;
+        const res  = await fetch(url);
+        const data = await res.json();
+        zobrazitVysledky(data.products || []);
+      } catch (err) {
+        console.error(err);
+        document.getElementById('onlineResults').innerHTML =
+          '<p style="font-size:13px;color:#991B1B;margin-top:8px">Vyhledávání selhalo. Zkuste to znovu nebo zadejte data ručně.</p>';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Hledat';
+      }
+    }
+
+    function zobrazitVysledky(produkty) {
+      const el = document.getElementById('onlineResults');
+      if (!produkty.length) {
+        el.innerHTML = '<p style="font-size:13px;color:#7A6560;margin-top:8px">Žádné výsledky. Zkuste jiný název nebo zadejte data ručně.</p>';
+        return;
+      }
+      const polozky = produkty.map((p, i) => `
+        <div class="sr-item" onclick="aplikovatProdukt(${i})">
+          <div class="sr-item-name">${esc(p.product_name || '—')}</div>
+          <div class="sr-item-sub">${esc([p.brands, p.origins].filter(Boolean).join(' · '))}</div>
+        </div>`).join('');
+      el.innerHTML = `<div class="search-dropdown">${polozky}</div>`;
+      // Uložit data pro kliknutí
+      window._onlineProducts = produkty;
+    }
+
+    function aplikovatProdukt(idx) {
+      const p = window._onlineProducts[idx];
+      if (!p) return;
+
+      if (p.product_name) pole('f_nazev').value = p.product_name;
+      if (p.brands)       pole('f_vinarstvi').value = p.brands.split(',')[0].trim();
+
+      // Původ
+      const zeme = (p.origins || '') || (p.countries_tags || []).map(t => t.replace('en:', '')).join(', ');
+      if (zeme) pole('f_zeme').value = zeme;
+
+      // Objem (např. "75 cl", "750 ml")
+      const objem = parseObjem(p.quantity);
+      if (objem) pole('f_objem').value = objem;
+
+      // Alkohol
+      const alc = p.nutriments && p.nutriments['alcohol_100g'];
+      if (alc) pole('f_alkohol').value = alc;
+
+      // Barva z kategorií
+      const barva = parseBarva(p.categories_tags || []);
+      if (barva) pole('f_barva').value = barva;
+
+      // Ročník z labelů
+      const rocnik = parseRocnik(p.labels_tags || []);
+      if (rocnik) pole('f_rocnik').value = rocnik;
+
+      document.getElementById('onlineResults').innerHTML =
+        '<p style="font-size:13px;color:#166534;margin-top:8px">✓ Data byla předvyplněna. Zkontrolujte a doplňte dle potřeby.</p>';
+      document.getElementById('onlineQuery').value = '';
+    }
+
+    // ── Parsovací pomocníky ───────────────────────────────────
+    function parseObjem(str) {
+      if (!str) return null;
+      const m = str.match(/([\d.,]+)\s*(l|cl|ml)/i);
+      if (!m) return null;
+      const n = parseFloat(m[1].replace(',', '.'));
+      const u = m[2].toLowerCase();
+      if (u === 'l')  return n.toFixed(2);
+      if (u === 'cl') return (n / 100).toFixed(2);
+      if (u === 'ml') return (n / 1000).toFixed(3);
+      return null;
+    }
+
+    function parseBarva(tags) {
+      if (tags.some(t => /red.?wine|vin.?rouge/i.test(t)))   return 'červené';
+      if (tags.some(t => /white.?wine|vin.?blanc/i.test(t))) return 'bílé';
+      if (tags.some(t => /ros[eé].?wine/i.test(t)))          return 'rosé';
+      if (tags.some(t => /sparkling|champagne|prosecco|cava|sekt/i.test(t))) return 'šumivé';
+      return '';
+    }
+
+    function parseRocnik(tags) {
+      for (const t of tags) {
+        const m = t.match(/(\d{4}).?vintage|vintage.?(\d{4})/i);
+        if (m) return m[1] || m[2];
+      }
+      return '';
+    }
+
+    // ── Utilities ─────────────────────────────────────────────
+    function pole(id)         { return document.getElementById(id); }
+    function cislo(v)         { const n = parseInt(v); return isNaN(n) ? null : n; }
+    function desetCislo(v)    { const n = parseFloat(v); return isNaN(n) ? null : n; }
+    function odhlasit()       { auth.signOut().then(() => window.location.href = 'index.html'); }
+
+    function zobrazMsg(text, typ) {
+      const el = document.getElementById('appMsg');
+      el.textContent = text;
+      el.className   = `msg ${typ}`;
+      el.style.display = 'block';
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function esc(s) {
+      const d = document.createElement('div');
+      d.textContent = String(s || '');
+      return d.innerHTML;
+    }
+  </script>
+</body>
+</html>

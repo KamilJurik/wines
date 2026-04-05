@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KamiWines</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="login-page">
+
+  <div class="login-box">
+    <div class="login-header">
+      <span class="login-icon">🍷</span>
+      <h1>KamiWines</h1>
+      <p>Váš vinný deník</p>
+    </div>
+
+    <!-- Přihlášení -->
+    <div id="loginForm">
+      <div id="loginMsg" class="msg error"></div>
+      <div class="form-group">
+        <label for="loginEmail">E-mail</label>
+        <input type="email" id="loginEmail" placeholder="vas@email.cz" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label for="loginPassword">Heslo</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary btn-full" id="loginBtn" onclick="prihlasit()">Přihlásit se</button>
+      <div class="divider">nebo</div>
+      <button class="btn btn-secondary btn-full" onclick="prepnout('registerForm')">Registrovat nový účet</button>
+    </div>
+
+    <!-- Registrace -->
+    <div id="registerForm" style="display:none">
+      <div id="registerMsg" class="msg error"></div>
+      <div class="form-group">
+        <label for="regName">Jméno</label>
+        <input type="text" id="regName" placeholder="Vaše jméno" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label for="regEmail">E-mail</label>
+        <input type="email" id="regEmail" placeholder="vas@email.cz" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label for="regPassword">Heslo</label>
+        <input type="password" id="regPassword" placeholder="Minimálně 6 znaků" autocomplete="new-password">
+      </div>
+      <button class="btn btn-primary btn-full" id="regBtn" onclick="registrovat()">Vytvořit účet</button>
+      <button class="btn btn-ghost btn-full" onclick="prepnout('loginForm')" style="margin-top:8px">← Zpět na přihlášení</button>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="js/config.js"></script>
+  <script>
+    // Přesměrovat přihlášeného uživatele
+    auth.onAuthStateChanged(user => {
+      if (user) window.location.href = 'vina.html';
+    });
+
+    function prepnout(zobrazit) {
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('registerForm').style.display = 'none';
+      document.getElementById(zobrazit).style.display = 'block';
+    }
+
+    async function prihlasit() {
+      const email    = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const msg      = document.getElementById('loginMsg');
+      const btn      = document.getElementById('loginBtn');
+
+      if (!email || !password) {
+        zobrazMsg(msg, 'Vyplňte e-mail a heslo.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Přihlašuji...';
+
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+      } catch (err) {
+        zobrazMsg(msg, prevestChybu(err.code));
+        btn.disabled = false;
+        btn.textContent = 'Přihlásit se';
+      }
+    }
+
+    async function registrovat() {
+      const name     = document.getElementById('regName').value.trim();
+      const email    = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const msg      = document.getElementById('registerMsg');
+      const btn      = document.getElementById('regBtn');
+
+      if (!name)     { zobrazMsg(msg, 'Zadejte prosím své jméno.');      return; }
+      if (!email)    { zobrazMsg(msg, 'Zadejte prosím e-mail.');          return; }
+      if (!password) { zobrazMsg(msg, 'Zadejte prosím heslo.');           return; }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Vytvářím účet...';
+
+      try {
+        const cred = await auth.createUserWithEmailAndPassword(email, password);
+        await cred.user.updateProfile({ displayName: name });
+        window.location.href = 'vina.html';
+      } catch (err) {
+        zobrazMsg(msg, prevestChybu(err.code));
+        btn.disabled = false;
+        btn.textContent = 'Vytvořit účet';
+      }
+    }
+
+    function zobrazMsg(el, text) {
+      el.textContent = text;
+      el.style.display = 'block';
+    }
+
+    function prevestChybu(code) {
+      const map = {
+        'auth/user-not-found':      'Uživatel s tímto e-mailem neexistuje.',
+        'auth/wrong-password':      'Nesprávné heslo.',
+        'auth/invalid-email':       'Neplatný formát e-mailu.',
+        'auth/email-already-in-use':'Tento e-mail je již registrován.',
+        'auth/weak-password':       'Heslo musí mít alespoň 6 znaků.',
+        'auth/too-many-requests':   'Příliš mnoho pokusů. Zkuste to za chvíli.',
+        'auth/invalid-credential':  'Nesprávný e-mail nebo heslo.',
+        'auth/network-request-failed': 'Chyba sítě. Zkontrolujte připojení.',
+      };
+      return map[code] || 'Nastala chyba. Zkuste to znovu.';
+    }
+
+    // Odeslat formulář klávesou Enter
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return;
+      if (document.getElementById('registerForm').style.display !== 'none') {
+        registrovat();
+      } else {
+        prihlasit();
+      }
+    });
+  </script>
+</body>
+</html>
