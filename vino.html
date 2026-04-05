@@ -63,155 +63,165 @@
          ══════════════════════════════════════════════════════ -->
 
     <!-- Základní informace -->
-    <div class="section-title">Základní informace</div>
-
-    <div class="form-group">
-      <label for="f_nazev">Název vína *</label>
-      <input type="text" id="f_nazev" placeholder="např. Ryzlink rýnský Nechory">
-    </div>
-
-    <div class="grid2">
-      <div class="form-group">
-        <label for="f_vinarstvi">Vinařství</label>
-        <input type="text" id="f_vinarstvi" placeholder="např. Sonberk">
+    <div class="fcard">
+      <div class="fcard-header">
+        <span class="fcard-icon">🍾</span> Základní informace
       </div>
-      <div class="form-group">
-        <label for="f_odruda">Odrůda</label>
-        <input type="text" id="f_odruda" placeholder="např. Ryzlink rýnský">
-      </div>
-    </div>
-
-    <div class="grid2">
-      <div class="form-group">
-        <label for="f_rocnik">Ročník</label>
-        <input type="number" id="f_rocnik" placeholder="např. 2022" min="1900" max="2100">
-      </div>
-      <div class="form-group">
-        <label for="f_barva">Barva</label>
-        <select id="f_barva">
-          <option value="">— vyberte —</option>
-          <option value="červené">Červené</option>
-          <option value="bílé">Bílé</option>
-          <option value="rosé">Rosé</option>
-          <option value="šumivé">Šumivé</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="grid2">
-      <div class="form-group">
-        <label for="f_privlastek">Přívlastek</label>
-        <input type="text" id="f_privlastek" placeholder="např. Pozdní sběr"
-               list="privlastek-list">
-        <datalist id="privlastek-list">
-          <option value="Kabinet">
-          <option value="Pozdní sběr">
-          <option value="Výběr z hroznů">
-          <option value="Výběr z bobulí">
-          <option value="Výběr z cibéb">
-          <option value="Ledové víno">
-          <option value="Slámové víno">
-        </datalist>
-      </div>
-      <div class="form-group">
-        <label for="f_typVina">Typ vína</label>
-        <input type="text" id="f_typVina" placeholder="např. Suché"
-               list="typ-list">
-        <datalist id="typ-list">
-          <option value="Suché">
-          <option value="Polosuché">
-          <option value="Polosladké">
-          <option value="Sladké">
-          <option value="Naturální">
-          <option value="Oranžové">
-        </datalist>
+      <div class="fcard-body">
+        <div class="form-group">
+          <label for="f_nazev">Název vína *</label>
+          <input type="text" id="f_nazev" placeholder="např. Ryzlink rýnský Nechory">
+        </div>
+        <div class="grid2">
+          <div class="form-group">
+            <label for="f_vinarstvi">Vinařství</label>
+            <input type="text" id="f_vinarstvi" placeholder="např. Sonberk">
+          </div>
+          <div class="form-group">
+            <label for="f_odruda">Odrůda</label>
+            <input type="text" id="f_odruda" placeholder="např. Ryzlink rýnský">
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="form-group">
+            <label for="f_rocnik">Ročník</label>
+            <input type="number" id="f_rocnik" placeholder="např. 2022" min="1900" max="2100">
+          </div>
+          <div class="form-group">
+            <label for="f_barva">Barva</label>
+            <select id="f_barva">
+              <option value="">— vyberte —</option>
+              <option value="červené">Červené</option>
+              <option value="bílé">Bílé</option>
+              <option value="rosé">Rosé</option>
+              <option value="šumivé">Šumivé</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="form-group">
+            <label for="f_privlastek">Přívlastek</label>
+            <input type="text" id="f_privlastek" placeholder="např. Pozdní sběr" list="privlastek-list">
+            <datalist id="privlastek-list">
+              <option value="Kabinet">
+              <option value="Pozdní sběr">
+              <option value="Výběr z hroznů">
+              <option value="Výběr z bobulí">
+              <option value="Výběr z cibéb">
+              <option value="Ledové víno">
+              <option value="Slámové víno">
+            </datalist>
+          </div>
+          <div class="form-group">
+            <label for="f_typVina">Typ vína</label>
+            <input type="text" id="f_typVina" placeholder="např. Suché" list="typ-list">
+            <datalist id="typ-list">
+              <option value="Suché">
+              <option value="Polosuché">
+              <option value="Polosladké">
+              <option value="Sladké">
+              <option value="Naturální">
+              <option value="Oranžové">
+            </datalist>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Původ -->
-    <div class="section-title">Původ</div>
-
-    <div class="grid2">
-      <div class="form-group">
-        <label for="f_zeme">Země původu</label>
-        <input type="text" id="f_zeme" placeholder="např. Česká republika">
+    <div class="fcard">
+      <div class="fcard-header">
+        <span class="fcard-icon">🗺️</span> Původ
       </div>
-      <div class="form-group">
-        <label for="f_oblast">Vinařská oblast</label>
-        <input type="text" id="f_oblast" placeholder="např. Morava">
-      </div>
-    </div>
-
-    <div class="grid2">
-      <div class="form-group">
-        <label for="f_podoblast">Vinařská podoblast</label>
-        <input type="text" id="f_podoblast" placeholder="např. Slovácká">
-      </div>
-      <div class="form-group">
-        <label for="f_trat">Viniční trať</label>
-        <input type="text" id="f_trat" placeholder="např. Nechory">
+      <div class="fcard-body">
+        <div class="grid2">
+          <div class="form-group">
+            <label for="f_zeme">Země původu</label>
+            <input type="text" id="f_zeme" placeholder="např. Česká republika">
+          </div>
+          <div class="form-group">
+            <label for="f_oblast">Vinařská oblast</label>
+            <input type="text" id="f_oblast" placeholder="např. Morava">
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="form-group">
+            <label for="f_podoblast">Vinařská podoblast</label>
+            <input type="text" id="f_podoblast" placeholder="např. Slovácká">
+          </div>
+          <div class="form-group">
+            <label for="f_trat">Viniční trať</label>
+            <input type="text" id="f_trat" placeholder="např. Nechory">
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Technické parametry -->
-    <div class="section-title">Technické parametry</div>
-
-    <div class="grid2">
-      <div class="form-group">
-        <label for="f_alkohol">Obsah alkoholu (%)</label>
-        <input type="number" id="f_alkohol" placeholder="např. 12.5" step="0.1" min="0" max="25">
+    <div class="fcard">
+      <div class="fcard-header">
+        <span class="fcard-icon">🔬</span> Technické parametry
       </div>
-      <div class="form-group">
-        <label for="f_cukr">Zbytkový cukr (g/l)</label>
-        <input type="number" id="f_cukr" placeholder="např. 4.2" step="0.1" min="0">
-      </div>
-    </div>
-
-    <div class="grid2">
-      <div class="form-group">
-        <label for="f_kyseliny">Kyseliny (g/l)</label>
-        <input type="number" id="f_kyseliny" placeholder="např. 6.8" step="0.1" min="0">
-      </div>
-      <div class="form-group">
-        <label for="f_objem">Objem láhve (l)</label>
-        <input type="number" id="f_objem" placeholder="0.75" step="0.01" min="0" value="0.75">
-      </div>
-    </div>
-
-    <div class="grid2">
-      <div class="form-group">
-        <label for="f_sarze">Číslo šarže</label>
-        <input type="text" id="f_sarze" placeholder="např. L2302">
-      </div>
-      <div class="form-group">
-        <label for="f_cena">Cena (Kč)</label>
-        <input type="number" id="f_cena" placeholder="např. 320" min="0">
+      <div class="fcard-body">
+        <div class="grid2">
+          <div class="form-group">
+            <label for="f_alkohol">Obsah alkoholu (%)</label>
+            <input type="number" id="f_alkohol" placeholder="např. 12.5" step="0.1" min="0" max="25">
+          </div>
+          <div class="form-group">
+            <label for="f_cukr">Zbytkový cukr (g/l)</label>
+            <input type="number" id="f_cukr" placeholder="např. 4.2" step="0.1" min="0">
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="form-group">
+            <label for="f_kyseliny">Kyseliny (g/l)</label>
+            <input type="number" id="f_kyseliny" placeholder="např. 6.8" step="0.1" min="0">
+          </div>
+          <div class="form-group">
+            <label for="f_objem">Objem láhve (l)</label>
+            <input type="number" id="f_objem" placeholder="0.75" step="0.01" min="0" value="0.75">
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="form-group">
+            <label for="f_sarze">Číslo šarže</label>
+            <input type="text" id="f_sarze" placeholder="např. L2302">
+          </div>
+          <div class="form-group">
+            <label for="f_cena">Cena (Kč)</label>
+            <input type="number" id="f_cena" placeholder="např. 320" min="0">
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Moje hodnocení -->
-    <div class="section-title">Moje hodnocení</div>
-
-    <div class="form-group">
-      <label>Hodnocení</label>
-      <div class="star-input-row" id="starRow">
-        <button class="star-btn" data-val="1" onclick="nastavHodnoceni(1)">★</button>
-        <button class="star-btn" data-val="2" onclick="nastavHodnoceni(2)">★</button>
-        <button class="star-btn" data-val="3" onclick="nastavHodnoceni(3)">★</button>
-        <button class="star-btn" data-val="4" onclick="nastavHodnoceni(4)">★</button>
-        <button class="star-btn" data-val="5" onclick="nastavHodnoceni(5)">★</button>
-        <span class="star-label" id="starLabel">— bez hodnocení</span>
+    <div class="fcard fcard-rating">
+      <div class="fcard-header">
+        <span class="fcard-icon">⭐</span> Moje hodnocení
       </div>
-    </div>
-
-    <div class="form-group">
-      <label for="f_degustace">Datum degustace</label>
-      <input type="date" id="f_degustace">
-    </div>
-
-    <div class="form-group">
-      <label for="f_komentar">Komentář</label>
-      <textarea id="f_komentar" placeholder="Vaše poznámky, chuťový profil, doporučení k jídlu…"></textarea>
+      <div class="fcard-body">
+        <div class="form-group">
+          <label>Hodnocení</label>
+          <div class="star-input-row" id="starRow">
+            <button class="star-btn" data-val="1" onclick="nastavHodnoceni(1)">★</button>
+            <button class="star-btn" data-val="2" onclick="nastavHodnoceni(2)">★</button>
+            <button class="star-btn" data-val="3" onclick="nastavHodnoceni(3)">★</button>
+            <button class="star-btn" data-val="4" onclick="nastavHodnoceni(4)">★</button>
+            <button class="star-btn" data-val="5" onclick="nastavHodnoceni(5)">★</button>
+            <span class="star-label" id="starLabel">— bez hodnocení</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="f_degustace">Datum degustace</label>
+          <input type="date" id="f_degustace">
+        </div>
+        <div class="form-group">
+          <label for="f_komentar">Komentář</label>
+          <textarea id="f_komentar" placeholder="Vaše poznámky, chuťový profil, doporučení k jídlu…"></textarea>
+        </div>
+      </div>
     </div>
 
     <!-- Akce -->
@@ -426,7 +436,29 @@
       }
     }
 
-    // ── Načtení dat z URL ─────────────────────────────────────
+    // ── Načtení dat z URL (záložní proxy) ────────────────────
+    const PROXIES = [
+      {
+        sestavUrl: u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+        ziskejHtml: async r => r.ok ? r.text() : null,
+      },
+      {
+        sestavUrl: u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+        ziskejHtml: async r => { try { const j = await r.json(); return j.contents || null; } catch { return null; } },
+      },
+      {
+        sestavUrl: u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+        ziskejHtml: async r => r.ok ? r.text() : null,
+      },
+    ];
+
+    async function fetchSTimeoutem(url, ms = 10000) {
+      const ctrl = new AbortController();
+      const id   = setTimeout(() => ctrl.abort(), ms);
+      try { return await fetch(url, { signal: ctrl.signal }); }
+      finally { clearTimeout(id); }
+    }
+
     async function nacistZUrl() {
       const url = document.getElementById('urlInput').value.trim();
       if (!url) return;
@@ -440,28 +472,39 @@
       const res = document.getElementById('urlResults');
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span>';
-      res.innerHTML = '';
+      res.innerHTML = '<p style="font-size:13px;color:#7A6560;margin-top:8px">Načítám stránku…</p>';
 
-      try {
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-        const response = await fetch(proxyUrl);
-        const json     = await response.json();
+      let html = null;
+      for (const proxy of PROXIES) {
+        try {
+          const response = await fetchSTimeoutem(proxy.sestavUrl(url), 12000);
+          html = await proxy.ziskejHtml(response);
+          if (html && html.length > 200) break;
+        } catch (e) {
+          console.warn('Proxy selhala:', proxy.sestavUrl('…'), e.message);
+        }
+      }
 
-        if (!json.contents) throw new Error('Prázdná odpověď od serveru');
-
-        const parser = new DOMParser();
-        const doc    = parser.parseFromString(json.contents, 'text/html');
-        const data   = extrahovatZHtml(doc);
-        aplikovatExtrahovanaData(data, res);
-
-      } catch (err) {
-        console.error(err);
+      if (!html || html.length < 200) {
         res.innerHTML =
-          '<p style="font-size:13px;color:#991B1B;margin-top:8px">Nepodařilo se načíst stránku. Zkontrolujte URL nebo zadejte data ručně.</p>';
-      } finally {
+          '<p style="font-size:13px;color:#991B1B;margin-top:8px">Stránku se nepodařilo načíst přes žádný proxy server. Zkuste jinou URL nebo zadejte data ručně.</p>';
         btn.disabled = false;
         btn.textContent = 'Načíst';
+        return;
       }
+
+      try {
+        const parser = new DOMParser();
+        const doc    = parser.parseFromString(html, 'text/html');
+        const data   = extrahovatZHtml(doc);
+        aplikovatExtrahovanaData(data, res);
+      } catch (err) {
+        console.error(err);
+        res.innerHTML = '<p style="font-size:13px;color:#991B1B;margin-top:8px">Chyba při zpracování stránky.</p>';
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Načíst';
     }
 
     // Extrakce dat z HTML dokumentu
