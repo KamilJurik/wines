@@ -26,14 +26,36 @@
 
     <!-- ── Online vyhledávání ──────────────────────────────── -->
     <div class="online-panel" id="onlinePanel">
-      <h3>🔍 Vyhledat víno online</h3>
-      <div class="online-row">
-        <input type="text" class="search-input" id="onlineQuery"
-               placeholder="Název vína nebo vinařství…"
-               onkeydown="if(event.key==='Enter') hledatOnline()">
-        <button class="btn btn-primary btn-sm" id="onlineBtn" onclick="hledatOnline()">Hledat</button>
+      <h3>🔍 Předvyplnit z internetu</h3>
+
+      <div class="mini-tabs">
+        <button class="mini-tab active" id="mtSearch" onclick="prepnoutVyhledavaniTab('search')">Hledat název</button>
+        <button class="mini-tab"        id="mtUrl"    onclick="prepnoutVyhledavaniTab('url')">Načíst z URL</button>
       </div>
-      <div id="onlineResults"></div>
+
+      <!-- Hledání názvu -->
+      <div id="tabSearch">
+        <div class="online-row">
+          <input type="text" class="search-input" id="onlineQuery"
+                 placeholder="Název vína nebo vinařství…"
+                 onkeydown="if(event.key==='Enter') hledatOnline()">
+          <button class="btn btn-primary btn-sm" id="onlineBtn" onclick="hledatOnline()">Hledat</button>
+        </div>
+        <div class="form-hint" style="margin-top:6px">Prohledá databázi Open Food Facts.</div>
+        <div id="onlineResults"></div>
+      </div>
+
+      <!-- Načtení z URL -->
+      <div id="tabUrl" style="display:none">
+        <div class="online-row">
+          <input type="url" class="search-input" id="urlInput"
+                 placeholder="https://www.wino.cz/…  nebo  vivino.com/…"
+                 onkeydown="if(event.key==='Enter') nacistZUrl()">
+          <button class="btn btn-primary btn-sm" id="urlBtn" onclick="nacistZUrl()">Načíst</button>
+        </div>
+        <div class="form-hint" style="margin-top:6px">Vložte odkaz na stránku vína z libovolného obchodu nebo katalogu.</div>
+        <div id="urlResults"></div>
+      </div>
     </div>
 
     <!-- ══════════════════════════════════════════════════════
@@ -366,6 +388,14 @@
       document.getElementById('starLabel').textContent = POPISKY_HVEZD[val] || '';
     }
 
+    // ── Přepínání tabů vyhledávání ────────────────────────────
+    function prepnoutVyhledavaniTab(tab) {
+      document.getElementById('tabSearch').style.display = tab === 'search' ? 'block' : 'none';
+      document.getElementById('tabUrl').style.display    = tab === 'url'    ? 'block' : 'none';
+      document.getElementById('mtSearch').classList.toggle('active', tab === 'search');
+      document.getElementById('mtUrl').classList.toggle('active',    tab === 'url');
+    }
+
     // ── Online hledání (Open Food Facts) ─────────────────────
     async function hledatOnline() {
       const query = document.getElementById('onlineQuery').value.trim();
@@ -376,10 +406,16 @@
       btn.innerHTML = '<span class="spinner"></span>';
 
       try {
-        const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&categories_tags=wines&action=process&json=1&page_size=8&fields=product_name,brands,origins,quantity,nutriments,labels_tags,categories_tags,countries_tags`;
+        // Hledáme bez omezení kategorie pro lepší pokrytí
+        const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&action=process&json=1&page_size=10&fields=product_name,brands,origins,quantity,nutriments,labels_tags,categories_tags,countries_tags`;
         const res  = await fetch(url);
         const data = await res.json();
-        zobrazitVysledky(data.products || []);
+        // Filtrovat jen vína pokud existují, jinak ukázat vše
+        let produkty = data.products || [];
+        const vina = produkty.filter(p =>
+          (p.categories_tags || []).some(t => /wine|vin[o]?|wein/i.test(t))
+        );
+        zobrazitVysledky(vina.length ? vina : produkty);
       } catch (err) {
         console.error(err);
         document.getElementById('onlineResults').innerHTML =
@@ -388,6 +424,151 @@
         btn.disabled = false;
         btn.textContent = 'Hledat';
       }
+    }
+
+    // ── Načtení dat z URL ─────────────────────────────────────
+    async function nacistZUrl() {
+      const url = document.getElementById('urlInput').value.trim();
+      if (!url) return;
+      if (!url.startsWith('http')) {
+        document.getElementById('urlResults').innerHTML =
+          '<p style="font-size:13px;color:#991B1B;margin-top:8px">Zadejte platnou URL adresu začínající https://</p>';
+        return;
+      }
+
+      const btn = document.getElementById('urlBtn');
+      const res = document.getElementById('urlResults');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>';
+      res.innerHTML = '';
+
+      try {
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+        const response = await fetch(proxyUrl);
+        const json     = await response.json();
+
+        if (!json.contents) throw new Error('Prázdná odpověď od serveru');
+
+        const parser = new DOMParser();
+        const doc    = parser.parseFromString(json.contents, 'text/html');
+        const data   = extrahovatZHtml(doc);
+        aplikovatExtrahovanaData(data, res);
+
+      } catch (err) {
+        console.error(err);
+        res.innerHTML =
+          '<p style="font-size:13px;color:#991B1B;margin-top:8px">Nepodařilo se načíst stránku. Zkontrolujte URL nebo zadejte data ručně.</p>';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Načíst';
+      }
+    }
+
+    // Extrakce dat z HTML dokumentu
+    function extrahovatZHtml(doc) {
+      const data = {};
+
+      // 1. JSON-LD structured data (nejspolehlivější)
+      doc.querySelectorAll('script[type="application/ld+json"]').forEach(script => {
+        try {
+          const json = JSON.parse(script.textContent);
+          const nodes = json['@graph'] ? json['@graph'] : (Array.isArray(json) ? json : [json]);
+          nodes.forEach(node => {
+            if (!['Product','Wine','Food','FoodProduct'].includes(node['@type'])) return;
+            if (node.name && !data.nazev)       data.nazev     = node.name;
+            if (node.brand && !data.vinarstvi)  data.vinarstvi = typeof node.brand === 'string' ? node.brand : (node.brand.name || '');
+            if (node.description && !data.popis) data.popis    = node.description;
+            if (node.offers) {
+              const offer = Array.isArray(node.offers) ? node.offers[0] : node.offers;
+              const price = parseFloat(String(offer.price || '').replace(',', '.'));
+              if (!isNaN(price) && price > 0) data.cena = Math.round(price);
+            }
+            if (node.alcohol)          data.alkohol    = parseFloat(node.alcohol);
+            if (node.vintage)          data.rocnik     = parseInt(node.vintage);
+            if (node.countryOfOrigin)  data.zeme       = node.countryOfOrigin;
+          });
+        } catch(e) {}
+      });
+
+      // 2. Open Graph / meta tagy
+      if (!data.nazev) {
+        const ogTitle   = metaContent(doc, 'og:title') || metaContent(doc, 'twitter:title');
+        const h1        = doc.querySelector('h1')?.textContent?.trim();
+        const pageTitle = doc.title?.trim();
+        let titul = ogTitle || h1 || pageTitle || '';
+        // Odebrat suffix webu ("Víno XY | Eshop vín")
+        titul = titul.replace(/\s*[|\-–—]\s*[^|\-–—]{3,}$/, '').trim();
+        if (titul) data.nazev = titul;
+      }
+
+      // 3. Popis z meta
+      if (!data.popis) {
+        data.popis = metaContent(doc, 'og:description') || metaContent(doc, 'description') || '';
+      }
+
+      // 4. Cena z běžných HTML elementů
+      if (!data.cena) {
+        const priceEl = doc.querySelector('[itemprop="price"], .price, .cena, [class*="price"]:not([class*="list"]), [class*="cena"]:not([class*="list"])');
+        if (priceEl) {
+          const txt   = (priceEl.getAttribute('content') || priceEl.textContent || '').replace(/\s/g, '');
+          const match = txt.match(/([\d]+[,.]?[\d]*)/);
+          if (match) {
+            const p = parseFloat(match[1].replace(',', '.'));
+            if (!isNaN(p) && p > 10 && p < 100000) data.cena = Math.round(p);
+          }
+        }
+      }
+
+      // 5. Ročník z textu názvu nebo stránky
+      if (!data.rocnik) {
+        const text = (data.nazev || '') + ' ' + doc.body?.textContent?.substring(0, 1000);
+        const m = text.match(/\b(19[6-9]\d|20[0-2]\d)\b/);
+        if (m) data.rocnik = parseInt(m[1]);
+      }
+
+      // 6. Barva z textu stránky
+      if (!data.barva) {
+        const text = doc.body?.textContent?.toLowerCase().substring(0, 4000) || '';
+        if      (/červen[éé]|red wine|vin rouge|rotwein/.test(text))            data.barva = 'červené';
+        else if (/bíl[éé]\s+vín|white wine|vin blanc|weißwein/.test(text))      data.barva = 'bílé';
+        else if (/rosé|rose wine/.test(text))                                    data.barva = 'rosé';
+        else if (/šumiv[éé]|sparkling|champagne|prosecco|sekt|cava/.test(text)) data.barva = 'šumivé';
+      }
+
+      // 7. Alkohol z textu
+      if (!data.alkohol) {
+        const text = doc.body?.textContent?.substring(0, 4000) || '';
+        const m = text.match(/(\d{1,2}[.,]\d)\s*%\s*(vol|alk|alcohol)?/i);
+        if (m) {
+          const alc = parseFloat(m[1].replace(',', '.'));
+          if (alc > 5 && alc < 25) data.alkohol = alc;
+        }
+      }
+
+      return data;
+    }
+
+    function metaContent(doc, name) {
+      return doc.querySelector(`meta[property="${name}"], meta[name="${name}"]`)?.getAttribute('content')?.trim() || null;
+    }
+
+    function aplikovatExtrahovanaData(data, resEl) {
+      let naplneno = 0;
+      if (data.nazev)     { pole('f_nazev').value    = data.nazev;              naplneno++; }
+      if (data.vinarstvi) { pole('f_vinarstvi').value = data.vinarstvi;         naplneno++; }
+      if (data.rocnik)    { pole('f_rocnik').value   = data.rocnik;             naplneno++; }
+      if (data.barva)     { pole('f_barva').value    = data.barva;              naplneno++; }
+      if (data.alkohol)   { pole('f_alkohol').value  = data.alkohol;            naplneno++; }
+      if (data.zeme)      { pole('f_zeme').value     = data.zeme;               naplneno++; }
+      if (data.cena)      { pole('f_cena').value     = data.cena;               naplneno++; }
+      if (data.popis && !pole('f_komentar').value) {
+        pole('f_komentar').value = data.popis; naplneno++;
+      }
+
+      const pocetLabel = naplneno === 1 ? 'pole' : naplneno < 5 ? 'pole' : 'polí';
+      resEl.innerHTML = naplneno
+        ? `<p style="font-size:13px;color:#166534;margin-top:8px">✓ Předvyplněno ${naplneno} ${pocetLabel}. Zkontrolujte a doplňte dle potřeby.</p>`
+        : `<p style="font-size:13px;color:#7A6560;margin-top:8px">Data se nepodařilo automaticky extrahovat. Zkuste jinou stránku vína nebo zadejte data ručně.</p>`;
     }
 
     function zobrazitVysledky(produkty) {

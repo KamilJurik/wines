@@ -425,6 +425,31 @@ body {
 
 .page-title { font-size: 22px; font-weight: 800; color: var(--text); }
 
+/* Mini tabs (uvnitř panelu) */
+.mini-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.mini-tab {
+  padding: 5px 14px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-light);
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.mini-tab.active {
+  background: var(--wine);
+  color: white;
+  border-color: var(--wine);
+}
+
 /* Online search panel */
 .online-panel {
   background: rgba(114,47,55,0.05);
