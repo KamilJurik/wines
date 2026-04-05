@@ -94,7 +94,7 @@
               <option value="červené">Červené</option>
               <option value="bílé">Bílé</option>
               <option value="rosé">Rosé</option>
-              <option value="šumivé">Šumivé</option>
+              <option value="oranžové">Oranžové</option>
             </select>
           </div>
         </div>
@@ -214,8 +214,20 @@
           </div>
         </div>
         <div class="form-group">
-          <label for="f_degustace">Datum degustace</label>
-          <input type="date" id="f_degustace">
+          <label>Datum degustace</label>
+          <div class="date-cs" id="f_degustace">
+            <select id="f_degu_d"><option value="">Den</option></select>
+            <select id="f_degu_m">
+              <option value="">Měsíc</option>
+              <option value="01">Leden</option><option value="02">Únor</option>
+              <option value="03">Březen</option><option value="04">Duben</option>
+              <option value="05">Květen</option><option value="06">Červen</option>
+              <option value="07">Červenec</option><option value="08">Srpen</option>
+              <option value="09">Září</option><option value="10">Říjen</option>
+              <option value="11">Listopad</option><option value="12">Prosinec</option>
+            </select>
+            <select id="f_degu_y"><option value="">Rok</option></select>
+          </div>
         </div>
         <div class="form-group">
           <label for="f_komentar">Komentář</label>
@@ -249,6 +261,40 @@
 
     const POPISKY_HVEZD = ['— bez hodnocení', '★ Slabé', '★★ Průměrné', '★★★ Dobré', '★★★★ Velmi dobré', '★★★★★ Vynikající'];
 
+    // ── Inicializace českého datepickeru ──────────────────────
+    (function initDatePicker() {
+      const denEl = document.getElementById('f_degu_d');
+      for (let d = 1; d <= 31; d++) {
+        const o = document.createElement('option');
+        o.value = String(d).padStart(2, '0');
+        o.textContent = d;
+        denEl.appendChild(o);
+      }
+      const rokEl = document.getElementById('f_degu_y');
+      const now = new Date().getFullYear();
+      for (let y = now; y >= 2000; y--) {
+        const o = document.createElement('option');
+        o.value = y;
+        o.textContent = y;
+        rokEl.appendChild(o);
+      }
+    })();
+
+    function getDatum() {
+      const d = document.getElementById('f_degu_d').value;
+      const m = document.getElementById('f_degu_m').value;
+      const y = document.getElementById('f_degu_y').value;
+      return (d && m && y) ? `${y}-${m}-${d}` : null;
+    }
+
+    function setDatum(iso) {
+      if (!iso) return;
+      const [y, m, d] = iso.split('-');
+      document.getElementById('f_degu_d').value = d;
+      document.getElementById('f_degu_m').value = m;
+      document.getElementById('f_degu_y').value = y;
+    }
+
     // ── Auth guard ────────────────────────────────────────────
     auth.onAuthStateChanged(user => {
       if (!user) { window.location.href = 'index.html'; return; }
@@ -258,11 +304,6 @@
       vinoId = new URLSearchParams(location.search).get('id');
       if (vinoId) {
         nacistVino(vinoId);
-      } else {
-        // Výchozí hodnoty pro nové víno
-        document.getElementById('f_oblast').value     = 'Morava';
-        document.getElementById('f_podoblast').value  = 'Slovácká';
-        document.getElementById('f_trat').value       = 'Nechory';
       }
     });
 
@@ -315,7 +356,7 @@
       pole('f_objem').value      = v.objem        != null ? v.objem : '0.75';
       pole('f_sarze').value      = v.cisloSarze  || '';
       pole('f_cena').value       = v.cena        != null ? v.cena : '';
-      pole('f_degustace').value  = v.datumDegustace || '';
+      setDatum(v.datumDegustace);
       pole('f_komentar').value   = v.komentar    || '';
       if (v.hodnoceni) nastavHodnoceni(v.hodnoceni);
     }
@@ -355,7 +396,7 @@
         cisloSarze:          pole('f_sarze').value.trim(),
         cena:                cislo(pole('f_cena').value),
         hodnoceni:           hodnoceni || null,
-        datumDegustace:      pole('f_degustace').value || null,
+        datumDegustace:      getDatum(),
         komentar:            pole('f_komentar').value.trim(),
       };
 
@@ -406,34 +447,219 @@
       document.getElementById('mtUrl').classList.toggle('active',    tab === 'url');
     }
 
-    // ── Online hledání (Open Food Facts) ─────────────────────
+    // ── Online hledání (mojelahve.cz + Open Food Facts) ──────
     async function hledatOnline() {
       const query = document.getElementById('onlineQuery').value.trim();
       if (!query) return;
 
       const btn = document.getElementById('onlineBtn');
+      const el  = document.getElementById('onlineResults');
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span>';
+      el.innerHTML  = '<p style="font-size:13px;color:#7A6560;margin-top:8px">Hledám…</p>';
 
-      try {
-        // Hledáme bez omezení kategorie pro lepší pokrytí
-        const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&action=process&json=1&page_size=10&fields=product_name,brands,origins,quantity,nutriments,labels_tags,categories_tags,countries_tags`;
-        const res  = await fetch(url);
-        const data = await res.json();
-        // Filtrovat jen vína pokud existují, jinak ukázat vše
-        let produkty = data.products || [];
-        const vina = produkty.filter(p =>
-          (p.categories_tags || []).some(t => /wine|vin[o]?|wein/i.test(t))
-        );
-        zobrazitVysledky(vina.length ? vina : produkty);
-      } catch (err) {
-        console.error(err);
-        document.getElementById('onlineResults').innerHTML =
-          '<p style="font-size:13px;color:#991B1B;margin-top:8px">Vyhledávání selhalo. Zkuste to znovu nebo zadejte data ručně.</p>';
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Hledat';
+      // Souběžné hledání na obou zdrojích
+      const [mlhVysledky, ofnVysledky] = await Promise.allSettled([
+        hledatNaMojelahve(query),
+        hledatNaOFN(query),
+      ]);
+
+      const mlh = mlhVysledky.status === 'fulfilled' ? mlhVysledky.value : [];
+      const ofn = ofnVysledky.status === 'fulfilled' ? ofnVysledky.value : [];
+
+      btn.disabled = false;
+      btn.textContent = 'Hledat';
+
+      if (!mlh.length && !ofn.length) {
+        el.innerHTML = '<p style="font-size:13px;color:#7A6560;margin-top:8px">Žádné výsledky. Zkuste jiný název nebo použijte záložku „Načíst z URL".</p>';
+        return;
       }
+
+      let html = '';
+      if (mlh.length) {
+        html += `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--wine);margin:10px 0 4px">mojelahve.cz</div>`;
+        html += `<div class="search-dropdown">${mlh.map((v, i) => `
+          <div class="sr-item" onclick="aplikovatMLH(${i})">
+            <div class="sr-item-name">${esc(v.nazev)}</div>
+            <div class="sr-item-sub">${esc([v.vinarstvi, v.barva, v.rocnik].filter(Boolean).join(' · '))}</div>
+          </div>`).join('')}</div>`;
+        window._mlhVysledky = mlh;
+      }
+      if (ofn.length) {
+        html += `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--wine);margin:10px 0 4px">Open Food Facts</div>`;
+        html += `<div class="search-dropdown">${ofn.map((p, i) => `
+          <div class="sr-item" onclick="aplikovatOFN(${i})">
+            <div class="sr-item-name">${esc(p.product_name || '—')}</div>
+            <div class="sr-item-sub">${esc([p.brands, p.origins].filter(Boolean).join(' · '))}</div>
+          </div>`).join('')}</div>`;
+        window._ofnVysledky = ofn;
+      }
+      el.innerHTML = html;
+    }
+
+    // ── mojelahve.cz ─────────────────────────────────────────
+    async function hledatNaMojelahve(query) {
+      const url = `https://mojelahve.cz/vyhledat/?SEARCH=${encodeURIComponent(query)}&SUBMIT=Hledat`;
+      let html = null;
+      for (const proxy of PROXIES) {
+        try {
+          const r = await fetchSTimeoutem(proxy.sestavUrl(url), 12000);
+          const h = await proxy.ziskejHtml(r);
+          if (h && h.length > 500) { html = h; break; }
+        } catch(e) { continue; }
+      }
+      if (!html) return [];
+      return parseMLHSearchPage(new DOMParser().parseFromString(html, 'text/html'));
+    }
+
+    function parseMLHSearchPage(doc) {
+      const vina = [];
+      const LABELY = ['BARVA','PŘÍVLASTEK','CUKRY','OBJEM','ALKOHOL','KYSELINY','ŠARŽE'];
+
+      // Najdi všechny vinné karty — hledej sekce s alespoň 2 spec labely
+      // Projdeme celé tělo a hledáme uzly "label → value" vedle sebe
+      const specs = {};   // label -> value pro aktuální kontext
+      let nazev = '';
+      let vinarstvi = '';
+
+      function projedeEl(el) {
+        for (const child of el.children) {
+          const tag = child.tagName;
+          const txt = child.textContent.trim();
+
+          // Nadpis = nové víno
+          if ((tag === 'H2' || tag === 'H3') && txt.length > 2 && txt.length < 200) {
+            // Ulož předchozí víno pokud má data
+            if (nazev && Object.keys(specs).length >= 2) {
+              vina.push(sestavVino(nazev, vinarstvi, { ...specs }));
+            }
+            nazev = txt;
+            vinarstvi = '';
+            Object.keys(specs).forEach(k => delete specs[k]);
+          }
+
+          // Vinařství — hledáme anchor nebo element s "Vinařství"
+          if (tag === 'A' && txt.length > 2 && txt.length < 80 && !nazev.includes(txt)) {
+            const href = child.getAttribute('href') || '';
+            if (href.includes('vinaren') || href.includes('vinarstvi') || href.includes('producer')) {
+              vinarstvi = txt;
+            }
+          }
+
+          // Spec labely
+          const txtU = txt.toUpperCase().replace(/\s+/g, ' ').trim();
+          if (LABELY.includes(txtU)) {
+            // Hodnota je v dalším sourozenci nebo v rodiči
+            const sib = child.nextElementSibling;
+            if (sib) {
+              const val = sib.textContent.trim();
+              if (txtU === 'CUKRY' && specs['CUKRY']) {
+                specs['CUKRY2'] = val;
+              } else {
+                specs[txtU] = val;
+              }
+            }
+          }
+
+          // Rekurze
+          if (child.children.length > 0) projedeEl(child);
+        }
+      }
+
+      projedeEl(doc.body);
+      if (nazev && Object.keys(specs).length >= 2) {
+        vina.push(sestavVino(nazev, vinarstvi, specs));
+      }
+
+      return vina.slice(0, 6);
+    }
+
+    function sestavVino(nazev, vinarstvi, specs) {
+      const v = { nazev, vinarstvi };
+
+      if (specs['BARVA']) {
+        const b = specs['BARVA'].toLowerCase();
+        if (b.includes('bíl'))     v.barva = 'bílé';
+        else if (b.includes('červen') || b.includes('red')) v.barva = 'červené';
+        else if (b.includes('rosé') || b.includes('rose'))  v.barva = 'rosé';
+        else if (b.includes('oranž'))                       v.barva = 'oranžové';
+      }
+      if (specs['PŘÍVLASTEK']) v.privlastek = specs['PŘÍVLASTEK'];
+
+      // CUKRY — může být typ (Suché) nebo g/l hodnota
+      ['CUKRY', 'CUKRY2'].forEach(k => {
+        if (!specs[k]) return;
+        const val = specs[k];
+        if (/^\d/.test(val) || val.includes('g/l')) {
+          v.zbytkCukr = parseFloat(val.replace(',', '.'));
+        } else if (!v.typVina) {
+          v.typVina = val;
+        }
+      });
+
+      if (specs['ALKOHOL']) {
+        const a = parseFloat(specs['ALKOHOL'].replace(',', '.').replace(/[^0-9.]/g, ''));
+        if (!isNaN(a)) v.alkohol = a;
+      }
+      if (specs['KYSELINY']) {
+        const k = parseFloat(specs['KYSELINY'].replace(',', '.'));
+        if (!isNaN(k)) v.kyseliny = k;
+      }
+      if (specs['OBJEM'])  v.objem     = parseObjem(specs['OBJEM']);
+      if (specs['ŠARŽE'])  v.cisloSarze = specs['ŠARŽE'];
+
+      // Ročník z názvu
+      const rm = nazev.match(/\b(20\d{2})\b/);
+      if (rm) v.rocnik = parseInt(rm[1]);
+
+      return v;
+    }
+
+    function aplikovatMLH(idx) {
+      const v = (window._mlhVysledky || [])[idx];
+      if (!v) return;
+      if (v.nazev)      pole('f_nazev').value      = v.nazev;
+      if (v.vinarstvi)  pole('f_vinarstvi').value  = v.vinarstvi;
+      if (v.barva)      pole('f_barva').value       = v.barva;
+      if (v.privlastek) pole('f_privlastek').value  = v.privlastek;
+      if (v.typVina)    pole('f_typVina').value     = v.typVina;
+      if (v.rocnik)     pole('f_rocnik').value      = v.rocnik;
+      if (v.alkohol)    pole('f_alkohol').value     = v.alkohol;
+      if (v.zbytkCukr != null) pole('f_cukr').value = v.zbytkCukr;
+      if (v.kyseliny)   pole('f_kyseliny').value    = v.kyseliny;
+      if (v.objem)      pole('f_objem').value       = v.objem;
+      if (v.cisloSarze) pole('f_sarze').value       = v.cisloSarze;
+      document.getElementById('onlineResults').innerHTML =
+        '<p style="font-size:13px;color:#166534;margin-top:8px">✓ Data z mojelahve.cz předvyplněna. Zkontrolujte a doplňte.</p>';
+    }
+
+    // ── Open Food Facts ───────────────────────────────────────
+    async function hledatNaOFN(query) {
+      const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&action=process&json=1&page_size=6&fields=product_name,brands,origins,quantity,nutriments,labels_tags,categories_tags,countries_tags`;
+      const res  = await fetch(url);
+      const data = await res.json();
+      const vse = data.products || [];
+      const vina = vse.filter(p => (p.categories_tags || []).some(t => /wine|vino|wein/i.test(t)));
+      return vina.length ? vina : vse.slice(0, 5);
+    }
+
+    function aplikovatOFN(idx) {
+      const p = (window._ofnVysledky || [])[idx];
+      if (!p) return;
+      if (p.product_name) pole('f_nazev').value    = p.product_name;
+      if (p.brands)       pole('f_vinarstvi').value = p.brands.split(',')[0].trim();
+      const zeme = p.origins || (p.countries_tags||[]).map(t=>t.replace('en:','')).join(', ');
+      if (zeme) pole('f_zeme').value = zeme;
+      const objem = parseObjem(p.quantity);
+      if (objem) pole('f_objem').value = objem;
+      const alc = p.nutriments?.['alcohol_100g'];
+      if (alc) pole('f_alkohol').value = alc;
+      const barva = parseBarva(p.categories_tags || []);
+      if (barva) pole('f_barva').value = barva;
+      const rocnik = parseRocnik(p.labels_tags || []);
+      if (rocnik) pole('f_rocnik').value = rocnik;
+      document.getElementById('onlineResults').innerHTML =
+        '<p style="font-size:13px;color:#166534;margin-top:8px">✓ Data z Open Food Facts předvyplněna.</p>';
     }
 
     // ── Načtení dat z URL (záložní proxy) ────────────────────
@@ -614,53 +840,6 @@
         : `<p style="font-size:13px;color:#7A6560;margin-top:8px">Data se nepodařilo automaticky extrahovat. Zkuste jinou stránku vína nebo zadejte data ručně.</p>`;
     }
 
-    function zobrazitVysledky(produkty) {
-      const el = document.getElementById('onlineResults');
-      if (!produkty.length) {
-        el.innerHTML = '<p style="font-size:13px;color:#7A6560;margin-top:8px">Žádné výsledky. Zkuste jiný název nebo zadejte data ručně.</p>';
-        return;
-      }
-      const polozky = produkty.map((p, i) => `
-        <div class="sr-item" onclick="aplikovatProdukt(${i})">
-          <div class="sr-item-name">${esc(p.product_name || '—')}</div>
-          <div class="sr-item-sub">${esc([p.brands, p.origins].filter(Boolean).join(' · '))}</div>
-        </div>`).join('');
-      el.innerHTML = `<div class="search-dropdown">${polozky}</div>`;
-      // Uložit data pro kliknutí
-      window._onlineProducts = produkty;
-    }
-
-    function aplikovatProdukt(idx) {
-      const p = window._onlineProducts[idx];
-      if (!p) return;
-
-      if (p.product_name) pole('f_nazev').value = p.product_name;
-      if (p.brands)       pole('f_vinarstvi').value = p.brands.split(',')[0].trim();
-
-      // Původ
-      const zeme = (p.origins || '') || (p.countries_tags || []).map(t => t.replace('en:', '')).join(', ');
-      if (zeme) pole('f_zeme').value = zeme;
-
-      // Objem (např. "75 cl", "750 ml")
-      const objem = parseObjem(p.quantity);
-      if (objem) pole('f_objem').value = objem;
-
-      // Alkohol
-      const alc = p.nutriments && p.nutriments['alcohol_100g'];
-      if (alc) pole('f_alkohol').value = alc;
-
-      // Barva z kategorií
-      const barva = parseBarva(p.categories_tags || []);
-      if (barva) pole('f_barva').value = barva;
-
-      // Ročník z labelů
-      const rocnik = parseRocnik(p.labels_tags || []);
-      if (rocnik) pole('f_rocnik').value = rocnik;
-
-      document.getElementById('onlineResults').innerHTML =
-        '<p style="font-size:13px;color:#166534;margin-top:8px">✓ Data byla předvyplněna. Zkontrolujte a doplňte dle potřeby.</p>';
-      document.getElementById('onlineQuery').value = '';
-    }
 
     // ── Parsovací pomocníky ───────────────────────────────────
     function parseObjem(str) {
@@ -679,7 +858,7 @@
       if (tags.some(t => /red.?wine|vin.?rouge/i.test(t)))   return 'červené';
       if (tags.some(t => /white.?wine|vin.?blanc/i.test(t))) return 'bílé';
       if (tags.some(t => /ros[eé].?wine/i.test(t)))          return 'rosé';
-      if (tags.some(t => /sparkling|champagne|prosecco|cava|sekt/i.test(t))) return 'šumivé';
+      if (tags.some(t => /orange.?wine|vin.?orange/i.test(t))) return 'oranžové';
       return '';
     }
 

@@ -649,6 +649,32 @@ body {
 .color-badge.rose::before    { background: var(--rose); }
 .color-badge.sumive::before  { background: var(--sumive); }
 
+/* Český datepicker */
+.date-cs {
+  display: flex;
+  gap: 8px;
+}
+
+.date-cs select {
+  flex: 1;
+  padding: 10px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--white);
+  transition: border-color 0.2s;
+  font-family: inherit;
+  cursor: pointer;
+}
+.date-cs select:focus {
+  outline: none;
+  border-color: var(--wine);
+}
+.date-cs select:first-child { flex: 0 0 80px; }
+.date-cs select:nth-child(2) { flex: 2; }
+.date-cs select:last-child   { flex: 0 0 90px; }
+
 /* Spinner */
 .spinner {
   display: inline-block;
