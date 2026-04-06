@@ -743,11 +743,14 @@
       btn.textContent = 'Hledat';
 
       if (!mlh.length && !ofn.length) {
-        el.innerHTML = '<p style="font-size:13px;color:#7A6560;margin-top:8px">Žádné výsledky. Zkuste jiný název nebo použijte záložku „Načíst z URL".</p>';
+        const mlhErr = mlhVysledky.status === 'rejected' ? ' (proxy nedostupné)' : '';
+        el.innerHTML = `<p style="font-size:13px;color:#7A6560;margin-top:8px">Žádné výsledky${mlhErr}. Zkuste jiný název, případně vložte URL stránky vína do záložky „Načíst z URL".</p>`;
         return;
       }
-
       let html = '';
+      if (!mlh.length && ofn.length) {
+        html += `<p style="font-size:11px;color:#B45309;margin-top:6px;margin-bottom:4px">⚠ mojelahve.cz nedostupné (proxy). Zobrazeny výsledky z Open Food Facts.</p>`;
+      }
       if (mlh.length) {
         html += `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--wine);margin:10px 0 4px">mojelahve.cz</div>`;
         html += `<div class="search-dropdown">${mlh.map((v, i) => `
@@ -773,118 +776,75 @@
     async function hledatNaMojelahve(query) {
       const url = `https://mojelahve.cz/vyhledat/?SEARCH=${encodeURIComponent(query)}&SUBMIT=Hledat`;
       let html = null;
+      let pouzityProxy = '';
       for (const proxy of PROXIES) {
         try {
           const r = await fetchSTimeoutem(proxy.sestavUrl(url), 12000);
           const h = await proxy.ziskejHtml(r);
-          if (h && h.length > 500) { html = h; break; }
+          if (h && h.length > 500) { html = h; pouzityProxy = proxy.nazev; break; }
         } catch(e) { continue; }
       }
       if (!html) return [];
+      console.log('MLH proxy:', pouzityProxy, '| HTML size:', html.length);
       return parseMLHSearchPage(new DOMParser().parseFromString(html, 'text/html'));
     }
 
-    function parseMLHSearchPage(doc) {
-      const vina = [];
-      const LABELY = ['BARVA','PŘÍVLASTEK','CUKRY','OBJEM','ALKOHOL','KYSELINY','ŠARŽE'];
-
-      // Najdi všechny vinné karty — hledej sekce s alespoň 2 spec labely
-      // Projdeme celé tělo a hledáme uzly "label → value" vedle sebe
-      const specs = {};   // label -> value pro aktuální kontext
-      let nazev = '';
-      let vinarstvi = '';
-
-      function projedeEl(el) {
-        for (const child of el.children) {
-          const tag = child.tagName;
-          const txt = child.textContent.trim();
-
-          // Nadpis = nové víno
-          if ((tag === 'H2' || tag === 'H3') && txt.length > 2 && txt.length < 200) {
-            // Ulož předchozí víno pokud má data
-            if (nazev && Object.keys(specs).length >= 2) {
-              vina.push(sestavVino(nazev, vinarstvi, { ...specs }));
-            }
-            nazev = txt;
-            vinarstvi = '';
-            Object.keys(specs).forEach(k => delete specs[k]);
-          }
-
-          // Vinařství — hledáme anchor nebo element s "Vinařství"
-          if (tag === 'A' && txt.length > 2 && txt.length < 80 && !nazev.includes(txt)) {
-            const href = child.getAttribute('href') || '';
-            if (href.includes('vinaren') || href.includes('vinarstvi') || href.includes('producer')) {
-              vinarstvi = txt;
-            }
-          }
-
-          // Spec labely
-          const txtU = txt.toUpperCase().replace(/\s+/g, ' ').trim();
-          if (LABELY.includes(txtU)) {
-            // Hodnota je v dalším sourozenci nebo v rodiči
-            const sib = child.nextElementSibling;
-            if (sib) {
-              const val = sib.textContent.trim();
-              if (txtU === 'CUKRY' && specs['CUKRY']) {
-                specs['CUKRY2'] = val;
-              } else {
-                specs[txtU] = val;
-              }
-            }
-          }
-
-          // Rekurze
-          if (child.children.length > 0) projedeEl(child);
+    // Extrahuje text z DOM s newlines na hranicích blokových elementů
+    // (DOMParser nemá innerText, textContent slévá vše dohromady)
+    function textSNovymi(el) {
+      if (!el) return '';
+      const BLOK = new Set(['DIV','P','LI','TD','TH','TR','BR','H1','H2','H3','H4','H5',
+        'SECTION','ARTICLE','DT','DD','HEADER','FOOTER','MAIN','UL','OL','TABLE']);
+      let out = '';
+      function walk(node) {
+        if (node.nodeType === 3) {
+          out += node.textContent;
+        } else if (node.nodeType === 1) {
+          const t = node.tagName;
+          if (t === 'SCRIPT' || t === 'STYLE' || t === 'NOSCRIPT') return;
+          if (BLOK.has(t)) out += '\n';
+          for (const c of node.childNodes) walk(c);
+          if (BLOK.has(t)) out += '\n';
         }
       }
-
-      projedeEl(doc.body);
-      if (nazev && Object.keys(specs).length >= 2) {
-        vina.push(sestavVino(nazev, vinarstvi, specs));
-      }
-
-      return vina.slice(0, 6);
+      walk(el);
+      return out.replace(/[ \t]+/g, ' ').replace(/\n[ \t]/g, '\n').replace(/\n{3,}/g, '\n\n');
     }
 
-    function sestavVino(nazev, vinarstvi, specs) {
-      const v = { nazev, vinarstvi };
+    // Nový parser: text-based (funguje nezávisle na HTML struktuře)
+    // Anchor = řádek začínající BARVA nebo PŘÍVLASTEK → vezme okolních 30 řádků a spustí OCR parser
+    function parseMLHSearchPage(doc) {
+      const text  = textSNovymi(doc.body);
+      const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
-      if (specs['BARVA']) {
-        const b = specs['BARVA'].toLowerCase();
-        if (b.includes('bíl'))     v.barva = 'bílé';
-        else if (b.includes('červen') || b.includes('red')) v.barva = 'červené';
-        else if (b.includes('rosé') || b.includes('rose'))  v.barva = 'rosé';
-        else if (b.includes('oranž'))                       v.barva = 'oranžové';
-      }
-      if (specs['PŘÍVLASTEK']) v.privlastek = specs['PŘÍVLASTEK'];
+      const vina  = [];
+      const seen  = new Set();
 
-      // CUKRY — může být typ (Suché) nebo g/l hodnota
-      ['CUKRY', 'CUKRY2'].forEach(k => {
-        if (!specs[k]) return;
-        const val = specs[k];
-        if (/^\d/.test(val) || val.includes('g/l')) {
-          v.zbytkCukr = parseFloat(val.replace(',', '.'));
-        } else if (!v.typVina) {
-          v.typVina = val;
-        }
+      // Řádek je spec-anchor pokud začíná jedním z hlavních labelů
+      const ANCHOR = /^(?:BARVA|P[RŘ][IÍ]VLASTEK|PRIVLASTEK)\b/i;
+
+      lines.forEach((line, idx) => {
+        if (!ANCHOR.test(line)) return;
+
+        // Okno: 10 řádků před (název, vinařství) + 20 řádků po (zbytek specs)
+        const start = Math.max(0, idx - 10);
+        const end   = Math.min(lines.length, idx + 20);
+        const chunk = lines.slice(start, end).join('\n');
+
+        const data = extrahovatZTextu(chunk);
+
+        // Klíč pro deduplikaci
+        const klic = (data.nazev || '') + '|' + (data.barva || '') + '|' + (data.rocnik || '');
+        if (!klic.startsWith('|') && seen.has(klic)) return;
+        seen.add(klic);
+
+        // Přijmeme víno, pokud má aspoň 2 rozpoznaná pole
+        const pocet = [data.nazev, data.barva, data.alkohol, data.objem,
+                       data.privlastek, data.typVina, data.vinarstvi].filter(Boolean).length;
+        if (pocet >= 2) vina.push(data);
       });
 
-      if (specs['ALKOHOL']) {
-        const a = parseFloat(specs['ALKOHOL'].replace(',', '.').replace(/[^0-9.]/g, ''));
-        if (!isNaN(a)) v.alkohol = a;
-      }
-      if (specs['KYSELINY']) {
-        const k = parseFloat(specs['KYSELINY'].replace(',', '.'));
-        if (!isNaN(k)) v.kyseliny = k;
-      }
-      if (specs['OBJEM'])  v.objem     = parseObjem(specs['OBJEM']);
-      if (specs['ŠARŽE'])  v.cisloSarze = specs['ŠARŽE'];
-
-      // Ročník z názvu
-      const rm = nazev.match(/\b(20\d{2})\b/);
-      if (rm) v.rocnik = parseInt(rm[1]);
-
-      return v;
+      return vina.slice(0, 6);
     }
 
     function aplikovatMLH(idx) {
@@ -937,15 +897,28 @@
     // ── Načtení dat z URL (záložní proxy) ────────────────────
     const PROXIES = [
       {
+        nazev: 'corsproxy.io',
         sestavUrl: u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
         ziskejHtml: async r => r.ok ? r.text() : null,
       },
       {
+        nazev: 'allorigins/raw',
+        sestavUrl: u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+        ziskejHtml: async r => r.ok ? r.text() : null,
+      },
+      {
+        nazev: 'allorigins/json',
         sestavUrl: u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
         ziskejHtml: async r => { try { const j = await r.json(); return j.contents || null; } catch { return null; } },
       },
       {
+        nazev: 'codetabs',
         sestavUrl: u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+        ziskejHtml: async r => r.ok ? r.text() : null,
+      },
+      {
+        nazev: 'htmldriven',
+        sestavUrl: u => `https://cors.eu.org/${u}`,
         ziskejHtml: async r => r.ok ? r.text() : null,
       },
     ];
