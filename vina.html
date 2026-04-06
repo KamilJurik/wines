@@ -9,8 +9,12 @@
 <body>
 
   <header class="app-header">
-    <div class="header-brand">🍷 Vinora</div>
+    <div class="header-brand">
+      <div class="header-brand-row">🍷 Vinora</div>
+      <div class="header-subtitle">Příběh v každé skleničce.</div>
+    </div>
     <div class="header-right">
+      <span class="header-version" id="versionBadge"></span>
       <span class="header-user" id="headerUser"></span>
       <span id="adminLink" style="display:none">
         <a href="admin.html" style="color:rgba(255,255,255,0.8);font-size:13px;text-decoration:none;margin-right:4px">⚙️ Admin</a>
@@ -88,6 +92,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="js/config.js"></script>
   <script>
+    document.getElementById('versionBadge').textContent = 'v' + APP_VERSION;
+
     const ADMIN_EMAIL = 'kamil.jurik@easyportal365.com';
     let vsechnaVina  = [];
     let aktualniTab  = 'moje';

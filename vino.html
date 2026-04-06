@@ -9,8 +9,12 @@
 <body>
 
   <header class="app-header">
-    <div class="header-brand">🍷 Vinora</div>
+    <div class="header-brand">
+      <div class="header-brand-row">🍷 Vinora</div>
+      <div class="header-subtitle">Příběh v každé skleničce.</div>
+    </div>
     <div class="header-right">
+      <span class="header-version" id="versionBadge"></span>
       <span class="header-user" id="headerUser"></span>
       <button class="btn-logout" onclick="odhlasit()">Odhlásit</button>
     </div>
@@ -276,6 +280,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="js/config.js"></script>
   <script>
+    document.getElementById('versionBadge').textContent = 'v' + APP_VERSION;
+
     let aktualniUser = null;
     let vinoId       = null;
     let hodnoceni    = 0;
@@ -929,10 +935,23 @@
       res.innerHTML = '<p style="font-size:13px;color:#7A6560;margin-top:8px">Načítám stránku…</p>';
 
       // mojelahve.cz používá JavaScript rendering — proxy dostane prázdnou kostru.
-      // Místo toho extrahujeme název z URL slugu a spustíme vyhledávání.
+      // Místo toho extrahujeme název z URL a spustíme vyhledávání.
       if (/mojelahve\.cz/i.test(url)) {
-        const slug = url.replace(/\/$/, '').split('/').pop() || '';
-        const query = slug.replace(/-/g, ' ').replace(/\s*\d{4}\s*$/, '').trim();
+        let query = '';
+        try {
+          const parsed = new URL(url);
+          // Případ 1: URL je search stránka (?SEARCH=...)
+          if (parsed.searchParams.has('SEARCH')) {
+            query = parsed.searchParams.get('SEARCH') || '';
+          } else {
+            // Případ 2: URL je stránka vína (/vino/ryzlink-rynsky-2022/)
+            const slug = parsed.pathname.replace(/\/$/, '').split('/').pop() || '';
+            query = slug.replace(/-/g, ' ').replace(/\s*\d{4}\s*$/, '').trim();
+          }
+        } catch (e) {
+          const slug = url.replace(/\/$/, '').split('/').pop() || '';
+          query = slug.replace(/-/g, ' ').trim();
+        }
         if (query) {
           res.innerHTML = '<p style="font-size:13px;color:#7A6560;margin-top:8px">mojelahve.cz vyžaduje JS — prohledávám databázi…</p>';
           const mlh = await hledatNaMojelahve(query);

@@ -418,6 +418,7 @@
     <div class="form-logo">
       <span class="form-logo-icon">🍷</span>
       <span class="form-logo-text">Vinora</span>
+      <span id="versionBadge" style="font-size:10px;opacity:0.45;font-weight:500;letter-spacing:0.5px;align-self:flex-end;padding-bottom:2px"></span>
     </div>
 
     <!-- Přihlášení -->
@@ -471,6 +472,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="js/config.js"></script>
   <script>
+    document.getElementById('versionBadge').textContent = 'v' + APP_VERSION;
+
     // ── Vinné zajímavosti ─────────────────────────────────────
     const FAKTA = [
       { e:'🍇', t:'Kolik hroznů na láhev?', b:'Na výrobu jedné láhve vína (0,75 l) je potřeba přibližně 600–800 hroznů, tedy asi 1,2 kg ovoce.' },
