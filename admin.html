@@ -15,7 +15,8 @@
     </div>
     <div class="header-right">
       <span class="header-version" id="versionBadge"></span>
-      <a href="vina.html" style="color:rgba(255,255,255,0.8);font-size:13px;text-decoration:none;margin-right:8px">← Vína</a>
+      <span class="header-user" id="headerUser" onclick="window.location.href='profil.html'" title="Upravit profil" style="font-size:13px"></span>
+      <a href="vina.html" style="color:rgba(255,255,255,0.8);font-size:13px;text-decoration:none;margin-right:4px">← Vína</a>
       <button class="btn-logout" onclick="auth.signOut().then(()=>location.href='index.html')">Odhlásit</button>
     </div>
   </header>
@@ -63,6 +64,7 @@
         window.location.href = 'index.html';
         return;
       }
+      document.getElementById('headerUser').textContent = user.displayName || user.email;
       nacistUzivatele();
     });
 

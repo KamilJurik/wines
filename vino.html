@@ -15,7 +15,7 @@
     </div>
     <div class="header-right">
       <span class="header-version" id="versionBadge"></span>
-      <span class="header-user" id="headerUser"></span>
+      <span class="header-user" id="headerUser" onclick="window.location.href='profil.html'" title="Upravit profil"></span>
       <button class="btn-logout" onclick="odhlasit()">Odhlásit</button>
     </div>
   </header>
@@ -29,7 +29,7 @@
     <div id="appMsg" class="msg error"></div>
 
     <!-- ── Online vyhledávání ──────────────────────────────── -->
-    <div class="online-panel" id="onlinePanel">
+    <div class="online-panel" id="onlinePanel" style="display:none">
       <h3>🔍 Předvyplnit z internetu</h3>
 
       <div class="mini-tabs">
@@ -222,6 +222,32 @@
       </div>
     </div>
 
+    <!-- Fotka etikety -->
+    <div class="fcard">
+      <div class="fcard-header">
+        <span class="fcard-icon">📸</span> Fotka etikety
+      </div>
+      <div class="fcard-body">
+        <div class="foto-zone" id="fotoZone"
+             onclick="document.getElementById('fotoInput').click()"
+             ondragover="event.preventDefault();this.classList.add('drag')"
+             ondragleave="this.classList.remove('drag')"
+             ondrop="fotoDrop(event)">
+          <input type="file" accept="image/*" id="fotoInput" style="display:none"
+                 onchange="fotoNacist(this.files[0])">
+          <div class="foto-preview-wrap" id="fotoPreviewWrap" style="display:none">
+            <img id="fotoPreview" src="" alt="etiketa">
+            <button type="button" class="foto-remove-btn"
+                    onclick="event.stopPropagation();smazatFoto()">✕ Odebrat</button>
+          </div>
+          <div id="fotoEmpty" style="display:flex;flex-direction:column;align-items:center;gap:6px">
+            <span style="font-size:32px">📷</span>
+            <div style="font-size:13px;color:var(--text-light)">Klikněte nebo přetáhněte fotku etikety</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Moje hodnocení -->
     <div class="fcard fcard-rating">
       <div class="fcard-header">
@@ -284,6 +310,7 @@
 
     let aktualniUser = null;
     let vinoId       = null;
+    let fotoBase64   = null;   // base64 komprimovaná fotka
     let hodnoceni    = 0;
     let jeVlastnik   = false;
 
@@ -332,6 +359,9 @@
       vinoId = new URLSearchParams(location.search).get('id');
       if (vinoId) {
         nacistVino(vinoId);
+      } else {
+        // Nové víno — zobraz panel pro předvyplnění
+        document.getElementById('onlinePanel').style.display = 'block';
       }
     });
 
@@ -387,6 +417,13 @@
       setDatum(v.datumDegustace);
       pole('f_komentar').value   = v.komentar    || '';
       if (v.hodnoceni) nastavHodnoceni(v.hodnoceni);
+      // Fotka
+      if (v.foto) {
+        fotoBase64 = v.foto;
+        document.getElementById('fotoPreview').src = v.foto;
+        document.getElementById('fotoPreviewWrap').style.display = 'flex';
+        document.getElementById('fotoEmpty').style.display = 'none';
+      }
     }
 
     function setReadonly(stav) {
@@ -426,6 +463,7 @@
         hodnoceni:           hodnoceni || null,
         datumDegustace:      getDatum(),
         komentar:            pole('f_komentar').value.trim(),
+        foto:                fotoBase64 || null,
       };
 
       try {
@@ -1147,6 +1185,53 @@
         if (m) return m[1] || m[2];
       }
       return '';
+    }
+
+    // ── Fotka etikety ─────────────────────────────────────────
+    function fotoDrop(e) {
+      e.preventDefault();
+      document.getElementById('fotoZone').classList.remove('drag');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) fotoNacist(file);
+    }
+
+    async function fotoNacist(file) {
+      if (!file) return;
+      const compressed = await komprimovatObrazek(file, 900, 0.78);
+      fotoBase64 = compressed;
+      document.getElementById('fotoPreview').src = compressed;
+      document.getElementById('fotoPreviewWrap').style.display = 'flex';
+      document.getElementById('fotoEmpty').style.display = 'none';
+    }
+
+    function smazatFoto() {
+      fotoBase64 = null;
+      document.getElementById('fotoPreview').src = '';
+      document.getElementById('fotoPreviewWrap').style.display = 'none';
+      document.getElementById('fotoEmpty').style.display = 'flex';
+      document.getElementById('fotoInput').value = '';
+    }
+
+    function komprimovatObrazek(file, maxPx, quality) {
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = new Image();
+          img.onload = () => {
+            let w = img.width, h = img.height;
+            if (w > maxPx || h > maxPx) {
+              if (w > h) { h = Math.round(h * maxPx / w); w = maxPx; }
+              else       { w = Math.round(w * maxPx / h); h = maxPx; }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
     }
 
     // ── Utilities ─────────────────────────────────────────────

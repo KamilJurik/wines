@@ -15,7 +15,7 @@
     </div>
     <div class="header-right">
       <span class="header-version" id="versionBadge"></span>
-      <span class="header-user" id="headerUser"></span>
+      <span class="header-user" id="headerUser" onclick="window.location.href='profil.html'" title="Upravit profil"></span>
       <span id="adminLink" style="display:none">
         <a href="admin.html" style="color:rgba(255,255,255,0.8);font-size:13px;text-decoration:none;margin-right:4px">⚙️ Admin</a>
       </span>
@@ -236,8 +236,12 @@
       const meta = [v.rocnik, v.odruda].filter(Boolean).join(' · ');
       const owner = aktualniTab === 'vsechna'
         ? `<div class="wine-owner">👤 ${esc(v.uzivatelJmeno || '—')}</div>` : '';
+      const fotoHtml = v.foto
+        ? `<div class="wine-card-foto"><img src="${v.foto}" alt="etiketa" loading="lazy"></div>`
+        : '';
       return `
         <a class="wine-card" href="vino.html?id=${v.id}">
+          ${fotoHtml}
           <div class="wine-card-top">
             <div class="wine-name">${esc(v.nazev || 'Bez názvu')}</div>
             ${barvaCls ? `<div class="color-dot ${barvaCls}"></div>` : ''}

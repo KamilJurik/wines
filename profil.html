@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vinora – Můj profil</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="header-brand-row">🍷 Vinora</div>
+      <div class="header-subtitle">Příběh v každé skleničce.</div>
+    </div>
+    <div class="header-right">
+      <span class="header-version" id="versionBadge"></span>
+      <span class="header-user" id="headerUser"></span>
+      <button class="btn-logout" onclick="odhlasit()">Odhlásit</button>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <div class="page-header">
+      <button class="back-btn" onclick="window.location.href='vina.html'">←</button>
+      <h1 class="page-title">Můj profil</h1>
+    </div>
+
+    <div id="profilMsg" class="msg" style="display:none"></div>
+
+    <!-- Základní údaje -->
+    <div class="fcard">
+      <div class="fcard-header">
+        <span class="fcard-icon">👤</span> Základní údaje
+      </div>
+      <div class="fcard-body">
+        <div class="form-group">
+          <label for="p_jmeno">Zobrazované jméno</label>
+          <input type="text" id="p_jmeno" placeholder="Vaše jméno">
+        </div>
+        <div class="form-group">
+          <label for="p_email">E-mail</label>
+          <input type="email" id="p_email" disabled style="opacity:0.6;background:#f5f0eb">
+          <div class="form-hint">E-mailovou adresu nelze změnit.</div>
+        </div>
+        <button class="btn btn-primary" id="saveNameBtn" onclick="ulozitJmeno()">Uložit jméno</button>
+      </div>
+    </div>
+
+    <!-- Změna hesla -->
+    <div class="fcard" style="margin-top:16px">
+      <div class="fcard-header">
+        <span class="fcard-icon">🔐</span> Změna hesla
+      </div>
+      <div class="fcard-body">
+        <div class="form-group">
+          <label for="p_current_pass">Současné heslo</label>
+          <input type="password" id="p_current_pass" placeholder="Zadejte současné heslo" autocomplete="current-password">
+        </div>
+        <div class="form-group">
+          <label for="p_new_pass">Nové heslo</label>
+          <input type="password" id="p_new_pass" placeholder="Minimálně 6 znaků" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label for="p_confirm_pass">Potvrzení nového hesla</label>
+          <input type="password" id="p_confirm_pass" placeholder="Zopakujte nové heslo" autocomplete="new-password">
+        </div>
+        <button class="btn btn-primary" id="savePassBtn" onclick="zmenitHeslo()">Změnit heslo</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="js/config.js"></script>
+  <script>
+    document.getElementById('versionBadge').textContent = 'v' + APP_VERSION;
+
+    auth.onAuthStateChanged(user => {
+      if (!user) { window.location.href = 'index.html'; return; }
+      document.getElementById('headerUser').textContent = user.displayName || user.email;
+      document.getElementById('p_jmeno').value = user.displayName || '';
+      document.getElementById('p_email').value = user.email || '';
+    });
+
+    async function ulozitJmeno() {
+      const jmeno = document.getElementById('p_jmeno').value.trim();
+      if (!jmeno) { zobrazMsg('Zadejte zobrazované jméno.', 'error'); return; }
+      const btn = document.getElementById('saveNameBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Ukládám…';
+      try {
+        await auth.currentUser.updateProfile({ displayName: jmeno });
+        // Synchronizuj i do Firestore (pro zobrazení na kartách vín)
+        await db.collection('uzivatele').doc(auth.currentUser.uid)
+                .set({ jmeno }, { merge: true });
+        document.getElementById('headerUser').textContent = jmeno;
+        zobrazMsg('Jméno bylo uloženo.', 'success');
+      } catch (err) {
+        zobrazMsg('Chyba při ukládání jména: ' + err.message, 'error');
+      }
+      btn.disabled = false;
+      btn.textContent = 'Uložit jméno';
+    }
+
+    async function zmenitHeslo() {
+      const current = document.getElementById('p_current_pass').value;
+      const newPass = document.getElementById('p_new_pass').value;
+      const confirm = document.getElementById('p_confirm_pass').value;
+
+      if (!current)              { zobrazMsg('Zadejte současné heslo.', 'error'); return; }
+      if (newPass.length < 6)    { zobrazMsg('Nové heslo musí mít alespoň 6 znaků.', 'error'); return; }
+      if (newPass !== confirm)   { zobrazMsg('Nové heslo a potvrzení se neshodují.', 'error'); return; }
+
+      const btn = document.getElementById('savePassBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Měním…';
+
+      try {
+        const user = auth.currentUser;
+        const credential = firebase.auth.EmailAuthProvider.credential(user.email, current);
+        await user.reauthenticateWithCredential(credential);
+        await user.updatePassword(newPass);
+        document.getElementById('p_current_pass').value = '';
+        document.getElementById('p_new_pass').value     = '';
+        document.getElementById('p_confirm_pass').value = '';
+        zobrazMsg('Heslo bylo úspěšně změněno.', 'success');
+      } catch (err) {
+        if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+          zobrazMsg('Současné heslo je nesprávné.', 'error');
+        } else {
+          zobrazMsg('Chyba: ' + err.message, 'error');
+        }
+      }
+      btn.disabled = false;
+      btn.textContent = 'Změnit heslo';
+    }
+
+    function odhlasit() { auth.signOut().then(() => window.location.href = 'index.html'); }
+
+    function zobrazMsg(text, typ) {
+      const el = document.getElementById('profilMsg');
+      el.textContent = text;
+      el.className = `msg ${typ}`;
+      el.style.display = 'block';
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (typ === 'success') setTimeout(() => { el.style.display = 'none'; }, 4000);
+    }
+  </script>
+</body>
+</html>
