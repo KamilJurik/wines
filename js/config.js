@@ -11,4 +11,4 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-const APP_VERSION = '2.0';
+const APP_VERSION = '2.1';

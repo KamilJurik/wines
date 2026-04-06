@@ -103,6 +103,29 @@ body {
   border-color: var(--wine);
 }
 
+/* Pole zvýrazněné po automatickém vyplnění */
+@keyframes fieldFilled {
+  0%   { border-color: #16A34A; box-shadow: 0 0 0 3px rgba(22,163,74,0.18); }
+  70%  { border-color: #16A34A; box-shadow: 0 0 0 3px rgba(22,163,74,0.18); }
+  100% { border-color: var(--border); box-shadow: none; }
+}
+.form-group input.field-filled,
+.form-group select.field-filled,
+.form-group textarea.field-filled {
+  animation: fieldFilled 2.8s ease forwards;
+}
+
+/* Pole názvu vína — trvale zvýrazněno */
+#f_nazev {
+  border-color: var(--wine-light);
+  border-width: 2px;
+  font-weight: 600;
+}
+#f_nazev:focus {
+  border-color: var(--wine);
+  box-shadow: 0 0 0 3px rgba(114,47,55,0.12);
+}
+
 .form-group input:disabled,
 .form-group select:disabled,
 .form-group textarea:disabled {

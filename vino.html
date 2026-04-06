@@ -968,17 +968,18 @@
     function aplikovatMLH(idx) {
       const v = (window._mlhVysledky || [])[idx];
       if (!v) return;
-      if (v.nazev)      pole('f_nazev').value      = v.nazev;
-      if (v.vinarstvi)  pole('f_vinarstvi').value  = v.vinarstvi;
-      if (v.barva)      pole('f_barva').value       = v.barva;
-      if (v.privlastek) pole('f_privlastek').value  = v.privlastek;
-      if (v.typVina)    pole('f_typVina').value     = v.typVina;
-      if (v.rocnik)     pole('f_rocnik').value      = v.rocnik;
-      if (v.alkohol)    pole('f_alkohol').value     = v.alkohol;
-      if (v.zbytkCukr != null) pole('f_cukr').value = v.zbytkCukr;
-      if (v.kyseliny)   pole('f_kyseliny').value    = v.kyseliny;
-      if (v.objem)      pole('f_objem').value       = v.objem;
-      if (v.cisloSarze) pole('f_sarze').value       = v.cisloSarze;
+      const set = (id, val) => { if (val != null && val !== '') { pole(id).value = val; zvyraznitPole(id); } };
+      set('f_nazev',      v.nazev);
+      set('f_vinarstvi',  v.vinarstvi);
+      set('f_barva',      v.barva);
+      set('f_privlastek', v.privlastek);
+      set('f_typVina',    v.typVina);
+      set('f_rocnik',     v.rocnik);
+      set('f_alkohol',    v.alkohol);
+      set('f_cukr',       v.zbytkCukr);
+      set('f_kyseliny',   v.kyseliny);
+      set('f_objem',      v.objem);
+      set('f_sarze',      v.cisloSarze);
       document.getElementById('onlineResults').innerHTML =
         '<p style="font-size:13px;color:#166534;margin-top:8px">✓ Data z mojelahve.cz předvyplněna. Zkontrolujte a doplňte.</p>';
     }
@@ -996,18 +997,15 @@
     function aplikovatOFN(idx) {
       const p = (window._ofnVysledky || [])[idx];
       if (!p) return;
-      if (p.product_name) pole('f_nazev').value    = p.product_name;
-      if (p.brands)       pole('f_vinarstvi').value = p.brands.split(',')[0].trim();
+      const set = (id, val) => { if (val != null && val !== '') { pole(id).value = val; zvyraznitPole(id); } };
+      set('f_nazev',    p.product_name);
+      if (p.brands) set('f_vinarstvi', p.brands.split(',')[0].trim());
       const zeme = p.origins || (p.countries_tags||[]).map(t=>t.replace('en:','')).join(', ');
-      if (zeme) pole('f_zeme').value = zeme;
-      const objem = parseObjem(p.quantity);
-      if (objem) pole('f_objem').value = objem;
-      const alc = p.nutriments?.['alcohol_100g'];
-      if (alc) pole('f_alkohol').value = alc;
-      const barva = parseBarva(p.categories_tags || []);
-      if (barva) pole('f_barva').value = barva;
-      const rocnik = parseRocnik(p.labels_tags || []);
-      if (rocnik) pole('f_rocnik').value = rocnik;
+      set('f_zeme',    zeme);
+      set('f_objem',   parseObjem(p.quantity));
+      set('f_alkohol', p.nutriments?.['alcohol_100g']);
+      set('f_barva',   parseBarva(p.categories_tags || []));
+      set('f_rocnik',  parseRocnik(p.labels_tags || []));
       document.getElementById('onlineResults').innerHTML =
         '<p style="font-size:13px;color:#166534;margin-top:8px">✓ Data z Open Food Facts předvyplněna.</p>';
     }
@@ -1224,7 +1222,13 @@
 
     function aplikovatExtrahovanaData(data, resEl) {
       let naplneno = 0;
-      const set = (id, val) => { if (val != null && val !== '') { pole(id).value = val; naplneno++; } };
+      const set = (id, val) => {
+        if (val != null && val !== '') {
+          pole(id).value = val;
+          zvyraznitPole(id);
+          naplneno++;
+        }
+      };
       set('f_nazev',     data.nazev);
       set('f_vinarstvi', data.vinarstvi);
       set('f_rocnik',    data.rocnik);
@@ -1239,7 +1243,9 @@
       set('f_sarze',     data.cisloSarze);
       set('f_cena',      data.cena);
       if (data.popis && !pole('f_komentar').value) {
-        pole('f_komentar').value = data.popis; naplneno++;
+        pole('f_komentar').value = data.popis;
+        zvyraznitPole('f_komentar');
+        naplneno++;
       }
 
       const pocetLabel = naplneno < 5 ? 'pole' : 'polí';
@@ -1349,6 +1355,17 @@
     function pole(id)         { return document.getElementById(id); }
     function cislo(v)         { const n = parseInt(v); return isNaN(n) ? null : n; }
     function desetCislo(v)    { const n = parseFloat(v); return isNaN(n) ? null : n; }
+
+    // Dočasné zvýraznění pole po automatickém vyplnění
+    function zvyraznitPole(id) {
+      const el = pole(id);
+      if (!el) return;
+      el.classList.remove('field-filled');
+      // force reflow pro restart animace při opakovaném volání
+      void el.offsetWidth;
+      el.classList.add('field-filled');
+      el.addEventListener('animationend', () => el.classList.remove('field-filled'), { once: true });
+    }
     function odhlasit()       { auth.signOut().then(() => window.location.href = 'index.html'); }
 
     function zobrazMsg(text, typ) {
