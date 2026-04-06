@@ -222,6 +222,36 @@
       </div>
     </div>
 
+    <!-- Vinný sklep -->
+    <div class="fcard">
+      <div class="fcard-header">
+        <span class="fcard-icon">🍾</span> Vinný sklep
+      </div>
+      <div class="fcard-body">
+        <div class="grid2">
+          <div class="form-group">
+            <label for="f_pocetLahvi">Počet lahví na skladě</label>
+            <div class="cellar-count-row">
+              <input type="number" id="f_pocetLahvi" min="0" max="999" placeholder="0">
+              <button type="button" id="otevritBtn" class="btn-otevrit"
+                      onclick="otevritLahev()" style="display:none">
+                🍾 Otevřít láhev
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Vhodné k pití (roky)</label>
+            <div class="pit-range">
+              <input type="number" id="f_pitOd" placeholder="od" min="2000" max="2060">
+              <span class="pit-range-sep">–</span>
+              <input type="number" id="f_pitDo" placeholder="do" min="2000" max="2060">
+            </div>
+            <div class="form-hint">Rok konzumace, např. 2025 – 2030</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Fotka etikety -->
     <div class="fcard">
       <div class="fcard-header">
@@ -382,6 +412,10 @@
           document.getElementById('saveBtn').textContent   = 'Uložit změny';
           document.getElementById('deleteBtn').style.display = 'inline-flex';
           document.getElementById('onlinePanel').style.display = 'none';
+          // Zobraz tlačítko Otevřít láhev pokud je víno na skladě
+          if ((v.pocetLahvi || 0) > 0) {
+            document.getElementById('otevritBtn').style.display = 'inline-flex';
+          }
         } else {
           // Readonly
           document.getElementById('pageTitle').textContent = v.nazev || 'Víno';
@@ -412,8 +446,11 @@
       pole('f_cukr').value       = v.zbytkCukr   != null ? v.zbytkCukr   : '';
       pole('f_kyseliny').value   = v.kyseliny    != null ? v.kyseliny    : '';
       pole('f_objem').value      = v.objem        != null ? v.objem : '0.75';
-      pole('f_sarze').value      = v.cisloSarze  || '';
-      pole('f_cena').value       = v.cena        != null ? v.cena : '';
+      pole('f_sarze').value       = v.cisloSarze  || '';
+      pole('f_cena').value        = v.cena        != null ? v.cena : '';
+      pole('f_pocetLahvi').value  = v.pocetLahvi  != null ? v.pocetLahvi : '';
+      pole('f_pitOd').value       = v.pitOd       || '';
+      pole('f_pitDo').value       = v.pitDo       || '';
       setDatum(v.datumDegustace);
       pole('f_komentar').value   = v.komentar    || '';
       if (v.hodnoceni) nastavHodnoceni(v.hodnoceni);
@@ -460,6 +497,9 @@
         objem:               desetCislo(pole('f_objem').value),
         cisloSarze:          pole('f_sarze').value.trim(),
         cena:                cislo(pole('f_cena').value),
+        pocetLahvi:          cislo(pole('f_pocetLahvi').value),
+        pitOd:               cislo(pole('f_pitOd').value),
+        pitDo:               cislo(pole('f_pitDo').value),
         hodnoceni:           hodnoceni || null,
         datumDegustace:      getDatum(),
         komentar:            pole('f_komentar').value.trim(),
@@ -1158,6 +1198,26 @@
         if (m) return m[1] || m[2];
       }
       return '';
+    }
+
+    // ── Otevřít láhev ─────────────────────────────────────────
+    async function otevritLahev() {
+      const stavaju = parseInt(pole('f_pocetLahvi').value) || 0;
+      if (stavaju <= 0) return;
+      const novy = stavaju - 1;
+      const skl = novy === 1 ? 'láhev' : novy < 5 ? 'láhve' : 'lahví';
+      if (!confirm(`Otevřít láhev? Zbyde ${novy} ${skl} na skladě.`)) return;
+      const btn = document.getElementById('otevritBtn');
+      btn.disabled = true;
+      try {
+        await db.collection('vina').doc(vinoId).update({ pocetLahvi: novy });
+        pole('f_pocetLahvi').value = novy;
+        if (novy === 0) btn.style.display = 'none';
+        zobrazMsg(novy > 0 ? `✓ Láhev otevřena. Zbývá: ${novy}` : '✓ Poslední láhev otevřena — sklep prázdný.', 'success');
+      } catch (err) {
+        zobrazMsg('Nepodařilo se aktualizovat zásoby.', 'error');
+      }
+      btn.disabled = false;
     }
 
     // ── Fotka etikety ─────────────────────────────────────────

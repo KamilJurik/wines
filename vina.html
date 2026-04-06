@@ -32,6 +32,45 @@
       <button class="filters-toggle" id="filtersToggle" onclick="prepnoutFiltry()">
         <span>⚙</span> Filtry
       </button>
+      <button class="dash-toggle-btn" id="dashToggleBtn" onclick="prepnoutDashboard()">
+        📊 <span class="dash-lbl">Statistiky</span>
+      </button>
+    </div>
+
+    <!-- Pít nyní banner (mimo dashboard, vždy viditelný) -->
+    <div id="pitNyniBanner" class="pit-nyni-banner" style="display:none">
+      <div class="pit-nyni-title">🍾 Vhodné k pití právě nyní</div>
+      <div id="pitNyniList"></div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboardPanel" style="display:none">
+      <div class="dashboard">
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-value" id="statPocet">—</div><div class="stat-label">vín celkem</div></div>
+          <div class="stat-card"><div class="stat-value" id="statPrumer">—</div><div class="stat-label">průměr ★</div></div>
+          <div class="stat-card"><div class="stat-value" id="statZeme">—</div><div class="stat-label">top země</div></div>
+          <div class="stat-card"><div class="stat-value" id="statOdruda">—</div><div class="stat-label">odrůda</div></div>
+        </div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="chart-title">Hodnocení</div>
+            <div id="chartHodnoceni"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Barva vína</div>
+            <div id="chartBarvy"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Ročníky</div>
+            <div id="chartRocniky"></div>
+          </div>
+        </div>
+        <div class="dash-section">
+          <div class="dash-section-title">⭐ Nejlépe hodnocená vína</div>
+          <div id="nejlepsiVina"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Rozšířené filtry -->
@@ -213,6 +252,8 @@
       const empty = document.getElementById('emptyState');
       const maNekteriFiltry = fBarva || fHodnoceni || fRocnik || fZeme || fPrivlastek;
 
+      aktualizovatDashboard(seznam);
+
       if (seznam.length === 0) {
         grid.innerHTML = '';
         document.getElementById('emptyText').textContent =
@@ -251,6 +292,118 @@
           <div class="stars-row">${hvezdy}</div>
           ${owner}
         </a>`;
+    }
+
+    // ── Dashboard ─────────────────────────────────────────────
+    let dashViditelny = false;
+    let posledniSeznam = [];
+
+    function prepnoutDashboard() {
+      dashViditelny = !dashViditelny;
+      document.getElementById('dashboardPanel').style.display = dashViditelny ? 'block' : 'none';
+      const btn = document.getElementById('dashToggleBtn');
+      btn.classList.toggle('open', dashViditelny);
+      btn.querySelector('.dash-lbl').textContent = dashViditelny ? 'Skrýt' : 'Statistiky';
+      if (dashViditelny) renderDashboard(posledniSeznam);
+    }
+
+    function aktualizovatDashboard(seznam) {
+      posledniSeznam = seznam;
+      // "Pít nyní" je vždy viditelné (bez otevírání dashboardu)
+      const nyni = new Date().getFullYear();
+      const pitNyni = seznam.filter(v =>
+        (v.pocetLahvi || 0) > 0 && v.pitOd && v.pitDo &&
+        nyni >= v.pitOd && nyni <= v.pitDo
+      );
+      const banner = document.getElementById('pitNyniBanner');
+      if (pitNyni.length) {
+        banner.style.display = 'block';
+        document.getElementById('pitNyniList').innerHTML = pitNyni.map(v =>
+          `<a class="pit-nyni-item" href="vino.html?id=${v.id}">
+            <span>${esc(v.nazev || '—')}${v.rocnik ? ' (' + v.rocnik + ')' : ''}</span>
+            <span class="pit-nyni-info">🍾 ${v.pocetLahvi} lah. · ${v.pitOd}–${v.pitDo}</span>
+          </a>`
+        ).join('');
+      } else {
+        banner.style.display = 'none';
+      }
+      if (dashViditelny) renderDashboard(seznam);
+    }
+
+    function renderDashboard(seznam) {
+      const nyni = new Date().getFullYear();
+      const n = seznam.length;
+
+      // Stat karty
+      const sHod = seznam.filter(v => v.hodnoceni);
+      const prumer = sHod.length
+        ? (sHod.reduce((s, v) => s + v.hodnoceni, 0) / sHod.length).toFixed(1) + ' ★'
+        : '—';
+      document.getElementById('statPocet').textContent  = n;
+      document.getElementById('statPrumer').textContent = prumer;
+      document.getElementById('statZeme').textContent   = zkratit(topVal(seznam.map(v => v.zemePouvodu)) || '—', 12);
+      document.getElementById('statOdruda').textContent = zkratit(topVal(seznam.map(v => v.odruda)) || '—', 12);
+
+      // Hodnocení bary
+      const maxH = Math.max(...[1,2,3,4,5].map(r => seznam.filter(v => v.hodnoceni === r).length), 1);
+      document.getElementById('chartHodnoceni').innerHTML = [5,4,3,2,1].map(r => {
+        const c = seznam.filter(v => v.hodnoceni === r).length;
+        return `<div class="chart-bar-row">
+          <div class="chart-bar-label">${'★'.repeat(r)}</div>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round(c/maxH*100)}%"></div></div>
+          <div class="chart-bar-count">${c}</div></div>`;
+      }).join('');
+
+      // Barvy bary
+      const bDef = [
+        { k: 'červené', cls: 'cervene', lbl: 'Červené' },
+        { k: 'bílé',    cls: 'bile',    lbl: 'Bílé' },
+        { k: 'rosé',    cls: 'rose',    lbl: 'Rosé' },
+        { k: 'oranžové',cls: 'oranzove',lbl: 'Oranžové' },
+      ];
+      const maxB = Math.max(...bDef.map(b => seznam.filter(v => v.barva === b.k).length), 1);
+      document.getElementById('chartBarvy').innerHTML = bDef.map(b => {
+        const c = seznam.filter(v => v.barva === b.k).length;
+        return `<div class="chart-bar-row">
+          <div class="chart-bar-label">${b.lbl}</div>
+          <div class="chart-bar-track"><div class="chart-bar-fill ${b.cls}" style="width:${Math.round(c/maxB*100)}%"></div></div>
+          <div class="chart-bar-count">${c}</div></div>`;
+      }).join('');
+
+      // Ročníky bary (posledních 10 let s daty)
+      const rokySDaty = [...new Set(seznam.map(v => v.rocnik).filter(r => r && r >= nyni-15 && r <= nyni))]
+        .sort((a, b) => a - b);
+      const maxR = Math.max(...rokySDaty.map(r => seznam.filter(v => v.rocnik === r).length), 1);
+      document.getElementById('chartRocniky').innerHTML = rokySDaty.length
+        ? rokySDaty.map(r => {
+            const c = seznam.filter(v => v.rocnik === r).length;
+            return `<div class="chart-bar-row">
+              <div class="chart-bar-label" style="min-width:34px">${r}</div>
+              <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round(c/maxR*100)}%"></div></div>
+              <div class="chart-bar-count">${c}</div></div>`;
+          }).join('')
+        : '<div style="font-size:11px;color:var(--text-light)">Žádná data</div>';
+
+      // Top 3 vína
+      const top3 = [...seznam].filter(v => v.hodnoceni)
+        .sort((a, b) => b.hodnoceni - a.hodnoceni || (b.datumPridani?.seconds || 0) - (a.datumPridani?.seconds || 0))
+        .slice(0, 3);
+      document.getElementById('nejlepsiVina').innerHTML = top3.length
+        ? top3.map(v =>
+            `<a class="top-wine-row" href="vino.html?id=${v.id}">
+              <div class="top-wine-name">${esc(v.nazev || 'Bez názvu')}</div>
+              <div class="top-wine-stars">${'★'.repeat(v.hodnoceni)}</div>
+            </a>`).join('')
+        : '<div style="font-size:12px;color:var(--text-light)">Žádná hodnocení</div>';
+    }
+
+    function topVal(arr) {
+      const m = {};
+      arr.filter(Boolean).forEach(v => m[v] = (m[v] || 0) + 1);
+      return Object.entries(m).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
+    }
+    function zkratit(s, max) {
+      return s && s.length > max ? s.slice(0, max) + '…' : (s || '—');
     }
 
     // ── Helpers ───────────────────────────────────────────────
