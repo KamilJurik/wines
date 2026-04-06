@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KamiWines – Správa uživatelů</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="header-brand">🍷 KamiWines</div>
+    <div class="header-right">
+      <a href="vina.html" style="color:rgba(255,255,255,0.8);font-size:13px;text-decoration:none;margin-right:8px">← Vína</a>
+      <button class="btn-logout" onclick="auth.signOut().then(()=>location.href='index.html')">Odhlásit</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">⚙️ Správa uživatelů</h1>
+    </div>
+
+    <div id="appMsg" class="msg error"></div>
+
+    <!-- Čekající na schválení -->
+    <div class="fcard" id="cardCekajici">
+      <div class="fcard-header" style="background:linear-gradient(90deg,rgba(146,64,14,0.1),rgba(146,64,14,0.02));color:#92400E;border-bottom-color:rgba(146,64,14,0.2)">
+        <span class="fcard-icon">⏳</span> Čekají na schválení
+        <span id="badgeCekajici" style="margin-left:8px;background:#FEF3C7;color:#92400E;border-radius:20px;padding:2px 8px;font-size:12px"></span>
+      </div>
+      <div class="fcard-body" id="listCekajici">
+        <div class="state-box" style="padding:20px"><span class="icon" style="font-size:28px">⏳</span>Načítám…</div>
+      </div>
+    </div>
+
+    <!-- Schválení uživatelé -->
+    <div class="fcard">
+      <div class="fcard-header">
+        <span class="fcard-icon">✅</span> Schválení uživatelé
+      </div>
+      <div class="fcard-body" id="listSchvaleni">
+        <div class="state-box" style="padding:20px"><span class="icon" style="font-size:28px">⏳</span>Načítám…</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="js/config.js"></script>
+  <script>
+    const ADMIN_EMAIL = 'kamil.jurik@easyportal365.com';
+
+    auth.onAuthStateChanged(user => {
+      if (!user || user.email !== ADMIN_EMAIL) {
+        window.location.href = 'index.html';
+        return;
+      }
+      nacistUzivatele();
+    });
+
+    function nacistUzivatele() {
+      db.collection('uzivatele')
+        .orderBy('datumRegistrace', 'desc')
+        .onSnapshot(snapshot => {
+          const vsichni  = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+          const cekajici = vsichni.filter(u => !u.schvaleno && u.email !== ADMIN_EMAIL);
+          const schvaleni = vsichni.filter(u => u.schvaleno && u.email !== ADMIN_EMAIL);
+
+          // Badge
+          const badge = document.getElementById('badgeCekajici');
+          badge.textContent = cekajici.length ? cekajici.length : '';
+          badge.style.display = cekajici.length ? 'inline' : 'none';
+
+          // Čekající
+          document.getElementById('listCekajici').innerHTML = cekajici.length
+            ? cekajici.map(u => renderUzivatel(u, false)).join('')
+            : '<p style="font-size:14px;color:var(--text-light);padding:4px 0">Žádní uživatelé nečekají na schválení.</p>';
+
+          // Schválení
+          document.getElementById('listSchvaleni').innerHTML = schvaleni.length
+            ? schvaleni.map(u => renderUzivatel(u, true)).join('')
+            : '<p style="font-size:14px;color:var(--text-light);padding:4px 0">Zatím žádní schválení uživatelé.</p>';
+
+        }, err => {
+          console.error(err);
+          document.getElementById('appMsg').textContent = 'Chyba načítání: ' + err.message;
+          document.getElementById('appMsg').style.display = 'block';
+        });
+    }
+
+    function renderUzivatel(u, schvalen) {
+      const initials = (u.jmeno || u.email || '?').charAt(0).toUpperCase();
+      const datum = u.datumRegistrace
+        ? new Date(u.datumRegistrace.seconds * 1000).toLocaleDateString('cs-CZ')
+        : '—';
+
+      const akce = schvalen
+        ? `<button class="btn btn-danger btn-sm" onclick="odebratPristup('${u.id}','${esc(u.jmeno || u.email)}')">Odebrat přístup</button>`
+        : `<button class="btn btn-primary btn-sm" onclick="schvalitUzivatele('${u.id}','${esc(u.jmeno || u.email)}')">Schválit</button>
+           <button class="btn btn-danger btn-sm" onclick="smazatUzivatele('${u.id}','${esc(u.jmeno || u.email)}')">Zamítnout</button>`;
+
+      return `
+        <div class="user-row">
+          <div class="user-avatar">${initials}</div>
+          <div class="user-info">
+            <div class="user-name">${esc(u.jmeno || '—')}</div>
+            <div class="user-email">${esc(u.email || '—')} · registrace ${datum}</div>
+          </div>
+          <span class="user-status ${schvalen ? 'approved' : 'pending'}">${schvalen ? 'Schválen' : 'Čeká'}</span>
+          <div style="display:flex;gap:6px;flex-shrink:0">${akce}</div>
+        </div>`;
+    }
+
+    async function schvalitUzivatele(uid, jmeno) {
+      if (!confirm(`Schválit uživatele „${jmeno}"?`)) return;
+      try {
+        await db.collection('uzivatele').doc(uid).update({ schvaleno: true });
+      } catch (err) {
+        alert('Chyba: ' + err.message);
+      }
+    }
+
+    async function odebratPristup(uid, jmeno) {
+      if (!confirm(`Odebrat přístup uživateli „${jmeno}"?\nUživatel se nebude moci přihlásit.`)) return;
+      try {
+        await db.collection('uzivatele').doc(uid).update({ schvaleno: false });
+      } catch (err) {
+        alert('Chyba: ' + err.message);
+      }
+    }
+
+    async function smazatUzivatele(uid, jmeno) {
+      if (!confirm(`Zamítnout a smazat uživatele „${jmeno}"?\nTato akce je nevratná.`)) return;
+      try {
+        await db.collection('uzivatele').doc(uid).delete();
+      } catch (err) {
+        alert('Chyba: ' + err.message);
+      }
+    }
+
+    function esc(s) {
+      return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+  </script>
+</body>
+</html>

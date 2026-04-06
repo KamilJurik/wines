@@ -31,6 +31,7 @@
       <div class="mini-tabs">
         <button class="mini-tab active" id="mtSearch" onclick="prepnoutVyhledavaniTab('search')">Hledat dle názvu</button>
         <button class="mini-tab"        id="mtUrl"    onclick="prepnoutVyhledavaniTab('url')">Načíst z URL</button>
+        <button class="mini-tab"        id="mtOcr"    onclick="prepnoutVyhledavaniTab('ocr')">Foto / sken</button>
       </div>
 
       <!-- Hledání názvu -->
@@ -41,7 +42,7 @@
                  onkeydown="if(event.key==='Enter') hledatOnline()">
           <button class="btn btn-primary btn-sm" id="onlineBtn" onclick="hledatOnline()">Hledat</button>
         </div>
-        <div class="form-hint" style="margin-top:6px">Prohledá databázi Open Food Facts.</div>
+        <div class="form-hint" style="margin-top:6px">Prohledá mojelahve.cz (57 000+ vín) a Open Food Facts.</div>
         <div id="onlineResults"></div>
       </div>
 
@@ -49,12 +50,31 @@
       <div id="tabUrl" style="display:none">
         <div class="online-row">
           <input type="url" class="search-input" id="urlInput"
-                 placeholder="https://www.wino.cz/…  nebo  vivino.com/…"
+                 placeholder="https://mojelahve.cz/…  nebo  wino.cz/…"
                  onkeydown="if(event.key==='Enter') nacistZUrl()">
           <button class="btn btn-primary btn-sm" id="urlBtn" onclick="nacistZUrl()">Načíst</button>
         </div>
         <div class="form-hint" style="margin-top:6px">Vložte odkaz na stránku vína z libovolného obchodu nebo katalogu.</div>
         <div id="urlResults"></div>
+      </div>
+
+      <!-- OCR z fotky -->
+      <div id="tabOcr" style="display:none">
+        <div class="ocr-zone" id="ocrZone"
+             ondragover="event.preventDefault();this.classList.add('drag')"
+             ondragleave="this.classList.remove('drag')"
+             ondrop="ocrDrop(event)">
+          <input type="file" accept="image/*" id="ocrInput" onchange="ocrNacist(this.files[0])">
+          <span class="ocr-zone-icon">📷</span>
+          <div class="ocr-zone-text">
+            <strong>Klikněte nebo přetáhněte fotku</strong><br>
+            etikety, screenshotu nebo jakéhokoliv textu o víně
+          </div>
+        </div>
+        <div class="ocr-preview" id="ocrPreview">
+          <img id="ocrImg" src="" alt="náhled">
+        </div>
+        <div id="ocrResults"></div>
       </div>
     </div>
 
@@ -443,8 +463,132 @@
     function prepnoutVyhledavaniTab(tab) {
       document.getElementById('tabSearch').style.display = tab === 'search' ? 'block' : 'none';
       document.getElementById('tabUrl').style.display    = tab === 'url'    ? 'block' : 'none';
+      document.getElementById('tabOcr').style.display    = tab === 'ocr'    ? 'block' : 'none';
       document.getElementById('mtSearch').classList.toggle('active', tab === 'search');
       document.getElementById('mtUrl').classList.toggle('active',    tab === 'url');
+      document.getElementById('mtOcr').classList.toggle('active',    tab === 'ocr');
+    }
+
+    // ── OCR z fotky (Tesseract.js) ────────────────────────────
+    function ocrDrop(e) {
+      e.preventDefault();
+      document.getElementById('ocrZone').classList.remove('drag');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) ocrNacist(file);
+    }
+
+    async function ocrNacist(file) {
+      if (!file) return;
+      const res = document.getElementById('ocrResults');
+
+      // Zobraz náhled
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('ocrImg').src = e.target.result;
+        document.getElementById('ocrPreview').style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+
+      res.innerHTML = '<p style="font-size:13px;color:#7A6560;margin-top:10px"><span class="spinner" style="border-color:rgba(114,47,55,.3);border-top-color:var(--wine)"></span> Rozpoznávám text…</p>';
+
+      try {
+        // Načíst Tesseract.js dynamicky
+        if (!window.Tesseract) {
+          await new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+            s.onload = resolve; s.onerror = reject;
+            document.head.appendChild(s);
+          });
+        }
+
+        const { data: { text } } = await Tesseract.recognize(file, 'ces+eng', {
+          logger: m => {
+            if (m.status === 'recognizing text') {
+              const pct = Math.round(m.progress * 100);
+              res.innerHTML = `<p style="font-size:13px;color:#7A6560;margin-top:10px">Rozpoznávám… ${pct}%</p>`;
+            }
+          }
+        });
+
+        const data = extrahovatZTextu(text);
+        aplikovatExtrahovanaData(data, res);
+
+        // Zobraz rozpoznaný text pro kontrolu
+        if (text.trim().length > 10) {
+          res.innerHTML += `<details style="margin-top:8px;font-size:12px;color:var(--text-light)">
+            <summary style="cursor:pointer">Rozpoznaný text (pro kontrolu)</summary>
+            <pre style="white-space:pre-wrap;margin-top:6px;font-size:11px;background:#f8f0e3;padding:8px;border-radius:6px;max-height:120px;overflow-y:auto">${esc(text.trim())}</pre>
+          </details>`;
+        }
+
+      } catch (err) {
+        console.error(err);
+        res.innerHTML = '<p style="font-size:13px;color:#991B1B;margin-top:10px">Rozpoznání textu selhalo. Zkuste jinou fotku nebo zadejte data ručně.</p>';
+      }
+    }
+
+    // Extrakce dat z volného textu (OCR výstup)
+    function extrahovatZTextu(text) {
+      const data = {};
+      const t = text.replace(/\n+/g, ' ').replace(/\s+/g, ' ');
+
+      // Ročník
+      const rocnikM = t.match(/\b(19[89]\d|20[012]\d)\b/);
+      if (rocnikM) data.rocnik = parseInt(rocnikM[1]);
+
+      // Alkohol
+      const alcM = t.match(/(\d{1,2}[.,]\d)\s*%\s*(vol|alk|alc)?/i);
+      if (alcM) {
+        const a = parseFloat(alcM[1].replace(',', '.'));
+        if (a > 5 && a < 25) data.alkohol = a;
+      }
+
+      // Objem
+      const objM = t.match(/(\d{2,4})\s*ml/i) || t.match(/(\d[.,]\d{1,2})\s*l\b/i);
+      if (objM) {
+        const raw = objM[1].replace(',', '.');
+        data.objem = t.includes('ml') ? (parseFloat(raw)/1000).toFixed(3) : parseFloat(raw).toFixed(2);
+      }
+
+      // Zbytkový cukr
+      const cukrM = t.match(/cukr[^\d]{0,10}(\d{1,3}[.,]\d?)\s*g/i) ||
+                    t.match(/(\d{1,3}[.,]\d?)\s*g\/l\s*(rs|residual|cukr|sugar)/i);
+      if (cukrM) data.zbytkCukr = parseFloat(cukrM[1].replace(',', '.'));
+
+      // Kyseliny
+      const kysM = t.match(/kysel[^\d]{0,10}(\d{1,2}[.,]\d?)\s*g/i) ||
+                   t.match(/(\d{1,2}[.,]\d?)\s*g\/l\s*(TA|kysel|acid)/i);
+      if (kysM) data.kyseliny = parseFloat(kysM[1].replace(',', '.'));
+
+      // Šarže
+      const sarzeM = t.match(/[šs]ar[žz]e?\s*[:\-#]?\s*([A-Z0-9]{3,12})/i);
+      if (sarzeM) data.cisloSarze = sarzeM[1].trim();
+
+      // Barva z klíčových slov
+      const tl = t.toLowerCase();
+      if      (/červen[éeé]|red wine|rouge|rotwein/.test(tl))          data.barva = 'červené';
+      else if (/bíl[éeé]\s*vín|white wine|blanc|weißwein/.test(tl))    data.barva = 'bílé';
+      else if (/rosé|rose wine/.test(tl))                               data.barva = 'rosé';
+      else if (/oranžov[éeé]|orange wine/.test(tl))                     data.barva = 'oranžové';
+
+      // Přívlastek
+      const privM = t.match(/\b(kabinet|pozdn[ií] sb[eě]r|výb[eě]r z hroznů|výb[eě]r z bobulí|výb[eě]r z cib[eé]b|ledov[eé] víno|slámov[eé] víno)\b/i);
+      if (privM) data.privlastek = privM[1].charAt(0).toUpperCase() + privM[1].slice(1).toLowerCase();
+
+      // Typ vína
+      const typM = t.match(/\b(such[eé]|polosuché|polosladké|sladk[eé])\b/i);
+      if (typM) data.typVina = typM[1].charAt(0).toUpperCase() + typM[1].slice(1).toLowerCase();
+
+      // Název — první výrazný řádek (velká písmena nebo první smysluplný řádek)
+      if (!data.nazev) {
+        const radky = text.split('\n').map(r => r.trim()).filter(r => r.length > 3 && r.length < 80);
+        const caps  = radky.find(r => r === r.toUpperCase() && r.length > 4 && /[A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]/.test(r));
+        if (caps) data.nazev = caps.charAt(0) + caps.slice(1).toLowerCase();
+        else if (radky.length > 0) data.nazev = radky[0];
+      }
+
+      return data;
     }
 
     // ── Online hledání (mojelahve.cz + Open Food Facts) ──────

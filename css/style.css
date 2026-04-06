@@ -689,6 +689,195 @@ body {
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* =====================
+   Wine facts (index)
+   ===================== */
+.facts-strip {
+  border-top: 1px solid rgba(201,150,58,0.2);
+  margin-top: 48px;
+  padding-top: 28px;
+}
+
+.facts-strip-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gold-lt);
+  opacity: 0.7;
+  margin-bottom: 12px;
+}
+
+.fact-box {
+  background: rgba(201,150,58,0.08);
+  border: 1px solid rgba(201,150,58,0.2);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  animation: fadeIn .5s ease;
+}
+
+.fact-emoji { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
+
+.fact-text {
+  font-size: 13px;
+  color: rgba(248,240,227,0.8);
+  line-height: 1.55;
+}
+
+.fact-text strong {
+  display: block;
+  color: var(--gold-lt);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 3px;
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity:1; transform:none; } }
+
+/* =====================
+   Pending approval overlay
+   ===================== */
+.approval-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(61,18,25,0.96);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.approval-box {
+  background: var(--cream);
+  border-radius: 16px;
+  padding: 40px 36px;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+}
+
+.approval-icon { font-size: 52px; display: block; margin-bottom: 16px; }
+.approval-box h2 { font-size: 22px; color: var(--wine); margin-bottom: 10px; }
+.approval-box p  { font-size: 14px; color: var(--text-light); line-height: 1.6; margin-bottom: 20px; }
+
+/* =====================
+   Advanced search filters
+   ===================== */
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.filter-select {
+  padding: 7px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  background: white;
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color .2s;
+}
+.filter-select:focus { outline: none; border-color: var(--wine); }
+.filter-select.active { border-color: var(--wine); background: rgba(114,47,55,0.05); }
+
+.filters-toggle {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 13px;
+  color: var(--text-light);
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all .2s;
+}
+.filters-toggle.open,
+.filters-toggle:hover { border-color: var(--wine); color: var(--wine); }
+
+/* =====================
+   OCR upload zone
+   ===================== */
+.ocr-zone {
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+  margin-top: 6px;
+  position: relative;
+}
+.ocr-zone:hover,
+.ocr-zone.drag { border-color: var(--wine); background: rgba(114,47,55,0.03); }
+.ocr-zone input[type=file] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+}
+.ocr-zone-icon { font-size: 28px; display: block; margin-bottom: 6px; }
+.ocr-zone-text { font-size: 13px; color: var(--text-light); }
+.ocr-zone-text strong { color: var(--wine); }
+
+.ocr-preview {
+  margin-top: 10px;
+  display: none;
+}
+.ocr-preview img {
+  max-width: 100%;
+  max-height: 180px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  object-fit: contain;
+}
+
+/* =====================
+   Admin page
+   ===================== */
+.user-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.user-row:last-child { border-bottom: none; }
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--wine);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.user-info { flex: 1; }
+.user-name  { font-weight: 700; font-size: 15px; }
+.user-email { font-size: 13px; color: var(--text-light); }
+.user-status {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+.user-status.pending  { background: #FEF3C7; color: #92400E; }
+.user-status.approved { background: #D1FAE5; color: #065F46; }
+
+/* =====================
    Responsive
    ===================== */
 @media (max-width: 520px) {

@@ -366,10 +366,17 @@
       </li>
     </ul>
 
-    <p class="hero-quote">
-      „Víno je poezie lahvovaná v čase."<br>
-      — Robert Louis Stevenson
-    </p>
+    <!-- Vinná zajímavost -->
+    <div class="facts-strip">
+      <div class="facts-strip-label">Věděli jste, že…</div>
+      <div class="fact-box" id="factBox">
+        <span class="fact-emoji" id="factEmoji"></span>
+        <div class="fact-text">
+          <strong id="factTitle"></strong>
+          <span id="factBody"></span>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Pravý panel — formulář -->
@@ -430,8 +437,45 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="js/config.js"></script>
   <script>
-    auth.onAuthStateChanged(user => {
-      if (user) window.location.href = 'vina.html';
+    // ── Vinné zajímavosti ─────────────────────────────────────
+    const FAKTA = [
+      { e:'🍇', t:'Kolik hroznů na láhev?', b:'Na výrobu jedné láhve vína (0,75 l) je potřeba přibližně 600–800 hroznů, tedy asi 1,2 kg ovoce.' },
+      { e:'🌍', t:'Nejstarší víno světa', b:'Nejstarší dochované víno pochází z Gruzie — nálezy svědčí o výrobě vína již před 8 000 lety.' },
+      { e:'🥃', t:'Proč burgundské sklenice?', b:'Širší tvar burgundské sklenice zvyšuje kontakt vína se vzduchem, čímž se uvolňují aromatické látky a víno "dýchá".' },
+      { e:'🌡️', t:'Teplota skladování', b:'Ideální teplota pro dlouhodobé skladování vína je 12–14 °C s vlhkostí 70 %. Výkyvy teplot poškozují víno více než samotná teplota.' },
+      { e:'🍾', t:'Tlak v šampaňském', b:'V láhvi šampaňského je tlak přibližně 5–6 atmosfér — stejný jako v pneumatice autobusu.' },
+      { e:'🌿', t:'Biodynamické vinařství', b:'Biodynamické vinařství se řídí lunárním kalendářem. "Ovocné dny" jsou považovány za ideální pro degustaci, "kořenové dny" méně příznivé.' },
+      { e:'🎨', t:'Barva červeného vína', b:'Barvu červenému vínu dávají antokyaniny z hroznových slupek. Čím déle mošt na slupkách maceruje, tím je víno tmavší.' },
+      { e:'🔬', t:'Zbytkový cukr', b:'Suché víno má méně než 4 g/l zbytkového cukru. Sladké dezertní víno může mít i přes 200 g/l — cukr přirozeně konzervuje víno.' },
+      { e:'🧪', t:'Siřičitany a příroda', b:'Siřičitany (SO₂) se přirozeně tvoří při fermentaci každého vína. Přídavek SO₂ jako konzervant je v EU povolen a regulován.' },
+      { e:'🕰️', t:'Taniny a čas', b:'Taniny v červeném víně se časem polymerizují a víno získává hebčí, zakulacenější charakter — proto ročníky z dobrých let zrají desítky let.' },
+      { e:'🌸', t:'Rosé není směs', b:'Kvalitní rosé se nevyrábí mícháním červeného a bílého vína (výjimkou je šampaňské). Vzniká krátkou macerací červených hroznů — jen několik hodin.' },
+      { e:'🇨🇿', t:'Česká vinařská oblast', b:'Česká republika má dvě vinařské oblasti: Moravskou (94 % produkce) a Českou. Moravská se dělí na 4 podoblasti: Slováckou, Velkopavlovickou, Znojemskou a Mikulovskou.' },
+      { e:'💧', t:'Oranžové víno', b:'Oranžové víno je bílé víno vyrobené jako červené — mošt fermentuje na slupkách týdny až měsíce. Vznikají tak taniny a výrazná zlatooranžová barva.' },
+      { e:'🦴', t:'Kyseliny ve víně', b:'Víno obsahuje hlavně kyselinu vinnou, jablečnou a citronovou. Kyselost (pH 2,9–3,9) přirozeně konzervuje víno a dodává mu svěžest.' },
+      { e:'📏', t:'Proč 0,75 l?', b:'Objem 0,75 l se ustálil jako standard, protože odpovídá přibližně šesti sklenicím a původně byl kompromisem mezi anglickými galony a francouzskými litry.' },
+    ];
+
+    (function zobrazFakt() {
+      const f = FAKTA[Math.floor(Math.random() * FAKTA.length)];
+      document.getElementById('factEmoji').textContent = f.e;
+      document.getElementById('factTitle').textContent = f.t;
+      document.getElementById('factBody').textContent  = f.b;
+    })();
+
+    // ── Auth + schválení ──────────────────────────────────────
+    auth.onAuthStateChanged(async user => {
+      if (!user) return;
+      // Zkontroluj schválení
+      const snap = await db.collection('uzivatele').doc(user.uid).get();
+      if (!snap.exists || snap.data().schvaleno) {
+        window.location.href = 'vina.html';
+      } else {
+        // Čeká na schválení — odhlásit a zobrazit zprávu
+        await auth.signOut();
+        zobrazMsg(document.getElementById('loginMsg'),
+          'Váš účet čeká na schválení administrátorem. Zkuste to prosím později.');
+      }
     });
 
     function prepnout(zobrazit) {
@@ -477,7 +521,19 @@
       try {
         const cred = await auth.createUserWithEmailAndPassword(email, password);
         await cred.user.updateProfile({ displayName: name });
-        window.location.href = 'vina.html';
+        // Uložit uživatele do Firestore — čeká na schválení
+        await db.collection('uzivatele').doc(cred.user.uid).set({
+          jmeno:        name,
+          email:        email,
+          schvaleno:    false,
+          datumRegistrace: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+        await auth.signOut();
+        prepnout('loginForm');
+        zobrazMsg(document.getElementById('loginMsg'),
+          '✓ Účet vytvořen! Vyčkejte prosím na schválení administrátorem.');
+        document.getElementById('loginMsg').className = 'msg success';
+        document.getElementById('loginMsg').style.display = 'block';
       } catch (err) {
         zobrazMsg(msg, prevestChybu(err.code));
         btn.disabled = false;

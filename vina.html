@@ -12,14 +12,60 @@
     <div class="header-brand">🍷 KamiWines</div>
     <div class="header-right">
       <span class="header-user" id="headerUser"></span>
+      <span id="adminLink" style="display:none">
+        <a href="admin.html" style="color:rgba(255,255,255,0.8);font-size:13px;text-decoration:none;margin-right:4px">⚙️ Admin</a>
+      </span>
       <button class="btn-logout" onclick="odhlasit()">Odhlásit</button>
     </div>
   </header>
 
   <div class="container">
+
+    <!-- Vyhledávací lišta -->
     <div class="search-bar">
       <input type="text" class="search-input" id="searchInput"
-             placeholder="Hledat víno, vinařství, odrůdu…" oninput="zobrazitVina()">
+             placeholder="Hledat víno…" oninput="zobrazitVina()">
+      <button class="filters-toggle" id="filtersToggle" onclick="prepnoutFiltry()">
+        <span>⚙</span> Filtry
+      </button>
+    </div>
+
+    <!-- Rozšířené filtry -->
+    <div id="filtersPanel" style="display:none">
+      <div class="filters-row">
+        <select class="filter-select" id="fBarva" onchange="zobrazitVina()">
+          <option value="">Barva — vše</option>
+          <option value="červené">Červené</option>
+          <option value="bílé">Bílé</option>
+          <option value="rosé">Rosé</option>
+          <option value="oranžové">Oranžové</option>
+        </select>
+
+        <select class="filter-select" id="fHodnoceni" onchange="zobrazitVina()">
+          <option value="">Hodnocení — vše</option>
+          <option value="5">★★★★★ (5)</option>
+          <option value="4">★★★★ (4+)</option>
+          <option value="3">★★★ (3+)</option>
+          <option value="2">★★ (2+)</option>
+          <option value="1">★ (1+)</option>
+        </select>
+
+        <select class="filter-select" id="fRocnik" onchange="zobrazitVina()">
+          <option value="">Ročník — vše</option>
+        </select>
+
+        <select class="filter-select" id="fZeme" onchange="zobrazitVina()">
+          <option value="">Země — vše</option>
+        </select>
+
+        <select class="filter-select" id="fPrivlastek" onchange="zobrazitVina()">
+          <option value="">Přívlastek — vše</option>
+        </select>
+
+        <button class="filters-toggle" onclick="resetFiltry()" style="color:#DC2626;border-color:#DC2626">
+          ✕ Reset
+        </button>
+      </div>
     </div>
 
     <div class="tabs">
@@ -28,7 +74,7 @@
     </div>
 
     <div id="loadingState" class="state-box"><span class="icon">⏳</span>Načítám vína…</div>
-    <div id="emptyState"   class="state-box" style="display:none">
+    <div id="emptyState" class="state-box" style="display:none">
       <span class="icon">🍾</span>
       <span id="emptyText"></span>
     </div>
@@ -42,25 +88,53 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="js/config.js"></script>
   <script>
+    const ADMIN_EMAIL = 'kamil.jurik@easyportal365.com';
     let vsechnaVina  = [];
     let aktualniTab  = 'moje';
     let aktualniUser = null;
+    let filtrySviditelne = false;
 
-    // ── Auth guard ────────────────────────────────────────────
-    auth.onAuthStateChanged(user => {
+    // ── Auth guard + schválení ────────────────────────────────
+    auth.onAuthStateChanged(async user => {
       if (!user) { window.location.href = 'index.html'; return; }
+
+      // Admin má vždy přístup, ostatní zkontrolujeme
+      if (user.email !== ADMIN_EMAIL) {
+        const snap = await db.collection('uzivatele').doc(user.uid).get();
+        if (!snap.exists || !snap.data().schvaleno) {
+          await auth.signOut();
+          window.location.href = 'index.html';
+          return;
+        }
+      } else {
+        // Zajistit záznam admina v kolekci uzivatele
+        const snap = await db.collection('uzivatele').doc(user.uid).get();
+        if (!snap.exists) {
+          await db.collection('uzivatele').doc(user.uid).set({
+            jmeno: user.displayName || 'Kamil',
+            email: user.email,
+            schvaleno: true,
+            datumRegistrace: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+        } else if (!snap.data().schvaleno) {
+          await db.collection('uzivatele').doc(user.uid).update({ schvaleno: true });
+        }
+        document.getElementById('adminLink').style.display = 'inline';
+      }
+
       aktualniUser = user;
       document.getElementById('headerUser').textContent = user.displayName || user.email;
       nacistVina();
     });
 
-    // ── Firestore realtime listener ───────────────────────────
+    // ── Firestore listener ────────────────────────────────────
     function nacistVina() {
       db.collection('vina')
         .orderBy('datumPridani', 'desc')
         .onSnapshot(snapshot => {
           vsechnaVina = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
           document.getElementById('loadingState').style.display = 'none';
+          naplnitFiltry();
           zobrazitVina();
         }, err => {
           console.error(err);
@@ -69,9 +143,33 @@
         });
     }
 
+    // ── Dynamické naplnění filtrů ─────────────────────────────
+    function naplnitFiltry() {
+      const rocniky   = [...new Set(vsechnaVina.map(v => v.rocnik).filter(Boolean))].sort((a,b) => b-a);
+      const zeme      = [...new Set(vsechnaVina.map(v => v.zemePouvodu).filter(Boolean))].sort();
+      const privlastky = [...new Set(vsechnaVina.map(v => v.privlastek).filter(Boolean))].sort();
+
+      naplnitSelect('fRocnik',    rocniky,    'Ročník — vše');
+      naplnitSelect('fZeme',      zeme,       'Země — vše');
+      naplnitSelect('fPrivlastek', privlastky, 'Přívlastek — vše');
+    }
+
+    function naplnitSelect(id, hodnoty, placeholder) {
+      const el  = document.getElementById(id);
+      const val = el.value;
+      el.innerHTML = `<option value="">${placeholder}</option>` +
+        hodnoty.map(h => `<option value="${esc(String(h))}">${esc(String(h))}</option>`).join('');
+      if (val) el.value = val;
+    }
+
     // ── Render ────────────────────────────────────────────────
     function zobrazitVina() {
-      const hledani = (document.getElementById('searchInput').value || '').toLowerCase();
+      const hledani    = (document.getElementById('searchInput').value || '').toLowerCase();
+      const fBarva     = document.getElementById('fBarva').value;
+      const fHodnoceni = parseInt(document.getElementById('fHodnoceni').value) || 0;
+      const fRocnik    = document.getElementById('fRocnik').value;
+      const fZeme      = document.getElementById('fZeme').value;
+      const fPrivlastek = document.getElementById('fPrivlastek').value;
 
       let seznam = vsechnaVina;
 
@@ -81,29 +179,42 @@
 
       if (hledani) {
         seznam = seznam.filter(v =>
-          hledatV(v.nazev,              hledani) ||
-          hledatV(v.vinarstvi,          hledani) ||
-          hledatV(v.odruda,             hledani) ||
-          hledatV(v.typVina,            hledani) ||
-          hledatV(v.privlastek,         hledani) ||
-          hledatV(v.zemePouvodu,        hledani) ||
-          hledatV(v.vinarskaOblast,     hledani) ||
-          hledatV(v.vinarskaPodoblast,  hledani) ||
-          hledatV(v.vinacniTrat,        hledani) ||
+          hledatV(v.nazev,             hledani) ||
+          hledatV(v.vinarstvi,         hledani) ||
+          hledatV(v.odruda,            hledani) ||
+          hledatV(v.privlastek,        hledani) ||
+          hledatV(v.zemePouvodu,       hledani) ||
+          hledatV(v.vinarskaOblast,    hledani) ||
+          hledatV(v.vinarskaPodoblast, hledani) ||
+          hledatV(v.vinacniTrat,       hledani) ||
+          hledatV(v.typVina,           hledani) ||
           hledatV(String(v.rocnik||''), hledani)
         );
       }
 
+      if (fBarva)      seznam = seznam.filter(v => v.barva === fBarva);
+      if (fHodnoceni)  seznam = seznam.filter(v => (v.hodnoceni || 0) >= fHodnoceni);
+      if (fRocnik)     seznam = seznam.filter(v => String(v.rocnik || '') === fRocnik);
+      if (fZeme)       seznam = seznam.filter(v => v.zemePouvodu === fZeme);
+      if (fPrivlastek) seznam = seznam.filter(v => v.privlastek === fPrivlastek);
+
+      // Zvýraznit aktivní filtry
+      ['fBarva','fHodnoceni','fRocnik','fZeme','fPrivlastek'].forEach(id => {
+        document.getElementById(id).classList.toggle('active', !!document.getElementById(id).value);
+      });
+
       const grid  = document.getElementById('winesGrid');
       const empty = document.getElementById('emptyState');
+      const maNekteriFiltry = fBarva || fHodnoceni || fRocnik || fZeme || fPrivlastek;
 
       if (seznam.length === 0) {
         grid.innerHTML = '';
-        document.getElementById('emptyText').textContent = hledani
-          ? `Žádné výsledky pro „${hledani}"`
-          : aktualniTab === 'moje'
-            ? 'Zatím žádná vína. Přidejte první kliknutím na +!'
-            : 'Žádná vína v databázi.';
+        document.getElementById('emptyText').textContent =
+          (hledani || maNekteriFiltry)
+            ? 'Žádné výsledky — zkuste upravit filtry.'
+            : aktualniTab === 'moje'
+              ? 'Zatím žádná vína. Přidejte první kliknutím na +!'
+              : 'Žádná vína v databázi.';
         empty.style.display = 'block';
       } else {
         empty.style.display = 'none';
@@ -115,13 +226,10 @@
       const hvezdy = [1,2,3,4,5].map(i =>
         `<span class="star${i <= (v.hodnoceni||0) ? ' on' : ''}">★</span>`
       ).join('');
-
       const barvaCls = barvaTridaNazev(v.barva);
       const meta = [v.rocnik, v.odruda].filter(Boolean).join(' · ');
       const owner = aktualniTab === 'vsechna'
-        ? `<div class="wine-owner">👤 ${esc(v.uzivatelJmeno || '—')}</div>`
-        : '';
-
+        ? `<div class="wine-owner">👤 ${esc(v.uzivatelJmeno || '—')}</div>` : '';
       return `
         <a class="wine-card" href="vino.html?id=${v.id}">
           <div class="wine-card-top">
@@ -143,22 +251,27 @@
       zobrazitVina();
     }
 
-    function odhlasit() {
-      auth.signOut().then(() => window.location.href = 'index.html');
+    function prepnoutFiltry() {
+      filtrySviditelne = !filtrySviditelne;
+      document.getElementById('filtersPanel').style.display = filtrySviditelne ? 'block' : 'none';
+      document.getElementById('filtersToggle').classList.toggle('open', filtrySviditelne);
     }
 
-    function hledatV(hodnota, hledani) {
-      return (hodnota || '').toLowerCase().includes(hledani);
+    function resetFiltry() {
+      ['fBarva','fHodnoceni','fRocnik','fZeme','fPrivlastek'].forEach(id => {
+        document.getElementById(id).value = '';
+        document.getElementById(id).classList.remove('active');
+      });
+      zobrazitVina();
     }
 
+    function odhlasit() { auth.signOut().then(() => window.location.href = 'index.html'); }
+    function hledatV(hodnota, h) { return (hodnota || '').toLowerCase().includes(h); }
     function barvaTridaNazev(barva) {
-      return { 'červené': 'cervene', 'bílé': 'bile', 'rosé': 'rose', 'šumivé': 'sumive' }[barva] || '';
+      return { 'červené':'cervene','bílé':'bile','rosé':'rose','oranžové':'oranzove' }[barva] || '';
     }
-
     function esc(s) {
-      const d = document.createElement('div');
-      d.textContent = s;
-      return d.innerHTML;
+      const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
     }
   </script>
 </body>
