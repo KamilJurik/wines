@@ -332,30 +332,8 @@
           </div>
         </div><!-- /Hodnocení -->
 
-        <!-- Nápověda -->
-        <div class="help-card">
-          <div class="help-card-title">💡 Rychlá nápověda</div>
-          <div class="help-item">
-            <span class="help-item-icon">🔍</span>
-            <div><strong>Předvyplnění z internetu</strong>Zadejte název vína — prohledáme databázi 57 000+ vín na mojelahve.cz a vrátíme vyplněný formulář.</div>
-          </div>
-          <div class="help-item">
-            <span class="help-item-icon">📷</span>
-            <div><strong>Sken etikety (OCR)</strong>Vyfoťte etiketu nebo vložte screenshot — systém automaticky rozpozná text a vyplní pole.</div>
-          </div>
-          <div class="help-item">
-            <span class="help-item-icon">🔗</span>
-            <div><strong>Načtení z URL</strong>Zkopírujte odkaz na víno z e-shopu nebo katalogu (mojelahve.cz, wino.cz…) a data se načtou automaticky.</div>
-          </div>
-          <div class="help-item">
-            <span class="help-item-icon">🏚️</span>
-            <div><strong>Vinný sklep</strong>Evidujte počet lahví a nastavte okno pití — na přehledu vín vás upozorníme, kdy je správný čas otevřít láhev.</div>
-          </div>
-          <div class="help-item">
-            <span class="help-item-icon">⭐</span>
-            <div><strong>Hodnocení a komentář</strong>Po degustaci přidejte hvězdičky a poznámky — uchováte tak chuťový profil pro příští výběr.</div>
-          </div>
-        </div><!-- /help-card -->
+        <!-- Nápověda — obsah doplní JS podle kontextu (nové / editace) -->
+        <div class="help-card" id="helpCard" style="display:none"></div>
 
       </div><!-- /vino-col personal -->
     </div><!-- /vino-cols -->
@@ -429,8 +407,9 @@
       if (vinoId) {
         nacistVino(vinoId);
       } else {
-        // Nové víno — zobraz panel pro předvyplnění
+        // Nové víno — zobraz panel pro předvyplnění + nápovědu pro přidání
         document.getElementById('onlinePanel').style.display = 'block';
+        nastavitNapovedu('nova');
       }
     });
 
@@ -451,6 +430,7 @@
           document.getElementById('saveBtn').textContent   = 'Uložit změny';
           document.getElementById('deleteBtn').style.display = 'inline-flex';
           document.getElementById('onlinePanel').style.display = 'none';
+          nastavitNapovedu('editace', v);
           // Zobraz tlačítko Otevřít láhev pokud je víno na skladě
           if ((v.pocetLahvi || 0) > 0) {
             document.getElementById('otevritBtn').style.display = 'inline-flex';
@@ -500,6 +480,65 @@
         document.getElementById('fotoPreviewWrap').style.display = 'flex';
         document.getElementById('fotoEmpty').style.display = 'none';
       }
+    }
+
+    // ── Kontextová nápověda ───────────────────────────────────
+    function nastavitNapovedu(mod, v) {
+      const card = document.getElementById('helpCard');
+      if (!card) return;
+      let titulek, polozky;
+
+      if (mod === 'nova') {
+        titulek = '💡 Jak přidat víno';
+        polozky = [
+          { icon: '🔍', nazev: 'Hledání podle názvu',
+            text: 'Nahoře zadejte název nebo vinařství — prohledáme 57 000+ vín na mojelahve.cz a předvyplníme formulář.' },
+          { icon: '🔗', nazev: 'Načtení z URL',
+            text: 'Zkopírujte odkaz na víno z libovolného e-shopu nebo katalogu a data se načtou automaticky.' },
+          { icon: '📷', nazev: 'Sken etikety',
+            text: 'Vyfoťte etiketu nebo vložte screenshot — OCR rozpozná text a vyplní pole.' },
+          { icon: '⭐', nazev: 'Hodnocení a komentář',
+            text: 'Ihned ohodnoťte víno hvězdičkami a zapište první dojem — uchovají se pro příští výběr.' },
+          { icon: '🏚️', nazev: 'Evidujte sklep',
+            text: 'Vyplňte počet lahví a okno pití — na přehledu vín pak uvidíte, co je čas otevřít.' },
+        ];
+      } else {
+        // Editace existujícího vína
+        const maFoto = !!(v && v.foto);
+        const maSklep = !!(v && v.pocetLahvi);
+        const maHodnoceni = !!(v && v.hodnoceni);
+        titulek = '💡 Tipy pro toto víno';
+        polozky = [
+          maSklep
+            ? { icon: '🍾', nazev: 'Otevřít láhev',
+                text: `Na skladě ${v.pocetLahvi} lah. — tlačítkem „Otevřít láhev" snížíte stav o 1.` }
+            : { icon: '🏚️', nazev: 'Přidat do skladu',
+                text: 'Vyplňte počet lahví a roky „vhodné k pití" — budete upozorněni v pravý čas.' },
+          !v?.pitOd
+            ? { icon: '📅', nazev: 'Nastavte okno pití',
+                text: 'Zadejte roky, kdy je víno vhodné k pití — Vinora vás upozorní na přehledu.' }
+            : { icon: '📅', nazev: 'Okno pití nastaveno',
+                text: `Víno je vhodné k pití ${v.pitOd}–${v.pitDo}.` },
+          maHodnoceni
+            ? { icon: '⭐', nazev: 'Aktualizovat hodnocení',
+                text: 'Po druhé degustaci zvažte přehodnocení — profil se postupem času mění.' }
+            : { icon: '⭐', nazev: 'Přidat hodnocení',
+                text: 'Víno ještě nemá hodnocení — ohodnoťte ho po degustaci.' },
+          maFoto
+            ? { icon: '📸', nazev: 'Fotka etikety',
+                text: 'Fotka je uložena — zobrazuje se na kartě vína v přehledu.' }
+            : { icon: '📸', nazev: 'Přidat fotku etikety',
+                text: 'Vyfoťte etiketu a přidejte ji — zobrazí se na kartě vína v přehledu.' },
+        ];
+      }
+
+      card.innerHTML = `<div class="help-card-title">${titulek}</div>` +
+        polozky.map(p => `
+          <div class="help-item">
+            <span class="help-item-icon">${p.icon}</span>
+            <div><strong>${p.nazev}</strong>${p.text}</div>
+          </div>`).join('');
+      card.style.display = 'block';
     }
 
     function setReadonly(stav) {

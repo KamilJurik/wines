@@ -1310,18 +1310,22 @@ body {
 }
 .fcard-pair .fcard {
   margin-bottom: 0;
+  /* height: 100% zajistí, že flex container zná svou výšku
+     a může ji distribuovat children přes flex: 1 */
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
-/* Foto zóna se roztáhne na celou výšku vedlejší karty */
 .fcard-pair .fcard .fcard-body {
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
+/* Foto zóna se roztáhne na celou výšku vedlejší karty */
 .fcard-pair .fcard .foto-zone {
   flex: 1;
-  min-height: 120px;
+  min-height: 0;
 }
 
 /* ── vino.html: two-column form ── */
