@@ -14,7 +14,6 @@
       <div class="header-subtitle">Příběh v každé skleničce.</div>
     </div>
     <div class="header-right">
-      <span class="header-version" id="versionBadge"></span>
       <span class="header-user" id="headerUser"></span>
       <button class="btn-logout" onclick="odhlasit()">Odhlásit</button>
     </div>
@@ -81,7 +80,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="js/config.js"></script>
   <script>
-    document.getElementById('versionBadge').textContent = 'v' + APP_VERSION;
+    document.getElementById('footerVersion').textContent = 'v' + APP_VERSION;
 
     let originalEmail = '';
 
@@ -186,6 +185,8 @@
 
     function odhlasit() { auth.signOut().then(() => window.location.href = 'index.html'); }
 
+    document.getElementById('footerVersion').textContent = 'v' + APP_VERSION;
+
     function zobrazMsg(text, typ) {
       const el = document.getElementById('profilMsg');
       el.textContent = text;
@@ -195,5 +196,9 @@
       if (typ === 'success') setTimeout(() => { el.style.display = 'none'; }, 4000);
     }
   </script>
+
+  <footer class="app-footer">
+    <strong>🍷 Vinora</strong> &nbsp;·&nbsp; <span id="footerVersion"></span> &nbsp;·&nbsp; © Kamil Juřík, 2026
+  </footer>
 </body>
 </html>

@@ -418,7 +418,6 @@
     <div class="form-logo">
       <span class="form-logo-icon">🍷</span>
       <span class="form-logo-text">Vinora</span>
-      <span id="versionBadge" style="font-size:10px;opacity:0.45;font-weight:500;letter-spacing:0.5px;align-self:flex-end;padding-bottom:2px"></span>
     </div>
 
     <!-- Přihlášení -->
@@ -465,6 +464,12 @@
       <button class="btn-login" id="regBtn" onclick="registrovat()">Vytvořit účet</button>
       <button class="btn-back" onclick="prepnout('loginForm')">← Zpět na přihlášení</button>
     </div>
+
+    <div style="text-align:center;margin-top:28px;padding-top:16px;border-top:1px solid #D4C0A8;font-size:11px;color:#9A8A84;line-height:2">
+      <strong style="color:#722F37">🍷 Vinora</strong>
+      &nbsp;·&nbsp; <span id="footerVersion"></span>
+      &nbsp;·&nbsp; © Kamil Juřík, 2026
+    </div>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -472,7 +477,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="js/config.js"></script>
   <script>
-    document.getElementById('versionBadge').textContent = 'v' + APP_VERSION;
+    document.getElementById('footerVersion').textContent = 'v' + APP_VERSION;
 
     // ── Vinné zajímavosti ─────────────────────────────────────
     const FAKTA = [

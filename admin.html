@@ -14,7 +14,6 @@
       <div class="header-subtitle">Příběh v každé skleničce.</div>
     </div>
     <div class="header-right">
-      <span class="header-version" id="versionBadge"></span>
       <span class="header-user" id="headerUser" onclick="window.location.href='profil.html'" title="Upravit profil" style="font-size:13px"></span>
       <a href="vina.html" style="color:rgba(255,255,255,0.8);font-size:13px;text-decoration:none;margin-right:4px">← Vína</a>
       <button class="btn-logout" onclick="auth.signOut().then(()=>location.href='index.html')">Odhlásit</button>
@@ -55,7 +54,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="js/config.js"></script>
   <script>
-    document.getElementById('versionBadge').textContent = 'v' + APP_VERSION;
+    document.getElementById('footerVersion').textContent = 'v' + APP_VERSION;
 
     const ADMIN_EMAIL = 'kamil.jurik@easyportal365.com';
 
@@ -152,5 +151,9 @@
       return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
   </script>
+
+  <footer class="app-footer">
+    <strong>🍷 Vinora</strong> &nbsp;·&nbsp; <span id="footerVersion"></span> &nbsp;·&nbsp; © Kamil Juřík, 2026
+  </footer>
 </body>
 </html>

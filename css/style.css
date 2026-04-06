@@ -1256,6 +1256,27 @@ body {
 
 .vina-main { min-width: 0; }
 
+/* ── Patička ── */
+.app-footer {
+  text-align: center;
+  padding: 20px 16px 24px;
+  margin-top: 48px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-light);
+  line-height: 2;
+}
+.app-footer strong { color: var(--wine); font-weight: 700; }
+
+/* ── Pár fcards vedle sebe (fotka + původ) ── */
+.fcard-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.fcard-pair .fcard { margin-bottom: 0; }
+
 /* ── vino.html: two-column form ── */
 .vino-cols {
   display: grid;
@@ -1322,6 +1343,7 @@ body {
 @media (max-width: 600px) {
   .stats-row  { grid-template-columns: repeat(2, 1fr); }
   .charts-row { grid-template-columns: 1fr; }
+  .fcard-pair { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 520px) {

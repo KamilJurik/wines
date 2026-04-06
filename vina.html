@@ -14,7 +14,6 @@
       <div class="header-subtitle">Příběh v každé skleničce.</div>
     </div>
     <div class="header-right">
-      <span class="header-version" id="versionBadge"></span>
       <span class="header-user" id="headerUser" onclick="window.location.href='profil.html'" title="Upravit profil"></span>
       <span id="adminLink" style="display:none">
         <a href="admin.html" style="color:rgba(255,255,255,0.8);font-size:13px;text-decoration:none;margin-right:4px">⚙️ Admin</a>
@@ -156,12 +155,16 @@
 
   <button class="fab" onclick="window.location.href='vino.html'" title="Přidat víno">+</button>
 
+  <footer class="app-footer">
+    <strong>🍷 Vinora</strong> &nbsp;·&nbsp; <span id="footerVersion"></span> &nbsp;·&nbsp; © Kamil Juřík, 2026
+  </footer>
+
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="js/config.js"></script>
   <script>
-    document.getElementById('versionBadge').textContent = 'v' + APP_VERSION;
+    document.getElementById('footerVersion').textContent = 'v' + APP_VERSION;
 
     const ADMIN_EMAIL = 'kamil.jurik@easyportal365.com';
     let vsechnaVina  = [];

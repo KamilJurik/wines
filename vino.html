@@ -14,7 +14,6 @@
       <div class="header-subtitle">Příběh v každé skleničce.</div>
     </div>
     <div class="header-right">
-      <span class="header-version" id="versionBadge"></span>
       <span class="header-user" id="headerUser" onclick="window.location.href='profil.html'" title="Upravit profil"></span>
       <button class="btn-logout" onclick="odhlasit()">Odhlásit</button>
     </div>
@@ -166,39 +165,39 @@
           </div>
         </div><!-- /Základní informace -->
 
-        <!-- Fotka etikety -->
-        <div class="fcard">
-          <div class="fcard-header">
-            <span class="fcard-icon">📸</span> Fotka etikety
-          </div>
-          <div class="fcard-body">
-            <div class="foto-zone" id="fotoZone"
-                 onclick="document.getElementById('fotoInput').click()"
-                 ondragover="event.preventDefault();this.classList.add('drag')"
-                 ondragleave="this.classList.remove('drag')"
-                 ondrop="fotoDrop(event)">
-              <input type="file" accept="image/*" id="fotoInput" style="display:none"
-                     onchange="fotoNacist(this.files[0])">
-              <div class="foto-preview-wrap" id="fotoPreviewWrap" style="display:none">
-                <img id="fotoPreview" src="" alt="etiketa">
-                <button type="button" class="foto-remove-btn"
-                        onclick="event.stopPropagation();smazatFoto()">✕ Odebrat</button>
-              </div>
-              <div id="fotoEmpty" style="display:flex;flex-direction:column;align-items:center;gap:6px">
-                <span style="font-size:32px">📷</span>
-                <div style="font-size:13px;color:var(--text-light)">Klikněte nebo přetáhněte fotku etikety</div>
+        <!-- Fotka etikety + Původ vedle sebe -->
+        <div class="fcard-pair">
+
+          <div class="fcard">
+            <div class="fcard-header">
+              <span class="fcard-icon">📸</span> Fotka etikety
+            </div>
+            <div class="fcard-body">
+              <div class="foto-zone" id="fotoZone"
+                   onclick="document.getElementById('fotoInput').click()"
+                   ondragover="event.preventDefault();this.classList.add('drag')"
+                   ondragleave="this.classList.remove('drag')"
+                   ondrop="fotoDrop(event)">
+                <input type="file" accept="image/*" id="fotoInput" style="display:none"
+                       onchange="fotoNacist(this.files[0])">
+                <div class="foto-preview-wrap" id="fotoPreviewWrap" style="display:none">
+                  <img id="fotoPreview" src="" alt="etiketa">
+                  <button type="button" class="foto-remove-btn"
+                          onclick="event.stopPropagation();smazatFoto()">✕ Odebrat</button>
+                </div>
+                <div id="fotoEmpty" style="display:flex;flex-direction:column;align-items:center;gap:6px">
+                  <span style="font-size:32px">📷</span>
+                  <div style="font-size:13px;color:var(--text-light)">Klikněte nebo přetáhněte fotku etikety</div>
+                </div>
               </div>
             </div>
-          </div>
-        </div><!-- /Fotka etikety -->
+          </div><!-- /Fotka etikety -->
 
-        <!-- Původ -->
-        <div class="fcard">
-          <div class="fcard-header">
-            <span class="fcard-icon">🗺️</span> Původ
-          </div>
-          <div class="fcard-body">
-            <div class="grid2">
+          <div class="fcard">
+            <div class="fcard-header">
+              <span class="fcard-icon">🗺️</span> Původ
+            </div>
+            <div class="fcard-body">
               <div class="form-group">
                 <label for="f_zeme">Země původu</label>
                 <input type="text" id="f_zeme" placeholder="např. Česká republika">
@@ -207,8 +206,6 @@
                 <label for="f_oblast">Vinařská oblast</label>
                 <input type="text" id="f_oblast" placeholder="např. Morava">
               </div>
-            </div>
-            <div class="grid2">
               <div class="form-group">
                 <label for="f_podoblast">Vinařská podoblast</label>
                 <input type="text" id="f_podoblast" placeholder="např. Slovácká">
@@ -218,8 +215,9 @@
                 <input type="text" id="f_trat" placeholder="např. Nechory">
               </div>
             </div>
-          </div>
-        </div><!-- /Původ -->
+          </div><!-- /Původ -->
+
+        </div><!-- /fcard-pair -->
 
         <!-- Technické parametry -->
         <div class="fcard">
@@ -343,12 +341,16 @@
     </div>
   </div>
 
+  <footer class="app-footer">
+    <strong>🍷 Vinora</strong> &nbsp;·&nbsp; <span id="footerVersion"></span> &nbsp;·&nbsp; © Kamil Juřík, 2026
+  </footer>
+
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="js/config.js"></script>
   <script>
-    document.getElementById('versionBadge').textContent = 'v' + APP_VERSION;
+    document.getElementById('footerVersion').textContent = 'v' + APP_VERSION;
 
     let aktualniUser = null;
     let vinoId       = null;
