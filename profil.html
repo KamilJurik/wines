@@ -41,10 +41,14 @@
         </div>
         <div class="form-group">
           <label for="p_email">E-mail</label>
-          <input type="email" id="p_email" disabled style="opacity:0.6;background:#f5f0eb">
-          <div class="form-hint">E-mailovou adresu nelze změnit.</div>
+          <input type="email" id="p_email" placeholder="vas@email.cz" autocomplete="email">
+          <div class="form-hint">Pro změnu e-mailu zadejte níže své heslo.</div>
         </div>
-        <button class="btn btn-primary" id="saveNameBtn" onclick="ulozitJmeno()">Uložit jméno</button>
+        <div class="form-group" id="emailPassGroup" style="display:none">
+          <label for="p_email_pass">Heslo pro potvrzení změny e-mailu</label>
+          <input type="password" id="p_email_pass" placeholder="Současné heslo" autocomplete="current-password">
+        </div>
+        <button class="btn btn-primary" id="saveBasicBtn" onclick="ulozitZakladniUdaje()">Uložit změny</button>
       </div>
     </div>
 
@@ -79,31 +83,72 @@
   <script>
     document.getElementById('versionBadge').textContent = 'v' + APP_VERSION;
 
+    let originalEmail = '';
+
     auth.onAuthStateChanged(user => {
       if (!user) { window.location.href = 'index.html'; return; }
       document.getElementById('headerUser').textContent = user.displayName || user.email;
-      document.getElementById('p_jmeno').value = user.displayName || '';
-      document.getElementById('p_email').value = user.email || '';
+      document.getElementById('p_jmeno').value  = user.displayName || '';
+      document.getElementById('p_email').value  = user.email || '';
+      originalEmail = user.email || '';
     });
 
-    async function ulozitJmeno() {
-      const jmeno = document.getElementById('p_jmeno').value.trim();
+    // Zobraz pole pro heslo, pokud uživatel mění e-mail
+    document.getElementById('p_email').addEventListener('input', () => {
+      const meni = document.getElementById('p_email').value.trim() !== originalEmail;
+      document.getElementById('emailPassGroup').style.display = meni ? 'block' : 'none';
+    });
+
+    async function ulozitZakladniUdaje() {
+      const jmeno    = document.getElementById('p_jmeno').value.trim();
+      const novyEmail = document.getElementById('p_email').value.trim();
+      const emailPass = document.getElementById('p_email_pass').value;
+
       if (!jmeno) { zobrazMsg('Zadejte zobrazované jméno.', 'error'); return; }
-      const btn = document.getElementById('saveNameBtn');
+
+      const btn = document.getElementById('saveBasicBtn');
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span> Ukládám…';
+
       try {
-        await auth.currentUser.updateProfile({ displayName: jmeno });
-        // Synchronizuj i do Firestore (pro zobrazení na kartách vín)
-        await db.collection('uzivatele').doc(auth.currentUser.uid)
-                .set({ jmeno }, { merge: true });
-        document.getElementById('headerUser').textContent = jmeno;
-        zobrazMsg('Jméno bylo uloženo.', 'success');
+        const user = auth.currentUser;
+
+        // Změna jména
+        if (jmeno !== (user.displayName || '')) {
+          await user.updateProfile({ displayName: jmeno });
+          await db.collection('uzivatele').doc(user.uid).set({ jmeno }, { merge: true });
+          document.getElementById('headerUser').textContent = jmeno;
+        }
+
+        // Změna e-mailu (vyžaduje re-autentizaci)
+        if (novyEmail && novyEmail !== originalEmail) {
+          if (!emailPass) {
+            zobrazMsg('Pro změnu e-mailu zadejte své heslo.', 'error');
+            btn.disabled = false; btn.textContent = 'Uložit změny';
+            return;
+          }
+          const credential = firebase.auth.EmailAuthProvider.credential(originalEmail, emailPass);
+          await user.reauthenticateWithCredential(credential);
+          await user.updateEmail(novyEmail);
+          originalEmail = novyEmail;
+          document.getElementById('emailPassGroup').style.display = 'none';
+          document.getElementById('p_email_pass').value = '';
+        }
+
+        zobrazMsg('Změny byly uloženy.', 'success');
       } catch (err) {
-        zobrazMsg('Chyba při ukládání jména: ' + err.message, 'error');
+        if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+          zobrazMsg('Heslo je nesprávné.', 'error');
+        } else if (err.code === 'auth/email-already-in-use') {
+          zobrazMsg('Tento e-mail již používá jiný účet.', 'error');
+        } else if (err.code === 'auth/invalid-email') {
+          zobrazMsg('Neplatná e-mailová adresa.', 'error');
+        } else {
+          zobrazMsg('Chyba: ' + err.message, 'error');
+        }
       }
       btn.disabled = false;
-      btn.textContent = 'Uložit jméno';
+      btn.textContent = 'Uložit změny';
     }
 
     async function zmenitHeslo() {
@@ -111,9 +156,9 @@
       const newPass = document.getElementById('p_new_pass').value;
       const confirm = document.getElementById('p_confirm_pass').value;
 
-      if (!current)              { zobrazMsg('Zadejte současné heslo.', 'error'); return; }
-      if (newPass.length < 6)    { zobrazMsg('Nové heslo musí mít alespoň 6 znaků.', 'error'); return; }
-      if (newPass !== confirm)   { zobrazMsg('Nové heslo a potvrzení se neshodují.', 'error'); return; }
+      if (!current)            { zobrazMsg('Zadejte současné heslo.', 'error'); return; }
+      if (newPass.length < 6)  { zobrazMsg('Nové heslo musí mít alespoň 6 znaků.', 'error'); return; }
+      if (newPass !== confirm)  { zobrazMsg('Nové heslo a potvrzení se neshodují.', 'error'); return; }
 
       const btn = document.getElementById('savePassBtn');
       btn.disabled = true;
