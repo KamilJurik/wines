@@ -390,6 +390,27 @@ body {
 .star { font-size: 15px; color: #DCCBBB; }
 .star.on { color: var(--gold); }
 
+.wine-privlastek {
+  font-size: 11px;
+  color: var(--wine-light);
+  font-weight: 600;
+  margin-bottom: 3px;
+  opacity: 0.9;
+}
+
+.wine-lahve {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--text-light);
+  margin-top: 6px;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2px 8px;
+}
+
 .wine-owner {
   font-size: 11px;
   color: var(--text-light);
@@ -494,8 +515,25 @@ body {
 .page-header {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 16px;
   margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.page-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.page-header-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 .back-btn {
@@ -507,10 +545,18 @@ body {
   padding: 2px 6px;
   border-radius: 6px;
   transition: background 0.15s;
+  flex-shrink: 0;
 }
 .back-btn:hover { background: rgba(114,47,55,0.08); }
 
-.page-title { font-size: 22px; font-weight: 800; color: var(--text); }
+.page-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--wine);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 /* Mini tabs (uvnitř panelu) — záložkový styl */
 .mini-tabs {
@@ -1213,7 +1259,7 @@ body {
 /* ── vino.html: two-column form ── */
 .vino-cols {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 360px;
   gap: 20px;
   align-items: start;
 }
@@ -1221,6 +1267,30 @@ body {
 .vino-col { display: flex; flex-direction: column; }
 .vino-col .fcard               { margin-bottom: 16px; }
 .vino-col .fcard:last-child    { margin-bottom: 0; }
+
+/* Pravý sloupec — osobní záznamy (sklep + hodnocení) */
+.vino-col-personal {
+  background: linear-gradient(160deg, rgba(114,47,55,0.05) 0%, rgba(114,47,55,0.02) 100%);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+}
+.vino-col-personal-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--wine);
+  opacity: 0.65;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.vino-col-personal .fcard {
+  box-shadow: 0 1px 6px rgba(114,47,55,0.07);
+  margin-bottom: 12px;
+}
+.vino-col-personal .fcard:last-child { margin-bottom: 0; }
 
 /* =====================
    Responsive

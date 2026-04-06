@@ -23,8 +23,15 @@
   <div class="page-wrap">
 
     <div class="page-header">
-      <button class="back-btn" onclick="window.location.href='vina.html'">←</button>
-      <h1 class="page-title" id="pageTitle">Přidat víno</h1>
+      <div class="page-header-left">
+        <button class="back-btn" onclick="window.location.href='vina.html'">←</button>
+        <h1 class="page-title" id="pageTitle">Přidat víno</h1>
+      </div>
+      <div class="page-header-actions" id="formActions">
+        <button class="btn btn-primary btn-sm" id="saveBtn" onclick="ulozit()">Uložit víno</button>
+        <button class="btn btn-secondary btn-sm" onclick="window.location.href='vina.html'">Zrušit</button>
+        <button class="btn btn-danger btn-sm" id="deleteBtn" onclick="smazat()" style="display:none">Smazat</button>
+      </div>
     </div>
 
     <div id="appMsg" class="msg error"></div>
@@ -185,11 +192,6 @@
           </div>
         </div><!-- /Fotka etikety -->
 
-      </div><!-- /vino-col left -->
-
-      <!-- PRAVÝ SLOUPEC: původ, parametry, sklep, hodnocení -->
-      <div class="vino-col">
-
         <!-- Původ -->
         <div class="fcard">
           <div class="fcard-header">
@@ -258,32 +260,36 @@
           </div>
         </div><!-- /Technické parametry -->
 
+      </div><!-- /vino-col left -->
+
+      <!-- PRAVÝ SLOUPEC — osobní záznamy (vizuálně oddělené) -->
+      <div class="vino-col vino-col-personal">
+        <div class="vino-col-personal-label">📝 Osobní záznamy</div>
+
         <!-- Vinný sklep -->
         <div class="fcard">
           <div class="fcard-header">
             <span class="fcard-icon">🏚️</span> Vinný sklep
           </div>
           <div class="fcard-body">
-            <div class="grid2">
-              <div class="form-group">
-                <label for="f_pocetLahvi">Počet lahví na skladě</label>
-                <div class="cellar-count-row">
-                  <input type="number" id="f_pocetLahvi" min="0" max="999" placeholder="0">
-                  <button type="button" id="otevritBtn" class="btn-otevrit"
-                          onclick="otevritLahev()" style="display:none">
-                    🍾 Otevřít láhev
-                  </button>
-                </div>
+            <div class="form-group">
+              <label for="f_pocetLahvi">Počet lahví</label>
+              <div class="cellar-count-row">
+                <input type="number" id="f_pocetLahvi" min="0" max="999" placeholder="0">
+                <button type="button" id="otevritBtn" class="btn-otevrit"
+                        onclick="otevritLahev()" style="display:none">
+                  🍾 Otevřít láhev
+                </button>
               </div>
-              <div class="form-group">
-                <label>Vhodné k pití (roky)</label>
-                <div class="pit-range">
-                  <input type="number" id="f_pitOd" placeholder="od" min="2000" max="2060">
-                  <span class="pit-range-sep">–</span>
-                  <input type="number" id="f_pitDo" placeholder="do" min="2000" max="2060">
-                </div>
-                <div class="form-hint">Rok konzumace, např. 2025 – 2030</div>
+            </div>
+            <div class="form-group">
+              <label>Vhodné k pití (roky)</label>
+              <div class="pit-range">
+                <input type="number" id="f_pitOd" placeholder="od" min="2000" max="2060">
+                <span class="pit-range-sep">–</span>
+                <input type="number" id="f_pitDo" placeholder="do" min="2000" max="2060">
               </div>
+              <div class="form-hint">Rok konzumace, např. 2025 – 2030</div>
             </div>
           </div>
         </div><!-- /Vinný sklep -->
@@ -328,15 +334,8 @@
           </div>
         </div><!-- /Hodnocení -->
 
-      </div><!-- /vino-col right -->
+      </div><!-- /vino-col personal -->
     </div><!-- /vino-cols -->
-
-    <!-- Akce (celá šířka) -->
-    <div class="form-actions" id="formActions">
-      <button class="btn btn-primary" id="saveBtn" onclick="ulozit()">Uložit víno</button>
-      <button class="btn btn-secondary" onclick="window.location.href='vina.html'">Zrušit</button>
-      <button class="btn btn-danger" id="deleteBtn" onclick="smazat()" style="display:none; margin-left:auto">Smazat</button>
-    </div>
 
     <!-- Zpráva pro readonly režim -->
     <div id="readonlyMsg" class="msg info" style="margin-top:16px">
@@ -421,7 +420,7 @@
 
         jeVlastnik = v.userId === aktualniUser.uid;
         if (jeVlastnik) {
-          document.getElementById('pageTitle').textContent = 'Upravit víno';
+          document.getElementById('pageTitle').textContent = v.nazev || 'Upravit víno';
           document.getElementById('saveBtn').textContent   = 'Uložit změny';
           document.getElementById('deleteBtn').style.display = 'inline-flex';
           document.getElementById('onlinePanel').style.display = 'none';

@@ -308,6 +308,10 @@
       const fotoHtml = v.foto
         ? `<div class="wine-card-foto"><img src="${v.foto}" alt="etiketa" loading="lazy"></div>`
         : '';
+      const privlastekHtml = v.privlastek
+        ? `<div class="wine-privlastek">${esc(v.privlastek)}</div>` : '';
+      const lahveHtml = (v.pocetLahvi || 0) > 0
+        ? `<div class="wine-lahve">🍾 ${v.pocetLahvi} lahví</div>` : '';
       return `
         <a class="wine-card" href="vino.html?id=${v.id}">
           ${fotoHtml}
@@ -316,8 +320,10 @@
             ${barvaCls ? `<div class="color-dot ${barvaCls}"></div>` : ''}
           </div>
           ${v.vinarstvi ? `<div class="wine-winery">${esc(v.vinarstvi)}</div>` : ''}
-          ${meta        ? `<div class="wine-meta">${esc(meta)}</div>` : ''}
+          ${privlastekHtml}
+          ${meta ? `<div class="wine-meta">${esc(meta)}</div>` : ''}
           <div class="stars-row">${hvezdy}</div>
+          ${lahveHtml}
           ${owner}
         </a>`;
     }
