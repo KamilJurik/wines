@@ -308,16 +308,12 @@
       const meta = [v.rocnik, v.odruda].filter(Boolean).join(' · ');
       const owner = aktualniTab === 'vsechna'
         ? `<div class="wine-owner">👤 ${esc(v.uzivatelJmeno || '—')}</div>` : '';
-      const fotoHtml = v.foto
-        ? `<div class="wine-card-foto"><img src="${v.foto}" alt="etiketa" loading="lazy"></div>`
-        : '';
       const privlastekHtml = v.privlastek
         ? `<div class="wine-privlastek">${esc(v.privlastek)}</div>` : '';
       const lahveHtml = (v.pocetLahvi || 0) > 0
         ? `<div class="wine-lahve">🍾 ${v.pocetLahvi} lahví</div>` : '';
       return `
         <a class="wine-card" href="vino.html?id=${v.id}">
-          ${fotoHtml}
           <div class="wine-card-top">
             <div class="wine-name">${esc(v.nazev || 'Bez názvu')}</div>
             ${barvaCls ? `<div class="color-dot ${barvaCls}"></div>` : ''}
