@@ -531,64 +531,134 @@
     // Extrakce dat z volného textu (OCR výstup)
     function extrahovatZTextu(text) {
       const data = {};
+
+      // ── 1. Nejdřív zkus strukturovaný formát mojelahve.cz ────
+      // Vzor: "LABEL ........ Hodnota" nebo "LABEL Hodnota"
+      const radky = text.split('\n').map(r => r.trim()).filter(Boolean);
+      const mlhLabely = {
+        'BARVA':     v => { data.barva = mapujBarvu(v); },
+        'PŘÍVLASTEK':v => { if (v.length < 40) data.privlastek = v; },
+        'PRIVLASTEK':v => { if (v.length < 40) data.privlastek = v; },
+        'CUKRY':     v => {
+          const n = parseFloat(v.replace(',', '.'));
+          if (!isNaN(n)) data.zbytkCukr = n;
+          else if (!data.typVina) data.typVina = v;
+        },
+        'OBJEM':     v => { data.objem = parseObjem(v); },
+        'ALKOHOL':   v => {
+          const m = v.match(/(\d{1,2}[.,]\d)/);
+          if (m) { const a = parseFloat(m[1].replace(',','.')); if (a>5&&a<25) data.alkohol=a; }
+        },
+        'KYSELINY':  v => {
+          const m = v.match(/(\d{1,2}[.,]\d?)/);
+          if (m) data.kyseliny = parseFloat(m[1].replace(',','.'));
+        },
+        'ŠARŽE':     v => { if (/^[A-Z0-9]{2,15}$/i.test(v.trim())) data.cisloSarze = v.trim(); },
+        'SARZE':     v => { if (/^[A-Z0-9]{2,15}$/i.test(v.trim())) data.cisloSarze = v.trim(); },
+      };
+
+      radky.forEach(radek => {
+        // Formát: "LABEL ........ Hodnota" (tečky jako oddělovač mojelahve.cz)
+        const mLabel = radek.match(/^([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]{3,15})[.\s]{2,}\s*(.+)$/);
+        if (mLabel) {
+          const label = mLabel[1].toUpperCase().trim();
+          const value = mLabel[2].trim();
+          if (mlhLabely[label]) mlhLabely[label](value);
+        }
+      });
+
       const t = text.replace(/\n+/g, ' ').replace(/\s+/g, ' ');
 
-      // Ročník
+      // ── 2. Ročník ─────────────────────────────────────────────
       const rocnikM = t.match(/\b(19[89]\d|20[012]\d)\b/);
       if (rocnikM) data.rocnik = parseInt(rocnikM[1]);
 
-      // Alkohol
-      const alcM = t.match(/(\d{1,2}[.,]\d)\s*%\s*(vol|alk|alc)?/i);
-      if (alcM) {
-        const a = parseFloat(alcM[1].replace(',', '.'));
-        if (a > 5 && a < 25) data.alkohol = a;
+      // ── 3. Alkohol (fallback regex) ───────────────────────────
+      if (!data.alkohol) {
+        const alcM = t.match(/(\d{1,2}[.,]\d)\s*%\s*(vol|alk|alc|obj)?/i);
+        if (alcM) {
+          const a = parseFloat(alcM[1].replace(',', '.'));
+          if (a > 5 && a < 25) data.alkohol = a;
+        }
       }
 
-      // Objem
-      const objM = t.match(/(\d{2,4})\s*ml/i) || t.match(/(\d[.,]\d{1,2})\s*l\b/i);
-      if (objM) {
-        const raw = objM[1].replace(',', '.');
-        data.objem = t.includes('ml') ? (parseFloat(raw)/1000).toFixed(3) : parseFloat(raw).toFixed(2);
+      // ── 4. Objem (fallback) ───────────────────────────────────
+      if (!data.objem) {
+        const objM = t.match(/(\d{2,4})\s*ml/i) || t.match(/(\d[.,]\d{1,2})\s*l\b/i);
+        if (objM) {
+          const raw = objM[1].replace(',', '.');
+          data.objem = /ml/i.test(t) ? (parseFloat(raw)/1000).toFixed(3) : parseFloat(raw).toFixed(2);
+        }
       }
 
-      // Zbytkový cukr
-      const cukrM = t.match(/cukr[^\d]{0,10}(\d{1,3}[.,]\d?)\s*g/i) ||
-                    t.match(/(\d{1,3}[.,]\d?)\s*g\/l\s*(rs|residual|cukr|sugar)/i);
-      if (cukrM) data.zbytkCukr = parseFloat(cukrM[1].replace(',', '.'));
+      // ── 5. Kyseliny g/l (fallback) ───────────────────────────
+      if (!data.kyseliny) {
+        const kysM = t.match(/kysel[^\d]{0,15}(\d{1,2}[.,]\d?)/i);
+        if (kysM) data.kyseliny = parseFloat(kysM[1].replace(',', '.'));
+      }
 
-      // Kyseliny
-      const kysM = t.match(/kysel[^\d]{0,10}(\d{1,2}[.,]\d?)\s*g/i) ||
-                   t.match(/(\d{1,2}[.,]\d?)\s*g\/l\s*(TA|kysel|acid)/i);
-      if (kysM) data.kyseliny = parseFloat(kysM[1].replace(',', '.'));
+      // ── 6. Zbytkový cukr g/l (fallback) ──────────────────────
+      if (!data.zbytkCukr) {
+        const cukrM = t.match(/cukr[^\d]{0,15}(\d{1,3}[.,]\d?)/i);
+        if (cukrM) data.zbytkCukr = parseFloat(cukrM[1].replace(',', '.'));
+      }
 
-      // Šarže
-      const sarzeM = t.match(/[šs]ar[žz]e?\s*[:\-#]?\s*([A-Z0-9]{3,12})/i);
-      if (sarzeM) data.cisloSarze = sarzeM[1].trim();
+      // ── 7. Šarže (fallback) ───────────────────────────────────
+      if (!data.cisloSarze) {
+        const sarzeM = t.match(/[šs]ar[žz]e?\s*[:\-#]?\s*([A-Z0-9]{3,12})/i);
+        if (sarzeM) data.cisloSarze = sarzeM[1].trim();
+      }
 
-      // Barva z klíčových slov
-      const tl = t.toLowerCase();
-      if      (/červen[éeé]|red wine|rouge|rotwein/.test(tl))          data.barva = 'červené';
-      else if (/bíl[éeé]\s*vín|white wine|blanc|weißwein/.test(tl))    data.barva = 'bílé';
-      else if (/rosé|rose wine/.test(tl))                               data.barva = 'rosé';
-      else if (/oranžov[éeé]|orange wine/.test(tl))                     data.barva = 'oranžové';
+      // ── 8. Barva (fallback) ───────────────────────────────────
+      if (!data.barva) data.barva = mapujBarvu(t);
 
-      // Přívlastek
-      const privM = t.match(/\b(kabinet|pozdn[ií] sb[eě]r|výb[eě]r z hroznů|výb[eě]r z bobulí|výb[eě]r z cib[eé]b|ledov[eé] víno|slámov[eé] víno)\b/i);
-      if (privM) data.privlastek = privM[1].charAt(0).toUpperCase() + privM[1].slice(1).toLowerCase();
+      // ── 9. Přívlastek z textu (fallback) ─────────────────────
+      if (!data.privlastek) {
+        const privM = t.match(/\b(kabinet|pozdn[ií] sb[eě]r|výb[eě]r z hroznů|výb[eě]r z bobulí|zemsk[éeé] víno|zem[sš]k[éeé]|výb[eě]r z cib[eé]b|ledov[eé] víno|slámov[eé] víno)\b/i);
+        if (privM) data.privlastek = capitalize(privM[1]);
+      }
 
-      // Typ vína
-      const typM = t.match(/\b(such[eé]|polosuché|polosladké|sladk[eé])\b/i);
-      if (typM) data.typVina = typM[1].charAt(0).toUpperCase() + typM[1].slice(1).toLowerCase();
+      // ── 10. Typ vína ──────────────────────────────────────────
+      if (!data.typVina) {
+        const typM = t.match(/\b(such[eé]|polosuché|polosladké|sladk[eé])\b/i);
+        if (typM) data.typVina = capitalize(typM[1]);
+      }
 
-      // Název — první výrazný řádek (velká písmena nebo první smysluplný řádek)
-      if (!data.nazev) {
-        const radky = text.split('\n').map(r => r.trim()).filter(r => r.length > 3 && r.length < 80);
-        const caps  = radky.find(r => r === r.toUpperCase() && r.length > 4 && /[A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]/.test(r));
-        if (caps) data.nazev = caps.charAt(0) + caps.slice(1).toLowerCase();
-        else if (radky.length > 0) data.nazev = radky[0];
+      // ── 11. Název vína ────────────────────────────────────────
+      // Strategie: hledáme řádek který obsahuje rok nebo odrůdu a nevypadá jako label
+      const LABELY_REGEX = /^(BARVA|PŘÍVLASTEK|PRIVLASTEK|CUKRY|OBJEM|ALKOHOL|KYSELINY|ŠARŽE|SARZE|HODNOCENÍ)/i;
+      const kandidati = radky.filter(r =>
+        r.length > 6 && r.length < 90 &&
+        !LABELY_REGEX.test(r) &&
+        !/^[\d.,\s%\/]+$/.test(r) &&           // ne čistě číselné
+        !/^[.·\-\s]+$/.test(r) &&              // ne jen tečky
+        !/vinařství|vinarstvi/i.test(r)         // ne "Vinařství XY" samotné
+      );
+
+      // Preferuj řádek s ročníkem
+      const sRocnikem = kandidati.find(r => /\b20[012]\d\b/.test(r));
+      // Nebo první rozumný kandidát
+      const nazevRaw = sRocnikem || kandidati[0] || '';
+
+      if (nazevRaw) {
+        // Odstraň "zemské víno" apod. pokud je to přívlastek
+        data.nazev = nazevRaw.replace(/,\s*(zemsk[éeé]|kabinet|pozdn[ií])[^,]*/i, '').trim();
       }
 
       return data;
+    }
+
+    function mapujBarvu(text) {
+      const tl = (text || '').toLowerCase();
+      if (/^bíl[ée]$|bíl[ée]\s*vín|white wine|blanc|weißwein/.test(tl)) return 'bílé';
+      if (/^červen[ée]$|červen[ée]\s*vín|red wine|rouge|rotwein/.test(tl)) return 'červené';
+      if (/^ros[ée]$|rose wine/.test(tl)) return 'rosé';
+      if (/^oranž|orange wine/.test(tl)) return 'oranžové';
+      return '';
+    }
+
+    function capitalize(s) {
+      return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : s;
     }
 
     // ── Online hledání (mojelahve.cz + Open Food Facts) ──────
