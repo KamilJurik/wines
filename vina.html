@@ -23,106 +23,136 @@
     </div>
   </header>
 
-  <div class="container">
+  <div class="page-wrap">
+    <div class="vina-layout">
 
-    <!-- Vyhledávací lišta -->
-    <div class="search-bar">
-      <input type="text" class="search-input" id="searchInput"
-             placeholder="Hledat víno…" oninput="zobrazitVina()">
-      <button class="filters-toggle" id="filtersToggle" onclick="prepnoutFiltry()">
-        <span>⚙</span> Filtry
-      </button>
-      <button class="dash-toggle-btn" id="dashToggleBtn" onclick="prepnoutDashboard()">
-        📊 <span class="dash-lbl">Statistiky</span>
-      </button>
-    </div>
+      <!-- ═══════════════════════════════════════
+           LEVÝ PANEL — Dashboard + Pít nyní
+           (Na desktopu vždy viditelný, sticky)
+           ═══════════════════════════════════════ -->
+      <aside class="vina-sidebar">
 
-    <!-- Pít nyní banner (mimo dashboard, vždy viditelný) -->
-    <div id="pitNyniBanner" class="pit-nyni-banner" style="display:none">
-      <div class="pit-nyni-title">🍾 Vhodné k pití právě nyní</div>
-      <div id="pitNyniList"></div>
-    </div>
-
-    <!-- Dashboard -->
-    <div id="dashboardPanel" style="display:none">
-      <div class="dashboard">
-        <div class="stats-row">
-          <div class="stat-card"><div class="stat-value" id="statPocet">—</div><div class="stat-label">vín celkem</div></div>
-          <div class="stat-card"><div class="stat-value" id="statPrumer">—</div><div class="stat-label">průměr ★</div></div>
-          <div class="stat-card"><div class="stat-value" id="statZeme">—</div><div class="stat-label">top země</div></div>
-          <div class="stat-card"><div class="stat-value" id="statOdruda">—</div><div class="stat-label">odrůda</div></div>
+        <!-- Banner: vína vhodná k pití hned -->
+        <div id="pitNyniBanner" class="pit-nyni-banner" style="display:none">
+          <div class="pit-nyni-title">🍾 Vhodné k pití právě nyní</div>
+          <div id="pitNyniList"></div>
         </div>
-        <div class="charts-row">
-          <div class="chart-card">
-            <div class="chart-title">Hodnocení</div>
-            <div id="chartHodnoceni"></div>
+
+        <!-- Dashboard (na desktopu vždy; na mobilu toggle) -->
+        <div class="dashboard" id="dashboardPanel">
+          <div class="stats-row">
+            <div class="stat-card">
+              <div class="stat-value" id="statPocet">—</div>
+              <div class="stat-label">vín celkem</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="statPrumer">—</div>
+              <div class="stat-label">průměr ★</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="statZeme">—</div>
+              <div class="stat-label">top země</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="statOdruda">—</div>
+              <div class="stat-label">odrůda</div>
+            </div>
           </div>
-          <div class="chart-card">
-            <div class="chart-title">Barva vína</div>
-            <div id="chartBarvy"></div>
+
+          <div class="charts-row">
+            <div class="chart-card">
+              <div class="chart-title">Hodnocení</div>
+              <div id="chartHodnoceni"></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Barva vína</div>
+              <div id="chartBarvy"></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Ročníky</div>
+              <div id="chartRocniky"></div>
+            </div>
           </div>
-          <div class="chart-card">
-            <div class="chart-title">Ročníky</div>
-            <div id="chartRocniky"></div>
+
+          <div class="dash-section">
+            <div class="dash-section-title">⭐ Nejlépe hodnocená vína</div>
+            <div id="nejlepsiVina"></div>
           </div>
         </div>
-        <div class="dash-section">
-          <div class="dash-section-title">⭐ Nejlépe hodnocená vína</div>
-          <div id="nejlepsiVina"></div>
+
+      </aside>
+
+      <!-- ═══════════════════════════════════════
+           PRAVÁ ČÁST — Hledání, filtry, vína
+           ═══════════════════════════════════════ -->
+      <div class="vina-main">
+
+        <!-- Vyhledávací lišta -->
+        <div class="search-bar">
+          <input type="text" class="search-input" id="searchInput"
+                 placeholder="Hledat víno…" oninput="zobrazitVina()">
+          <button class="filters-toggle" id="filtersToggle" onclick="prepnoutFiltry()">
+            <span>⚙</span> Filtry
+          </button>
+          <!-- Zobrazí se jen na mobilu (CSS .dash-mobile-toggle) -->
+          <button class="dash-toggle-btn dash-mobile-toggle" id="dashToggleBtn" onclick="prepnoutDashboard()">
+            📊 <span class="dash-lbl">Statistiky</span>
+          </button>
         </div>
-      </div>
-    </div>
 
-    <!-- Rozšířené filtry -->
-    <div id="filtersPanel" style="display:none">
-      <div class="filters-row">
-        <select class="filter-select" id="fBarva" onchange="zobrazitVina()">
-          <option value="">Barva — vše</option>
-          <option value="červené">Červené</option>
-          <option value="bílé">Bílé</option>
-          <option value="rosé">Rosé</option>
-          <option value="oranžové">Oranžové</option>
-        </select>
+        <!-- Rozšířené filtry -->
+        <div id="filtersPanel" style="display:none">
+          <div class="filters-row">
+            <select class="filter-select" id="fBarva" onchange="zobrazitVina()">
+              <option value="">Barva — vše</option>
+              <option value="červené">Červené</option>
+              <option value="bílé">Bílé</option>
+              <option value="rosé">Rosé</option>
+              <option value="oranžové">Oranžové</option>
+            </select>
 
-        <select class="filter-select" id="fHodnoceni" onchange="zobrazitVina()">
-          <option value="">Hodnocení — vše</option>
-          <option value="5">★★★★★ (5)</option>
-          <option value="4">★★★★ (4+)</option>
-          <option value="3">★★★ (3+)</option>
-          <option value="2">★★ (2+)</option>
-          <option value="1">★ (1+)</option>
-        </select>
+            <select class="filter-select" id="fHodnoceni" onchange="zobrazitVina()">
+              <option value="">Hodnocení — vše</option>
+              <option value="5">★★★★★ (5)</option>
+              <option value="4">★★★★ (4+)</option>
+              <option value="3">★★★ (3+)</option>
+              <option value="2">★★ (2+)</option>
+              <option value="1">★ (1+)</option>
+            </select>
 
-        <select class="filter-select" id="fRocnik" onchange="zobrazitVina()">
-          <option value="">Ročník — vše</option>
-        </select>
+            <select class="filter-select" id="fRocnik" onchange="zobrazitVina()">
+              <option value="">Ročník — vše</option>
+            </select>
 
-        <select class="filter-select" id="fZeme" onchange="zobrazitVina()">
-          <option value="">Země — vše</option>
-        </select>
+            <select class="filter-select" id="fZeme" onchange="zobrazitVina()">
+              <option value="">Země — vše</option>
+            </select>
 
-        <select class="filter-select" id="fPrivlastek" onchange="zobrazitVina()">
-          <option value="">Přívlastek — vše</option>
-        </select>
+            <select class="filter-select" id="fPrivlastek" onchange="zobrazitVina()">
+              <option value="">Přívlastek — vše</option>
+            </select>
 
-        <button class="filters-toggle" onclick="resetFiltry()" style="color:#DC2626;border-color:#DC2626">
-          ✕ Reset
-        </button>
-      </div>
-    </div>
+            <button class="filters-toggle" onclick="resetFiltry()" style="color:#DC2626;border-color:#DC2626">
+              ✕ Reset
+            </button>
+          </div>
+        </div>
 
-    <div class="tabs">
-      <button class="tab active" id="tabMoje"    onclick="prepnoutTab('moje')">Moje vína</button>
-      <button class="tab"        id="tabVsechna" onclick="prepnoutTab('vsechna')">Všechna vína</button>
-    </div>
+        <div class="tabs">
+          <button class="tab active" id="tabMoje"    onclick="prepnoutTab('moje')">Moje vína</button>
+          <button class="tab"        id="tabVsechna" onclick="prepnoutTab('vsechna')">Všechna vína</button>
+        </div>
 
-    <div id="loadingState" class="state-box"><span class="icon">⏳</span>Načítám vína…</div>
-    <div id="emptyState" class="state-box" style="display:none">
-      <span class="icon">🍾</span>
-      <span id="emptyText"></span>
-    </div>
-    <div id="winesGrid" class="wines-grid"></div>
-  </div>
+        <div id="loadingState" class="state-box"><span class="icon">⏳</span>Načítám vína…</div>
+        <div id="emptyState" class="state-box" style="display:none">
+          <span class="icon">🍾</span>
+          <span id="emptyText"></span>
+        </div>
+        <div id="winesGrid" class="wines-grid"></div>
+
+      </div><!-- /vina-main -->
+    </div><!-- /vina-layout -->
+  </div><!-- /page-wrap -->
 
   <button class="fab" onclick="window.location.href='vino.html'" title="Přidat víno">+</button>
 
@@ -138,12 +168,12 @@
     let aktualniTab  = 'moje';
     let aktualniUser = null;
     let filtrySviditelne = false;
+    let dashViditelny = false;   // relevantní jen pro mobil
 
     // ── Auth guard + schválení ────────────────────────────────
     auth.onAuthStateChanged(async user => {
       if (!user) { window.location.href = 'index.html'; return; }
 
-      // Admin má vždy přístup, ostatní zkontrolujeme
       if (user.email !== ADMIN_EMAIL) {
         const snap = await db.collection('uzivatele').doc(user.uid).get();
         if (!snap.exists || !snap.data().schvaleno) {
@@ -152,7 +182,6 @@
           return;
         }
       } else {
-        // Zajistit záznam admina v kolekci uzivatele
         const snap = await db.collection('uzivatele').doc(user.uid).get();
         if (!snap.exists) {
           await db.collection('uzivatele').doc(user.uid).set({
@@ -190,8 +219,8 @@
 
     // ── Dynamické naplnění filtrů ─────────────────────────────
     function naplnitFiltry() {
-      const rocniky   = [...new Set(vsechnaVina.map(v => v.rocnik).filter(Boolean))].sort((a,b) => b-a);
-      const zeme      = [...new Set(vsechnaVina.map(v => v.zemePouvodu).filter(Boolean))].sort();
+      const rocniky    = [...new Set(vsechnaVina.map(v => v.rocnik).filter(Boolean))].sort((a,b) => b-a);
+      const zeme       = [...new Set(vsechnaVina.map(v => v.zemePouvodu).filter(Boolean))].sort();
       const privlastky = [...new Set(vsechnaVina.map(v => v.privlastek).filter(Boolean))].sort();
 
       naplnitSelect('fRocnik',    rocniky,    'Ročník — vše');
@@ -209,11 +238,11 @@
 
     // ── Render ────────────────────────────────────────────────
     function zobrazitVina() {
-      const hledani    = (document.getElementById('searchInput').value || '').toLowerCase();
-      const fBarva     = document.getElementById('fBarva').value;
-      const fHodnoceni = parseInt(document.getElementById('fHodnoceni').value) || 0;
-      const fRocnik    = document.getElementById('fRocnik').value;
-      const fZeme      = document.getElementById('fZeme').value;
+      const hledani     = (document.getElementById('searchInput').value || '').toLowerCase();
+      const fBarva      = document.getElementById('fBarva').value;
+      const fHodnoceni  = parseInt(document.getElementById('fHodnoceni').value) || 0;
+      const fRocnik     = document.getElementById('fRocnik').value;
+      const fZeme       = document.getElementById('fZeme').value;
       const fPrivlastek = document.getElementById('fPrivlastek').value;
 
       let seznam = vsechnaVina;
@@ -243,7 +272,6 @@
       if (fZeme)       seznam = seznam.filter(v => v.zemePouvodu === fZeme);
       if (fPrivlastek) seznam = seznam.filter(v => v.privlastek === fPrivlastek);
 
-      // Zvýraznit aktivní filtry
       ['fBarva','fHodnoceni','fRocnik','fZeme','fPrivlastek'].forEach(id => {
         document.getElementById(id).classList.toggle('active', !!document.getElementById(id).value);
       });
@@ -295,21 +323,23 @@
     }
 
     // ── Dashboard ─────────────────────────────────────────────
-    let dashViditelny = false;
+    // Na desktopu vždy viditelný (CSS). Na mobilu toggle tlačítkem.
     let posledniSeznam = [];
 
     function prepnoutDashboard() {
+      // Relevantní jen na mobilu — na desktopu CSS přebíjí
       dashViditelny = !dashViditelny;
-      document.getElementById('dashboardPanel').style.display = dashViditelny ? 'block' : 'none';
+      const panel = document.getElementById('dashboardPanel');
+      panel.classList.toggle('dash-open', dashViditelny);
       const btn = document.getElementById('dashToggleBtn');
       btn.classList.toggle('open', dashViditelny);
       btn.querySelector('.dash-lbl').textContent = dashViditelny ? 'Skrýt' : 'Statistiky';
-      if (dashViditelny) renderDashboard(posledniSeznam);
     }
 
     function aktualizovatDashboard(seznam) {
       posledniSeznam = seznam;
-      // "Pít nyní" je vždy viditelné (bez otevírání dashboardu)
+
+      // Pít nyní — vždy viditelný
       const nyni = new Date().getFullYear();
       const pitNyni = seznam.filter(v =>
         (v.pocetLahvi || 0) > 0 && v.pitOd && v.pitDo &&
@@ -327,14 +357,15 @@
       } else {
         banner.style.display = 'none';
       }
-      if (dashViditelny) renderDashboard(seznam);
+
+      // Dashboard se vždy renderuje (CSS rozhodne o viditelnosti)
+      renderDashboard(seznam);
     }
 
     function renderDashboard(seznam) {
       const nyni = new Date().getFullYear();
       const n = seznam.length;
 
-      // Stat karty
       const sHod = seznam.filter(v => v.hodnoceni);
       const prumer = sHod.length
         ? (sHod.reduce((s, v) => s + v.hodnoceni, 0) / sHod.length).toFixed(1) + ' ★'
@@ -344,7 +375,7 @@
       document.getElementById('statZeme').textContent   = zkratit(topVal(seznam.map(v => v.zemePouvodu)) || '—', 12);
       document.getElementById('statOdruda').textContent = zkratit(topVal(seznam.map(v => v.odruda)) || '—', 12);
 
-      // Hodnocení bary
+      // Hodnocení
       const maxH = Math.max(...[1,2,3,4,5].map(r => seznam.filter(v => v.hodnoceni === r).length), 1);
       document.getElementById('chartHodnoceni').innerHTML = [5,4,3,2,1].map(r => {
         const c = seznam.filter(v => v.hodnoceni === r).length;
@@ -354,12 +385,12 @@
           <div class="chart-bar-count">${c}</div></div>`;
       }).join('');
 
-      // Barvy bary
+      // Barvy
       const bDef = [
-        { k: 'červené', cls: 'cervene', lbl: 'Červené' },
-        { k: 'bílé',    cls: 'bile',    lbl: 'Bílé' },
-        { k: 'rosé',    cls: 'rose',    lbl: 'Rosé' },
-        { k: 'oranžové',cls: 'oranzove',lbl: 'Oranžové' },
+        { k: 'červené',  cls: 'cervene', lbl: 'Červené' },
+        { k: 'bílé',     cls: 'bile',    lbl: 'Bílé' },
+        { k: 'rosé',     cls: 'rose',    lbl: 'Rosé' },
+        { k: 'oranžové', cls: 'oranzove',lbl: 'Oranžové' },
       ];
       const maxB = Math.max(...bDef.map(b => seznam.filter(v => v.barva === b.k).length), 1);
       document.getElementById('chartBarvy').innerHTML = bDef.map(b => {
@@ -370,7 +401,7 @@
           <div class="chart-bar-count">${c}</div></div>`;
       }).join('');
 
-      // Ročníky bary (posledních 10 let s daty)
+      // Ročníky
       const rokySDaty = [...new Set(seznam.map(v => v.rocnik).filter(r => r && r >= nyni-15 && r <= nyni))]
         .sort((a, b) => a - b);
       const maxR = Math.max(...rokySDaty.map(r => seznam.filter(v => v.rocnik === r).length), 1);
@@ -384,7 +415,7 @@
           }).join('')
         : '<div style="font-size:11px;color:var(--text-light)">Žádná data</div>';
 
-      // Top 3 vína
+      // Top 3
       const top3 = [...seznam].filter(v => v.hodnoceni)
         .sort((a, b) => b.hodnoceni - a.hodnoceni || (b.datumPridani?.seconds || 0) - (a.datumPridani?.seconds || 0))
         .slice(0, 3);

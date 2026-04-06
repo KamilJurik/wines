@@ -1174,12 +1174,86 @@ body {
 .pit-range-sep { color: var(--text-light); font-size: 14px; }
 
 /* =====================
+   Full-width Page Wrap
+   (vina.html + vino.html)
+   ===================== */
+.page-wrap {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px 28px 80px;
+}
+
+/* ── vina.html: sidebar + main grid ── */
+.vina-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.vina-sidebar {
+  position: sticky;
+  top: 72px;
+  max-height: calc(100vh - 88px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.vina-sidebar::-webkit-scrollbar        { width: 4px; }
+.vina-sidebar::-webkit-scrollbar-thumb  { background: var(--border); border-radius: 4px; }
+
+.vina-sidebar .dashboard    { margin-bottom: 0; }
+.vina-sidebar .stats-row    { grid-template-columns: repeat(2, 1fr); }
+.vina-sidebar .charts-row   { grid-template-columns: 1fr; gap: 8px; }
+.vina-sidebar .pit-nyni-banner { margin-bottom: 12px; }
+
+.vina-main { min-width: 0; }
+
+/* ── vino.html: two-column form ── */
+.vino-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.vino-col { display: flex; flex-direction: column; }
+.vino-col .fcard               { margin-bottom: 16px; }
+.vino-col .fcard:last-child    { margin-bottom: 0; }
+
+/* =====================
    Responsive
    ===================== */
+
+/* Desktop: dashboard sidebar always shown; hide mobile toggle */
+@media (min-width: 901px) {
+  #dashboardPanel              { display: block; }
+  .dash-mobile-toggle          { display: none !important; }
+}
+
+/* Tablet + mobile: stack both layouts */
+@media (max-width: 900px) {
+  .vina-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .vina-sidebar {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+  .vino-cols { grid-template-columns: 1fr; }
+  .page-wrap { padding: 16px 14px 80px; }
+  /* Dashboard hidden by default on mobile; .dash-open reveals it */
+  #dashboardPanel:not(.dash-open) { display: none; }
+}
+
 @media (max-width: 600px) {
   .stats-row  { grid-template-columns: repeat(2, 1fr); }
   .charts-row { grid-template-columns: 1fr; }
 }
+
 @media (max-width: 520px) {
   .wines-grid    { grid-template-columns: 1fr; }
   .grid2         { grid-template-columns: 1fr; }

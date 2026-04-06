@@ -20,7 +20,8 @@
     </div>
   </header>
 
-  <div class="container">
+  <div class="page-wrap">
+
     <div class="page-header">
       <button class="back-btn" onclick="window.location.href='vina.html'">←</button>
       <h1 class="page-title" id="pageTitle">Přidat víno</h1>
@@ -28,7 +29,7 @@
 
     <div id="appMsg" class="msg error"></div>
 
-    <!-- ── Online vyhledávání ──────────────────────────────── -->
+    <!-- ── Online vyhledávání (celá šířka, jen pro nové víno) ── -->
     <div class="online-panel" id="onlinePanel" style="display:none">
       <h3>🔍 Předvyplnit z internetu</h3>
 
@@ -83,242 +84,254 @@
     </div>
 
     <!-- ══════════════════════════════════════════════════════
-         FORMULÁŘ
+         FORMULÁŘ — dvou-sloupcový layout
          ══════════════════════════════════════════════════════ -->
+    <div class="vino-cols">
 
-    <!-- Základní informace -->
-    <div class="fcard">
-      <div class="fcard-header">
-        <span class="fcard-icon">🍾</span> Základní informace
-      </div>
-      <div class="fcard-body">
-        <div class="form-group">
-          <label for="f_nazev">Název vína *</label>
-          <input type="text" id="f_nazev" placeholder="např. Ryzlink rýnský Nechory">
-        </div>
-        <div class="grid2">
-          <div class="form-group">
-            <label for="f_vinarstvi">Vinařství</label>
-            <input type="text" id="f_vinarstvi" placeholder="např. Sonberk">
-          </div>
-          <div class="form-group">
-            <label for="f_odruda">Odrůda</label>
-            <input type="text" id="f_odruda" placeholder="např. Ryzlink rýnský">
-          </div>
-        </div>
-        <div class="grid2">
-          <div class="form-group">
-            <label for="f_rocnik">Ročník</label>
-            <input type="number" id="f_rocnik" placeholder="např. 2022" min="1900" max="2100">
-          </div>
-          <div class="form-group">
-            <label for="f_barva">Barva</label>
-            <select id="f_barva">
-              <option value="">— vyberte —</option>
-              <option value="červené">Červené</option>
-              <option value="bílé">Bílé</option>
-              <option value="rosé">Rosé</option>
-              <option value="oranžové">Oranžové</option>
-            </select>
-          </div>
-        </div>
-        <div class="grid2">
-          <div class="form-group">
-            <label for="f_privlastek">Přívlastek</label>
-            <input type="text" id="f_privlastek" placeholder="např. Pozdní sběr" list="privlastek-list">
-            <datalist id="privlastek-list">
-              <option value="Zemské víno">
-              <option value="Zemský">
-              <option value="Kabinet">
-              <option value="Pozdní sběr">
-              <option value="Výběr z hroznů">
-              <option value="Výběr z bobulí">
-              <option value="Výběr z cibéb">
-              <option value="Ledové víno">
-              <option value="Slámové víno">
-            </datalist>
-          </div>
-          <div class="form-group">
-            <label for="f_typVina">Typ vína</label>
-            <input type="text" id="f_typVina" placeholder="např. Suché" list="typ-list">
-            <datalist id="typ-list">
-              <option value="Suché">
-              <option value="Polosuché">
-              <option value="Polosladké">
-              <option value="Sladké">
-              <option value="Naturální">
-              <option value="Oranžové">
-            </datalist>
-          </div>
-        </div>
-      </div>
-    </div>
+      <!-- LEVÝ SLOUPEC: hlavní identita vína + foto -->
+      <div class="vino-col">
 
-    <!-- Původ -->
-    <div class="fcard">
-      <div class="fcard-header">
-        <span class="fcard-icon">🗺️</span> Původ
-      </div>
-      <div class="fcard-body">
-        <div class="grid2">
-          <div class="form-group">
-            <label for="f_zeme">Země původu</label>
-            <input type="text" id="f_zeme" placeholder="např. Česká republika">
+        <!-- Základní informace -->
+        <div class="fcard">
+          <div class="fcard-header">
+            <span class="fcard-icon">🍾</span> Základní informace
           </div>
-          <div class="form-group">
-            <label for="f_oblast">Vinařská oblast</label>
-            <input type="text" id="f_oblast" placeholder="např. Morava">
-          </div>
-        </div>
-        <div class="grid2">
-          <div class="form-group">
-            <label for="f_podoblast">Vinařská podoblast</label>
-            <input type="text" id="f_podoblast" placeholder="např. Slovácká">
-          </div>
-          <div class="form-group">
-            <label for="f_trat">Viniční trať</label>
-            <input type="text" id="f_trat" placeholder="např. Nechory">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Technické parametry -->
-    <div class="fcard">
-      <div class="fcard-header">
-        <span class="fcard-icon">🔬</span> Technické parametry
-      </div>
-      <div class="fcard-body">
-        <div class="grid2">
-          <div class="form-group">
-            <label for="f_alkohol">Obsah alkoholu (%)</label>
-            <input type="number" id="f_alkohol" placeholder="např. 12.5" step="0.1" min="0" max="25">
-          </div>
-          <div class="form-group">
-            <label for="f_cukr">Zbytkový cukr (g/l)</label>
-            <input type="number" id="f_cukr" placeholder="např. 4.2" step="0.1" min="0">
-          </div>
-        </div>
-        <div class="grid2">
-          <div class="form-group">
-            <label for="f_kyseliny">Kyseliny (g/l)</label>
-            <input type="number" id="f_kyseliny" placeholder="např. 6.8" step="0.1" min="0">
-          </div>
-          <div class="form-group">
-            <label for="f_objem">Objem láhve (l)</label>
-            <input type="number" id="f_objem" placeholder="0.75" step="0.01" min="0" value="0.75">
-          </div>
-        </div>
-        <div class="grid2">
-          <div class="form-group">
-            <label for="f_sarze">Číslo šarže</label>
-            <input type="text" id="f_sarze" placeholder="např. L2302">
-          </div>
-          <div class="form-group">
-            <label for="f_cena">Cena (Kč)</label>
-            <input type="number" id="f_cena" placeholder="např. 320" min="0">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Vinný sklep -->
-    <div class="fcard">
-      <div class="fcard-header">
-        <span class="fcard-icon">🍾</span> Vinný sklep
-      </div>
-      <div class="fcard-body">
-        <div class="grid2">
-          <div class="form-group">
-            <label for="f_pocetLahvi">Počet lahví na skladě</label>
-            <div class="cellar-count-row">
-              <input type="number" id="f_pocetLahvi" min="0" max="999" placeholder="0">
-              <button type="button" id="otevritBtn" class="btn-otevrit"
-                      onclick="otevritLahev()" style="display:none">
-                🍾 Otevřít láhev
-              </button>
+          <div class="fcard-body">
+            <div class="form-group">
+              <label for="f_nazev">Název vína *</label>
+              <input type="text" id="f_nazev" placeholder="např. Ryzlink rýnský Nechory">
+            </div>
+            <div class="grid2">
+              <div class="form-group">
+                <label for="f_vinarstvi">Vinařství</label>
+                <input type="text" id="f_vinarstvi" placeholder="např. Sonberk">
+              </div>
+              <div class="form-group">
+                <label for="f_odruda">Odrůda</label>
+                <input type="text" id="f_odruda" placeholder="např. Ryzlink rýnský">
+              </div>
+            </div>
+            <div class="grid2">
+              <div class="form-group">
+                <label for="f_rocnik">Ročník</label>
+                <input type="number" id="f_rocnik" placeholder="např. 2022" min="1900" max="2100">
+              </div>
+              <div class="form-group">
+                <label for="f_barva">Barva</label>
+                <select id="f_barva">
+                  <option value="">— vyberte —</option>
+                  <option value="červené">Červené</option>
+                  <option value="bílé">Bílé</option>
+                  <option value="rosé">Rosé</option>
+                  <option value="oranžové">Oranžové</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid2">
+              <div class="form-group">
+                <label for="f_privlastek">Přívlastek</label>
+                <input type="text" id="f_privlastek" placeholder="např. Pozdní sběr" list="privlastek-list">
+                <datalist id="privlastek-list">
+                  <option value="Zemské víno">
+                  <option value="Zemský">
+                  <option value="Kabinet">
+                  <option value="Pozdní sběr">
+                  <option value="Výběr z hroznů">
+                  <option value="Výběr z bobulí">
+                  <option value="Výběr z cibéb">
+                  <option value="Ledové víno">
+                  <option value="Slámové víno">
+                </datalist>
+              </div>
+              <div class="form-group">
+                <label for="f_typVina">Typ vína</label>
+                <input type="text" id="f_typVina" placeholder="např. Suché" list="typ-list">
+                <datalist id="typ-list">
+                  <option value="Suché">
+                  <option value="Polosuché">
+                  <option value="Polosladké">
+                  <option value="Sladké">
+                  <option value="Naturální">
+                  <option value="Oranžové">
+                </datalist>
+              </div>
             </div>
           </div>
-          <div class="form-group">
-            <label>Vhodné k pití (roky)</label>
-            <div class="pit-range">
-              <input type="number" id="f_pitOd" placeholder="od" min="2000" max="2060">
-              <span class="pit-range-sep">–</span>
-              <input type="number" id="f_pitDo" placeholder="do" min="2000" max="2060">
+        </div><!-- /Základní informace -->
+
+        <!-- Fotka etikety -->
+        <div class="fcard">
+          <div class="fcard-header">
+            <span class="fcard-icon">📸</span> Fotka etikety
+          </div>
+          <div class="fcard-body">
+            <div class="foto-zone" id="fotoZone"
+                 onclick="document.getElementById('fotoInput').click()"
+                 ondragover="event.preventDefault();this.classList.add('drag')"
+                 ondragleave="this.classList.remove('drag')"
+                 ondrop="fotoDrop(event)">
+              <input type="file" accept="image/*" id="fotoInput" style="display:none"
+                     onchange="fotoNacist(this.files[0])">
+              <div class="foto-preview-wrap" id="fotoPreviewWrap" style="display:none">
+                <img id="fotoPreview" src="" alt="etiketa">
+                <button type="button" class="foto-remove-btn"
+                        onclick="event.stopPropagation();smazatFoto()">✕ Odebrat</button>
+              </div>
+              <div id="fotoEmpty" style="display:flex;flex-direction:column;align-items:center;gap:6px">
+                <span style="font-size:32px">📷</span>
+                <div style="font-size:13px;color:var(--text-light)">Klikněte nebo přetáhněte fotku etikety</div>
+              </div>
             </div>
-            <div class="form-hint">Rok konzumace, např. 2025 – 2030</div>
           </div>
-        </div>
-      </div>
-    </div>
+        </div><!-- /Fotka etikety -->
 
-    <!-- Fotka etikety -->
-    <div class="fcard">
-      <div class="fcard-header">
-        <span class="fcard-icon">📸</span> Fotka etikety
-      </div>
-      <div class="fcard-body">
-        <div class="foto-zone" id="fotoZone"
-             onclick="document.getElementById('fotoInput').click()"
-             ondragover="event.preventDefault();this.classList.add('drag')"
-             ondragleave="this.classList.remove('drag')"
-             ondrop="fotoDrop(event)">
-          <input type="file" accept="image/*" id="fotoInput" style="display:none"
-                 onchange="fotoNacist(this.files[0])">
-          <div class="foto-preview-wrap" id="fotoPreviewWrap" style="display:none">
-            <img id="fotoPreview" src="" alt="etiketa">
-            <button type="button" class="foto-remove-btn"
-                    onclick="event.stopPropagation();smazatFoto()">✕ Odebrat</button>
-          </div>
-          <div id="fotoEmpty" style="display:flex;flex-direction:column;align-items:center;gap:6px">
-            <span style="font-size:32px">📷</span>
-            <div style="font-size:13px;color:var(--text-light)">Klikněte nebo přetáhněte fotku etikety</div>
-          </div>
-        </div>
-      </div>
-    </div>
+      </div><!-- /vino-col left -->
 
-    <!-- Moje hodnocení -->
-    <div class="fcard fcard-rating">
-      <div class="fcard-header">
-        <span class="fcard-icon">⭐</span> Moje hodnocení
-      </div>
-      <div class="fcard-body">
-        <div class="form-group">
-          <label>Hodnocení</label>
-          <div class="star-input-row" id="starRow">
-            <button class="star-btn" data-val="1" onclick="nastavHodnoceni(1)">★</button>
-            <button class="star-btn" data-val="2" onclick="nastavHodnoceni(2)">★</button>
-            <button class="star-btn" data-val="3" onclick="nastavHodnoceni(3)">★</button>
-            <button class="star-btn" data-val="4" onclick="nastavHodnoceni(4)">★</button>
-            <button class="star-btn" data-val="5" onclick="nastavHodnoceni(5)">★</button>
-            <span class="star-label" id="starLabel">— bez hodnocení</span>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Datum degustace</label>
-          <div class="date-cs" id="f_degustace">
-            <select id="f_degu_d"><option value="">Den</option></select>
-            <select id="f_degu_m">
-              <option value="">Měsíc</option>
-              <option value="01">Leden</option><option value="02">Únor</option>
-              <option value="03">Březen</option><option value="04">Duben</option>
-              <option value="05">Květen</option><option value="06">Červen</option>
-              <option value="07">Červenec</option><option value="08">Srpen</option>
-              <option value="09">Září</option><option value="10">Říjen</option>
-              <option value="11">Listopad</option><option value="12">Prosinec</option>
-            </select>
-            <select id="f_degu_y"><option value="">Rok</option></select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="f_komentar">Komentář</label>
-          <textarea id="f_komentar" placeholder="Vaše poznámky, chuťový profil, doporučení k jídlu…"></textarea>
-        </div>
-      </div>
-    </div>
+      <!-- PRAVÝ SLOUPEC: původ, parametry, sklep, hodnocení -->
+      <div class="vino-col">
 
-    <!-- Akce -->
+        <!-- Původ -->
+        <div class="fcard">
+          <div class="fcard-header">
+            <span class="fcard-icon">🗺️</span> Původ
+          </div>
+          <div class="fcard-body">
+            <div class="grid2">
+              <div class="form-group">
+                <label for="f_zeme">Země původu</label>
+                <input type="text" id="f_zeme" placeholder="např. Česká republika">
+              </div>
+              <div class="form-group">
+                <label for="f_oblast">Vinařská oblast</label>
+                <input type="text" id="f_oblast" placeholder="např. Morava">
+              </div>
+            </div>
+            <div class="grid2">
+              <div class="form-group">
+                <label for="f_podoblast">Vinařská podoblast</label>
+                <input type="text" id="f_podoblast" placeholder="např. Slovácká">
+              </div>
+              <div class="form-group">
+                <label for="f_trat">Viniční trať</label>
+                <input type="text" id="f_trat" placeholder="např. Nechory">
+              </div>
+            </div>
+          </div>
+        </div><!-- /Původ -->
+
+        <!-- Technické parametry -->
+        <div class="fcard">
+          <div class="fcard-header">
+            <span class="fcard-icon">🔬</span> Technické parametry
+          </div>
+          <div class="fcard-body">
+            <div class="grid2">
+              <div class="form-group">
+                <label for="f_alkohol">Obsah alkoholu (%)</label>
+                <input type="number" id="f_alkohol" placeholder="např. 12.5" step="0.1" min="0" max="25">
+              </div>
+              <div class="form-group">
+                <label for="f_cukr">Zbytkový cukr (g/l)</label>
+                <input type="number" id="f_cukr" placeholder="např. 4.2" step="0.1" min="0">
+              </div>
+            </div>
+            <div class="grid2">
+              <div class="form-group">
+                <label for="f_kyseliny">Kyseliny (g/l)</label>
+                <input type="number" id="f_kyseliny" placeholder="např. 6.8" step="0.1" min="0">
+              </div>
+              <div class="form-group">
+                <label for="f_objem">Objem láhve (l)</label>
+                <input type="number" id="f_objem" placeholder="0.75" step="0.01" min="0" value="0.75">
+              </div>
+            </div>
+            <div class="grid2">
+              <div class="form-group">
+                <label for="f_sarze">Číslo šarže</label>
+                <input type="text" id="f_sarze" placeholder="např. L2302">
+              </div>
+              <div class="form-group">
+                <label for="f_cena">Cena (Kč)</label>
+                <input type="number" id="f_cena" placeholder="např. 320" min="0">
+              </div>
+            </div>
+          </div>
+        </div><!-- /Technické parametry -->
+
+        <!-- Vinný sklep -->
+        <div class="fcard">
+          <div class="fcard-header">
+            <span class="fcard-icon">🏚️</span> Vinný sklep
+          </div>
+          <div class="fcard-body">
+            <div class="grid2">
+              <div class="form-group">
+                <label for="f_pocetLahvi">Počet lahví na skladě</label>
+                <div class="cellar-count-row">
+                  <input type="number" id="f_pocetLahvi" min="0" max="999" placeholder="0">
+                  <button type="button" id="otevritBtn" class="btn-otevrit"
+                          onclick="otevritLahev()" style="display:none">
+                    🍾 Otevřít láhev
+                  </button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Vhodné k pití (roky)</label>
+                <div class="pit-range">
+                  <input type="number" id="f_pitOd" placeholder="od" min="2000" max="2060">
+                  <span class="pit-range-sep">–</span>
+                  <input type="number" id="f_pitDo" placeholder="do" min="2000" max="2060">
+                </div>
+                <div class="form-hint">Rok konzumace, např. 2025 – 2030</div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /Vinný sklep -->
+
+        <!-- Moje hodnocení -->
+        <div class="fcard fcard-rating">
+          <div class="fcard-header">
+            <span class="fcard-icon">⭐</span> Moje hodnocení
+          </div>
+          <div class="fcard-body">
+            <div class="form-group">
+              <label>Hodnocení</label>
+              <div class="star-input-row" id="starRow">
+                <button class="star-btn" data-val="1" onclick="nastavHodnoceni(1)">★</button>
+                <button class="star-btn" data-val="2" onclick="nastavHodnoceni(2)">★</button>
+                <button class="star-btn" data-val="3" onclick="nastavHodnoceni(3)">★</button>
+                <button class="star-btn" data-val="4" onclick="nastavHodnoceni(4)">★</button>
+                <button class="star-btn" data-val="5" onclick="nastavHodnoceni(5)">★</button>
+                <span class="star-label" id="starLabel">— bez hodnocení</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Datum degustace</label>
+              <div class="date-cs" id="f_degustace">
+                <select id="f_degu_d"><option value="">Den</option></select>
+                <select id="f_degu_m">
+                  <option value="">Měsíc</option>
+                  <option value="01">Leden</option><option value="02">Únor</option>
+                  <option value="03">Březen</option><option value="04">Duben</option>
+                  <option value="05">Květen</option><option value="06">Červen</option>
+                  <option value="07">Červenec</option><option value="08">Srpen</option>
+                  <option value="09">Září</option><option value="10">Říjen</option>
+                  <option value="11">Listopad</option><option value="12">Prosinec</option>
+                </select>
+                <select id="f_degu_y"><option value="">Rok</option></select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="f_komentar">Komentář</label>
+              <textarea id="f_komentar" placeholder="Vaše poznámky, chuťový profil, doporučení k jídlu…"></textarea>
+            </div>
+          </div>
+        </div><!-- /Hodnocení -->
+
+      </div><!-- /vino-col right -->
+    </div><!-- /vino-cols -->
+
+    <!-- Akce (celá šířka) -->
     <div class="form-actions" id="formActions">
       <button class="btn btn-primary" id="saveBtn" onclick="ulozit()">Uložit víno</button>
       <button class="btn btn-secondary" onclick="window.location.href='vina.html'">Zrušit</button>
