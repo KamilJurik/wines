@@ -123,6 +123,8 @@
             <label for="f_privlastek">Přívlastek</label>
             <input type="text" id="f_privlastek" placeholder="např. Pozdní sběr" list="privlastek-list">
             <datalist id="privlastek-list">
+              <option value="Zemské víno">
+              <option value="Zemský">
               <option value="Kabinet">
               <option value="Pozdní sběr">
               <option value="Výběr z hroznů">
@@ -551,19 +553,31 @@
         },
         'KYSELINY':  v => {
           const m = v.match(/(\d{1,2}[.,]\d?)/);
-          if (m) data.kyseliny = parseFloat(m[1].replace(',','.'));
+          if (m) { data.kyseliny = parseFloat(m[1].replace(',','.')); return; }
+          // Fallback: integer without decimal (OCR může vynechat desetinnou tečku)
+          const n = parseFloat(v);
+          if (!isNaN(n) && n > 0 && n < 30) data.kyseliny = n;
         },
         'ŠARŽE':     v => { if (/^[A-Z0-9]{2,15}$/i.test(v.trim())) data.cisloSarze = v.trim(); },
         'SARZE':     v => { if (/^[A-Z0-9]{2,15}$/i.test(v.trim())) data.cisloSarze = v.trim(); },
       };
 
       radky.forEach(radek => {
-        // Formát: "LABEL ........ Hodnota" (tečky jako oddělovač mojelahve.cz)
-        const mLabel = radek.match(/^([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]{3,15})[.\s]{2,}\s*(.+)$/);
+        // Formát: "LABEL . Hodnota" nebo "LABEL Hodnota" — separator může být 1+ tečka/mezera/šum
+        const mLabel = radek.match(/([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]{3,15})[.\s·]{1,}\s*(.+)$/);
         if (mLabel) {
           const label = mLabel[1].toUpperCase().trim();
           const value = mLabel[2].trim();
           if (mlhLabely[label]) mlhLabely[label](value);
+        }
+
+        // Vinařství — "Vinařství XYZ" nebo "VINAŘSTVÍ XYZ", hodnota končí u prvního known labelu nebo konce
+        if (!data.vinarstvi) {
+          const vinM = radek.match(/vina[řr]stv[ií]\s+(.+?)(?:\s+(?:OBJEM|BARVA|P[RŘ][ÍI]VLASTEK|ALKOHOL|CUKRY|KYSELINY|[ŠS]AR[ŽZ]E)\b|$)/i);
+          if (vinM) {
+            const candidate = vinM[1].trim();
+            if (candidate.length > 1 && candidate.length < 60) data.vinarstvi = candidate;
+          }
         }
       });
 
@@ -914,6 +928,31 @@
       btn.innerHTML = '<span class="spinner"></span>';
       res.innerHTML = '<p style="font-size:13px;color:#7A6560;margin-top:8px">Načítám stránku…</p>';
 
+      // mojelahve.cz používá JavaScript rendering — proxy dostane prázdnou kostru.
+      // Místo toho extrahujeme název z URL slugu a spustíme vyhledávání.
+      if (/mojelahve\.cz/i.test(url)) {
+        const slug = url.replace(/\/$/, '').split('/').pop() || '';
+        const query = slug.replace(/-/g, ' ').replace(/\s*\d{4}\s*$/, '').trim();
+        if (query) {
+          res.innerHTML = '<p style="font-size:13px;color:#7A6560;margin-top:8px">mojelahve.cz vyžaduje JS — prohledávám databázi…</p>';
+          const mlh = await hledatNaMojelahve(query);
+          btn.disabled = false;
+          btn.textContent = 'Načíst';
+          if (!mlh.length) {
+            res.innerHTML = '<p style="font-size:13px;color:#7A6560;margin-top:8px">Víno nenalezeno. Zkuste záložku „Hledat dle názvu".</p>';
+            return;
+          }
+          window._mlhVysledky = mlh;
+          res.innerHTML = `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--wine);margin:10px 0 4px">mojelahve.cz</div>
+            <div class="search-dropdown">${mlh.map((v, i) => `
+              <div class="sr-item" onclick="aplikovatMLH(${i});document.getElementById('urlResults').innerHTML=''">
+                <div class="sr-item-name">${esc(v.nazev)}</div>
+                <div class="sr-item-sub">${esc([v.vinarstvi, v.barva, v.rocnik].filter(Boolean).join(' · '))}</div>
+              </div>`).join('')}</div>`;
+          return;
+        }
+      }
+
       let html = null;
       for (const proxy of PROXIES) {
         try {
@@ -1037,18 +1076,25 @@
 
     function aplikovatExtrahovanaData(data, resEl) {
       let naplneno = 0;
-      if (data.nazev)     { pole('f_nazev').value    = data.nazev;              naplneno++; }
-      if (data.vinarstvi) { pole('f_vinarstvi').value = data.vinarstvi;         naplneno++; }
-      if (data.rocnik)    { pole('f_rocnik').value   = data.rocnik;             naplneno++; }
-      if (data.barva)     { pole('f_barva').value    = data.barva;              naplneno++; }
-      if (data.alkohol)   { pole('f_alkohol').value  = data.alkohol;            naplneno++; }
-      if (data.zeme)      { pole('f_zeme').value     = data.zeme;               naplneno++; }
-      if (data.cena)      { pole('f_cena').value     = data.cena;               naplneno++; }
+      const set = (id, val) => { if (val != null && val !== '') { pole(id).value = val; naplneno++; } };
+      set('f_nazev',     data.nazev);
+      set('f_vinarstvi', data.vinarstvi);
+      set('f_rocnik',    data.rocnik);
+      set('f_barva',     data.barva);
+      set('f_privlastek', data.privlastek);
+      set('f_typVina',   data.typVina);
+      set('f_zeme',      data.zeme);
+      set('f_alkohol',   data.alkohol);
+      set('f_cukr',      data.zbytkCukr);
+      set('f_kyseliny',  data.kyseliny);
+      set('f_objem',     data.objem);
+      set('f_sarze',     data.cisloSarze);
+      set('f_cena',      data.cena);
       if (data.popis && !pole('f_komentar').value) {
         pole('f_komentar').value = data.popis; naplneno++;
       }
 
-      const pocetLabel = naplneno === 1 ? 'pole' : naplneno < 5 ? 'pole' : 'polí';
+      const pocetLabel = naplneno < 5 ? 'pole' : 'polí';
       resEl.innerHTML = naplneno
         ? `<p style="font-size:13px;color:#166534;margin-top:8px">✓ Předvyplněno ${naplneno} ${pocetLabel}. Zkontrolujte a doplňte dle potřeby.</p>`
         : `<p style="font-size:13px;color:#7A6560;margin-top:8px">Data se nepodařilo automaticky extrahovat. Zkuste jinou stránku vína nebo zadejte data ručně.</p>`;
