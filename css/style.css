@@ -1224,16 +1224,18 @@ body {
 .cellar-count-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 .cellar-count-row input { width: 80px; flex-shrink: 0; }
+.cellar-count-row .btn-otevrit { flex: 1 1 auto; min-width: 0; justify-content: center; display: inline-flex; }
 .btn-otevrit {
   background: var(--cream);
   border: 1px solid var(--wine-light);
   color: var(--wine);
-  padding: 8px 14px;
+  padding: 8px 12px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 12.5px;
   cursor: pointer;
   white-space: nowrap;
   font-family: inherit;
