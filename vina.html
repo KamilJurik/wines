@@ -165,7 +165,7 @@
         </div>
 
         <div class="tabs">
-          <button class="tab active" id="tabMoje"     onclick="prepnoutTab('moje')">Moje sklep</button>
+          <button class="tab active" id="tabMoje"     onclick="prepnoutTab('moje')">Můj sklep</button>
           <button class="tab"        id="tabWishlist" onclick="prepnoutTab('wishlist')">🌟 Wishlist</button>
           <button class="tab"        id="tabVsechna"  onclick="prepnoutTab('vsechna')">Všechna vína</button>
         </div>
@@ -438,8 +438,14 @@
         : '—';
       document.getElementById('statPocet').textContent  = n;
       document.getElementById('statPrumer').textContent = prumer;
-      document.getElementById('statZeme').textContent   = zkratit(topVal(seznam.map(v => v.zemePouvodu)) || '—', 12);
-      document.getElementById('statOdruda').textContent = zkratit(topVal(seznam.map(v => v.odruda)) || '—', 12);
+      const topZeme   = topVal(seznam.map(v => v.zemePouvodu)) || '—';
+      const topOdruda = topVal(seznam.map(v => v.odruda)) || '—';
+      const elZeme   = document.getElementById('statZeme');
+      const elOdruda = document.getElementById('statOdruda');
+      elZeme.textContent   = zkratit(topZeme, 16);
+      elZeme.title         = topZeme;
+      elOdruda.textContent = zkratit(topOdruda, 16);
+      elOdruda.title       = topOdruda;
 
       // ── Hodnota sklepa (#7) ──────────────────────────────────
       const sCenou = seznam.filter(v => v.cena && (v.pocetLahvi || 0) > 0 && !v.wishlist);
