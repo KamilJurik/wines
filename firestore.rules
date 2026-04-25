@@ -28,11 +28,12 @@ service cloud.firestore {
     // Ostatní pole čte admin nebo sám uživatel. Přepínat schvaleno smí jen admin.
     match /uzivatele/{uid} {
       allow read:   if isSignedIn() && (request.auth.uid == uid || isAdmin());
-      // Vytvoření vlastního docu při registraci — schvaleno musí být false.
+      // Při registraci uživatel vytváří vlastní doc se schvaleno=false.
+      // Admin si může vytvořit vlastní doc rovnou se schvaleno=true (auto-init).
       allow create: if isSignedIn()
                     && request.auth.uid == uid
-                    && request.resource.data.schvaleno == false;
-      // Uživatel smí měnit jen své jméno; schvaleno mění jen admin.
+                    && (isAdmin() || request.resource.data.schvaleno == false);
+      // Uživatel smí měnit jen své jméno; schvaleno/email mění jen admin.
       allow update: if isAdmin()
                     || (isSignedIn() && request.auth.uid == uid
                         && request.resource.data.schvaleno == resource.data.schvaleno
