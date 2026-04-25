@@ -19,6 +19,7 @@
   --bile:    #C9A84C;
   --rose:    #E06070;
   --sumive:  #5B8EA6;
+  --oranzove:#E07A30;
 }
 
 body {
@@ -403,7 +404,7 @@ body {
 .color-dot.bile     { background: var(--bile); }
 .color-dot.rose     { background: var(--rose); }
 .color-dot.sumive   { background: var(--sumive); }
-.color-dot.oranzove { background: var(--oranzove, #E07A30); }
+.color-dot.oranzove { background: var(--oranzove); }
 
 .wine-winery { font-size: 13px; color: var(--text-light); margin-bottom: 3px; }
 .wine-meta   { font-size: 12px; color: var(--text-light); margin-bottom: 10px; }
@@ -800,10 +801,11 @@ body {
   border-radius: 50%;
   display: inline-block;
 }
-.color-badge.cervene::before { background: var(--cervene); }
-.color-badge.bile::before    { background: var(--bile); }
-.color-badge.rose::before    { background: var(--rose); }
-.color-badge.sumive::before  { background: var(--sumive); }
+.color-badge.cervene::before  { background: var(--cervene); }
+.color-badge.bile::before     { background: var(--bile); }
+.color-badge.rose::before     { background: var(--rose); }
+.color-badge.sumive::before   { background: var(--sumive); }
+.color-badge.oranzove::before { background: var(--oranzove); }
 
 /* Český datepicker */
 .date-cs {
@@ -1142,7 +1144,8 @@ body {
 .chart-bar-fill.cervene  { background: var(--cervene); }
 .chart-bar-fill.bile     { background: var(--bile); }
 .chart-bar-fill.rose     { background: var(--rose); }
-.chart-bar-fill.oranzove { background: var(--oranzove, #E07A30); }
+.chart-bar-fill.oranzove { background: var(--oranzove); }
+.chart-bar-fill.sumive   { background: var(--sumive); }
 .chart-bar-count {
   font-size: 10px;
   color: var(--text-light);
@@ -1427,3 +1430,357 @@ body {
   .login-box     { padding: 28px 20px; }
   .header-user   { display: none; }
 }
+
+/* =====================
+   v3.0 — Tabs (Sklep / Wishlist)
+   ===================== */
+.wishlist-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(201,150,58,0.08);
+  border: 1px solid rgba(201,150,58,0.25);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+.wishlist-toggle-row label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; color: var(--wine); }
+.wishlist-toggle-row input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--gold); cursor: pointer; }
+.wishlist-toggle-row .hint { color: var(--text-light); font-size: 12px; flex: 1; }
+
+.wine-card.is-wishlist {
+  background: linear-gradient(135deg, #FFFBEB 0%, white 100%);
+  border-color: #FCD34D;
+}
+.wine-card.is-wishlist::before {
+  content: '🌟 Wishlist';
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  color: #92400E;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 6px;
+}
+
+/* =====================
+   v3.0 — Tagy / Štítky
+   ===================== */
+.tag-input-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: white;
+  min-height: 42px;
+  align-items: center;
+  cursor: text;
+}
+.tag-input-wrap:focus-within { border-color: var(--wine); }
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(114,47,55,0.1);
+  color: var(--wine);
+  border-radius: 14px;
+  padding: 3px 4px 3px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.tag-chip-x {
+  background: none;
+  border: none;
+  color: var(--wine);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 4px;
+  border-radius: 50%;
+}
+.tag-chip-x:hover { background: rgba(114,47,55,0.2); }
+.tag-input-wrap input {
+  flex: 1;
+  min-width: 100px;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  background: transparent;
+  font-family: inherit;
+  padding: 4px 0;
+}
+.wine-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+.wine-tag-mini {
+  font-size: 10px;
+  padding: 1px 7px;
+  background: rgba(114,47,55,0.1);
+  color: var(--wine);
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+/* =====================
+   v3.0 — Modal (otevřít láhev, historie, atd.)
+   ===================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(61,18,25,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9000;
+  padding: 16px;
+  animation: fadeIn .18s ease;
+}
+.modal-box {
+  background: var(--cream);
+  border-radius: 16px;
+  padding: 24px 26px;
+  max-width: 480px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  animation: modalIn .22s ease;
+}
+@keyframes modalIn { from { opacity: 0; transform: scale(0.96) translateY(8px); } to { opacity: 1; transform: none; } }
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--wine);
+  margin-bottom: 6px;
+}
+.modal-sub {
+  font-size: 13px;
+  color: var(--text-light);
+  margin-bottom: 16px;
+}
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+.modal-actions .btn { flex: 1; }
+
+.history-list { margin-top: 4px; }
+.history-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+.history-row:last-child { border-bottom: none; }
+.history-date {
+  flex: 0 0 90px;
+  font-size: 12px;
+  color: var(--text-light);
+  font-weight: 600;
+  padding-top: 2px;
+}
+.history-body { flex: 1; min-width: 0; }
+.history-rating { font-size: 13px; color: var(--gold); font-weight: 600; }
+.history-comment { font-size: 13px; color: var(--text); line-height: 1.5; margin-top: 3px; white-space: pre-wrap; }
+.history-empty { font-size: 13px; color: var(--text-light); padding: 16px 0; text-align: center; }
+
+/* =====================
+   v3.0 — Podobná vína
+   ===================== */
+.similar-wines {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+.similar-wine-card {
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: border-color .15s, transform .15s;
+}
+.similar-wine-card:hover { border-color: var(--wine); transform: translateY(-2px); }
+.similar-wine-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.similar-wine-meta { font-size: 11px; color: var(--text-light); margin-top: 3px; }
+.similar-wine-stars { font-size: 11px; color: var(--gold); margin-top: 4px; }
+
+/* =====================
+   v3.0 — Mapa původu
+   ===================== */
+.map-card { padding: 0; overflow: hidden; }
+#originsMap {
+  width: 100%;
+  height: 320px;
+  background: var(--cream);
+}
+.leaflet-popup-content { font-size: 12px; line-height: 1.4; }
+.leaflet-popup-content strong { color: var(--wine); display: block; margin-bottom: 2px; }
+
+/* =====================
+   v3.0 — Časová osa otevírání
+   ===================== */
+.timeline-list {
+  position: relative;
+  padding-left: 18px;
+}
+.timeline-list::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 5px;
+  width: 2px;
+  background: var(--border);
+}
+.timeline-row {
+  position: relative;
+  padding: 4px 0 8px;
+  font-size: 12px;
+}
+.timeline-row::before {
+  content: '';
+  position: absolute;
+  left: -17px;
+  top: 7px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--wine);
+  border: 2px solid var(--cream);
+}
+.timeline-month { font-weight: 700; color: var(--wine); margin-bottom: 3px; }
+.timeline-item { color: var(--text); padding: 1px 0; text-decoration: none; display: block; }
+.timeline-item:hover { color: var(--wine); }
+.timeline-item .date-mini { color: var(--text-light); font-size: 11px; margin-right: 4px; }
+.timeline-item .stars-mini { color: var(--gold); font-size: 10px; }
+
+/* =====================
+   v3.0 — Hodnota sklepa
+   ===================== */
+.value-card {
+  background: linear-gradient(135deg, var(--gold) 0%, #B8862F 100%);
+  color: white;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.value-card-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  opacity: 0.85;
+  margin-bottom: 4px;
+}
+.value-card-value {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+.value-card-sub {
+  font-size: 11px;
+  opacity: 0.85;
+  margin-top: 4px;
+}
+
+/* =====================
+   v3.0 — EAN scanner
+   ===================== */
+.ean-zone { position: relative; }
+#eanVideo {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: black;
+  display: block;
+}
+.ean-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  height: 25%;
+  border: 2px solid var(--gold);
+  border-radius: 6px;
+  pointer-events: none;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.4);
+}
+.ean-status {
+  font-size: 12px;
+  color: var(--text-light);
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* Provider radio (Tesseract / Claude Vision) */
+.ocr-provider-row {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+.ocr-provider-row label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: var(--text);
+  font-weight: 600;
+}
+.ocr-provider-row .ocr-provider-hint {
+  font-size: 11px;
+  color: var(--text-light);
+  font-weight: 400;
+}
+
+/* =====================
+   v3.0 — Audit log (admin)
+   ===================== */
+.audit-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  align-items: baseline;
+}
+.audit-row:last-child { border-bottom: none; }
+.audit-time {
+  color: var(--text-light);
+  font-size: 11px;
+  font-weight: 600;
+}
+.audit-text { line-height: 1.5; }
+.audit-text strong { color: var(--wine); }
+.audit-text .audit-action {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  padding: 1px 7px;
+  border-radius: 10px;
+  margin-right: 6px;
+}
+.audit-action.schvalil { background: #D1FAE5; color: #065F46; }
+.audit-action.odebral  { background: #FEF3C7; color: #92400E; }
+.audit-action.smazal   { background: #FECACA; color: #991B1B; }
+

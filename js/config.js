@@ -10,5 +10,31 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+const storage = (typeof firebase.storage === 'function') ? firebase.storage() : null;
 
-const APP_VERSION = '2.1';
+const APP_VERSION = '3.0';
+const ADMIN_EMAIL = 'kamil.jurik@easyportal365.com';
+
+// Helpers ──────────────────────────────────────────────
+function sklonujLahev(n) { return n === 1 ? 'láhev' : (n >= 2 && n <= 4) ? 'láhve' : 'lahví'; }
+function sklonujLahve(n) { return n === 1 ? 'láhev' : (n >= 2 && n <= 4) ? 'láhve' : 'lahví'; }
+
+// Backward-compatible čtení viniční tratě (typo `vinacniTrat` v <=2.1)
+function ctiVinicniTrat(v) { return v.vinicniTrat || v.vinacniTrat || ''; }
+
+// Audit log helper — používá ho admin.html, ale i jiné akce ho mohou volat
+async function auditLog(akce, cil) {
+  try {
+    const u = auth.currentUser;
+    if (!u) return;
+    await db.collection('auditLog').add({
+      adminUid:   u.uid,
+      adminEmail: u.email,
+      akce:       akce,
+      cilUid:     cil?.uid   || null,
+      cilEmail:   cil?.email || null,
+      cilJmeno:   cil?.jmeno || null,
+      casovaZnamka: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+  } catch (e) { console.warn('audit log failed', e); }
+}

@@ -1,0 +1,73 @@
+rules_version = '2';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Vinora — Firestore Security Rules
+// ═══════════════════════════════════════════════════════════════════════════
+// Nasazení:
+//   1. Firebase CLI:  firebase deploy --only firestore:rules
+//   2. NEBO Firebase Console → Firestore → Rules → vlož obsah a publikuj
+// ═══════════════════════════════════════════════════════════════════════════
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ───── Helpery ──────────────────────────────────────────────
+    function isSignedIn()   { return request.auth != null; }
+    function isAdmin()      { return isSignedIn() && request.auth.token.email == 'kamil.jurik@easyportal365.com'; }
+    function isApproved()   {
+      return isSignedIn() && (
+        isAdmin() ||
+        exists(/databases/$(database)/documents/uzivatele/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/uzivatele/$(request.auth.uid)).data.schvaleno == true
+      );
+    }
+    function isOwner(rsc)   { return isSignedIn() && rsc.data.userId == request.auth.uid; }
+
+    // ───── uzivatele ────────────────────────────────────────────
+    // Při registraci si uživatel vytváří vlastní doc (schvaleno=false).
+    // Ostatní pole čte admin nebo sám uživatel. Přepínat schvaleno smí jen admin.
+    match /uzivatele/{uid} {
+      allow read:   if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      // Vytvoření vlastního docu při registraci — schvaleno musí být false.
+      allow create: if isSignedIn()
+                    && request.auth.uid == uid
+                    && request.resource.data.schvaleno == false;
+      // Uživatel smí měnit jen své jméno; schvaleno mění jen admin.
+      allow update: if isAdmin()
+                    || (isSignedIn() && request.auth.uid == uid
+                        && request.resource.data.schvaleno == resource.data.schvaleno
+                        && request.resource.data.email     == resource.data.email);
+      allow delete: if isAdmin();
+    }
+
+    // ───── vina ────────────────────────────────────────────────
+    // Schválený uživatel čte všechna vína; CRUD jen na svých.
+    match /vina/{id} {
+      allow read:   if isApproved();
+      allow create: if isApproved()
+                    && request.resource.data.userId == request.auth.uid;
+      allow update: if isApproved() && isOwner(resource)
+                    && request.resource.data.userId == resource.data.userId;
+      allow delete: if isApproved() && isOwner(resource);
+    }
+
+    // ───── degustace ───────────────────────────────────────────
+    // Historie otevírání lahví / degustací. Každý záznam patří jednomu vínu.
+    match /degustace/{id} {
+      allow read:   if isApproved();
+      allow create: if isApproved()
+                    && request.resource.data.userId == request.auth.uid;
+      allow update: if isApproved() && isOwner(resource);
+      allow delete: if isApproved() && isOwner(resource);
+    }
+
+    // ───── auditLog ────────────────────────────────────────────
+    // Pouze admin čte; zápis kdokoli přihlášený admin (zapisuje sám sebe).
+    match /auditLog/{id} {
+      allow read:   if isAdmin();
+      allow create: if isAdmin()
+                    && request.resource.data.adminUid == request.auth.uid;
+      allow update, delete: if false;  // nemodifikovatelné
+    }
+  }
+}

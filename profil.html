@@ -73,6 +73,28 @@
       </div>
     </div>
 
+    <!-- Claude API klíč pro Claude Vision OCR -->
+    <div class="fcard" style="margin-top:16px">
+      <div class="fcard-header">
+        <span class="fcard-icon">🤖</span> Claude Vision (OCR etiket)
+      </div>
+      <div class="fcard-body">
+        <div class="form-group">
+          <label for="p_claude_key">Anthropic API klíč</label>
+          <input type="password" id="p_claude_key" placeholder="sk-ant-…" autocomplete="off">
+          <div class="form-hint">
+            Volitelné. Pokud zadáte vlastní klíč, OCR etiket bude používat Claude Vision (přesnější než Tesseract).
+            Klíč je uložen <strong>jen ve vašem prohlížeči</strong> (localStorage), nikam se neodesílá.
+            Získat klíč: <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener" style="color:var(--wine)">console.anthropic.com</a>.
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary" id="saveClaudeBtn" onclick="ulozitClaudeKlic()">Uložit klíč</button>
+          <button class="btn btn-secondary" onclick="smazatClaudeKlic()">Smazat klíč</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -80,8 +102,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="js/config.js"></script>
   <script>
-    document.getElementById('footerVersion').textContent = 'v' + APP_VERSION;
-
     let originalEmail = '';
 
     auth.onAuthStateChanged(user => {
@@ -90,7 +110,43 @@
       document.getElementById('p_jmeno').value  = user.displayName || '';
       document.getElementById('p_email').value  = user.email || '';
       originalEmail = user.email || '';
+
+      // Předvyplň zamaskovaný Claude API klíč, pokud existuje
+      const klic = localStorage.getItem('vinora_claude_api_key');
+      if (klic) {
+        document.getElementById('p_claude_key').value = '••••••••' + klic.slice(-6);
+        document.getElementById('p_claude_key').dataset.masked = '1';
+      }
     });
+
+    // Po focus odmaskuj
+    document.getElementById('p_claude_key').addEventListener('focus', e => {
+      if (e.target.dataset.masked === '1') {
+        e.target.value = '';
+        e.target.dataset.masked = '';
+      }
+    });
+
+    function ulozitClaudeKlic() {
+      const inp = document.getElementById('p_claude_key');
+      const val = inp.value.trim();
+      if (!val) { zobrazMsg('Zadejte API klíč nebo použijte Smazat.', 'error'); return; }
+      if (!val.startsWith('sk-ant-')) {
+        zobrazMsg('Klíč musí začínat „sk-ant-".', 'error'); return;
+      }
+      localStorage.setItem('vinora_claude_api_key', val);
+      inp.value = '••••••••' + val.slice(-6);
+      inp.dataset.masked = '1';
+      zobrazMsg('Claude Vision API klíč byl uložen.', 'success');
+    }
+
+    function smazatClaudeKlic() {
+      localStorage.removeItem('vinora_claude_api_key');
+      const inp = document.getElementById('p_claude_key');
+      inp.value = '';
+      inp.dataset.masked = '';
+      zobrazMsg('Klíč smazán. OCR bude používat Tesseract.', 'success');
+    }
 
     // Zobraz pole pro heslo, pokud uživatel mění e-mail
     document.getElementById('p_email').addEventListener('input', () => {
@@ -185,8 +241,6 @@
 
     function odhlasit() { auth.signOut().then(() => window.location.href = 'index.html'); }
 
-    document.getElementById('footerVersion').textContent = 'v' + APP_VERSION;
-
     function zobrazMsg(text, typ) {
       const el = document.getElementById('profilMsg');
       el.textContent = text;
@@ -200,5 +254,8 @@
   <footer class="app-footer">
     <strong>🍷 Vinora</strong> &nbsp;·&nbsp; <span id="footerVersion"></span> &nbsp;·&nbsp; © Kamil Juřík, 2026
   </footer>
+  <script>
+    document.getElementById('footerVersion').textContent = 'v' + APP_VERSION;
+  </script>
 </body>
 </html>

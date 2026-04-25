@@ -506,14 +506,20 @@
     })();
 
     // ── Auth + schválení ──────────────────────────────────────
+    // ADMIN_EMAIL je definován v js/config.js
     auth.onAuthStateChanged(async user => {
       if (!user) return;
+      // Admin se dostane vždy — vina.html mu případně vytvoří doc
+      if (user.email === ADMIN_EMAIL) {
+        window.location.href = 'vina.html';
+        return;
+      }
       // Zkontroluj schválení
       const snap = await db.collection('uzivatele').doc(user.uid).get();
-      if (!snap.exists || snap.data().schvaleno) {
+      if (snap.exists && snap.data().schvaleno) {
         window.location.href = 'vina.html';
       } else {
-        // Čeká na schválení — odhlásit a zobrazit zprávu
+        // Čeká na schválení (nebo doc neexistuje) — odhlásit a zobrazit zprávu
         await auth.signOut();
         zobrazMsg(document.getElementById('loginMsg'),
           'Váš účet čeká na schválení administrátorem. Zkuste to prosím později.');

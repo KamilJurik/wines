@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vinora – Moje vína</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 </head>
 <body>
 
@@ -39,6 +41,14 @@
 
         <!-- Dashboard (na desktopu vždy; na mobilu toggle) -->
         <div class="dashboard" id="dashboardPanel">
+
+          <!-- Hodnota sklepa (#7) -->
+          <div class="value-card" id="valueCard" style="display:none">
+            <div class="value-card-label">💰 Hodnota sklepa</div>
+            <div class="value-card-value" id="statHodnota">—</div>
+            <div class="value-card-sub" id="statHodnotaSub">—</div>
+          </div>
+
           <div class="stats-row">
             <div class="stat-card">
               <div class="stat-value" id="statPocet">—</div>
@@ -77,6 +87,18 @@
             <div class="dash-section-title">⭐ Nejlépe hodnocená vína</div>
             <div id="nejlepsiVina"></div>
           </div>
+
+          <!-- Mapa původu (#11) -->
+          <div class="dash-section map-card" id="mapSection" style="display:none">
+            <div class="dash-section-title" style="padding:13px 13px 4px">🗺️ Mapa původu</div>
+            <div id="originsMap"></div>
+          </div>
+
+          <!-- Časová osa otevírání (#12) -->
+          <div class="dash-section" id="timelineSection" style="display:none">
+            <div class="dash-section-title">📅 Nedávno otevřené</div>
+            <div class="timeline-list" id="timelineList"></div>
+          </div>
         </div>
 
       </aside>
@@ -108,6 +130,7 @@
               <option value="bílé">Bílé</option>
               <option value="rosé">Rosé</option>
               <option value="oranžové">Oranžové</option>
+              <option value="šumivé">Šumivé</option>
             </select>
 
             <select class="filter-select" id="fHodnoceni" onchange="zobrazitVina()">
@@ -131,6 +154,10 @@
               <option value="">Přívlastek — vše</option>
             </select>
 
+            <select class="filter-select" id="fTag" onchange="zobrazitVina()">
+              <option value="">Tag — vše</option>
+            </select>
+
             <button class="filters-toggle" onclick="resetFiltry()" style="color:#DC2626;border-color:#DC2626">
               ✕ Reset
             </button>
@@ -138,8 +165,9 @@
         </div>
 
         <div class="tabs">
-          <button class="tab active" id="tabMoje"    onclick="prepnoutTab('moje')">Moje vína</button>
-          <button class="tab"        id="tabVsechna" onclick="prepnoutTab('vsechna')">Všechna vína</button>
+          <button class="tab active" id="tabMoje"     onclick="prepnoutTab('moje')">Moje sklep</button>
+          <button class="tab"        id="tabWishlist" onclick="prepnoutTab('wishlist')">🌟 Wishlist</button>
+          <button class="tab"        id="tabVsechna"  onclick="prepnoutTab('vsechna')">Všechna vína</button>
         </div>
 
         <div id="loadingState" class="state-box"><span class="icon">⏳</span>Načítám vína…</div>
@@ -153,7 +181,7 @@
     </div><!-- /vina-layout -->
   </div><!-- /page-wrap -->
 
-  <button class="fab" onclick="window.location.href='vino.html'" title="Přidat víno">+</button>
+  <button class="fab" id="fabBtn" onclick="pridatVino()" title="Přidat víno">+</button>
 
   <footer class="app-footer">
     <strong>🍷 Vinora</strong> &nbsp;·&nbsp; <span id="footerVersion"></span> &nbsp;·&nbsp; © Kamil Juřík, 2026
@@ -162,20 +190,29 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="js/config.js"></script>
   <script>
     document.getElementById('footerVersion').textContent = 'v' + APP_VERSION;
 
-    const ADMIN_EMAIL = 'kamil.jurik@easyportal365.com';
     let vsechnaVina  = [];
-    let aktualniTab  = 'moje';
+    let aktualniTab  = 'moje';   // 'moje' | 'wishlist' | 'vsechna'
     let aktualniUser = null;
     let filtrySviditelne = false;
-    let dashViditelny = false;   // relevantní jen pro mobil
+    let dashViditelny = false;
+    let unsubVina    = null;     // unsubscribe pro onSnapshot — fix memory leaku
+    let mapaInstance = null;
+    let mapaMarkery  = [];
 
     // ── Auth guard + schválení ────────────────────────────────
     auth.onAuthStateChanged(async user => {
-      if (!user) { window.location.href = 'index.html'; return; }
+      if (!user) {
+        if (unsubVina) { unsubVina(); unsubVina = null; }
+        window.location.href = 'index.html';
+        return;
+      }
 
       if (user.email !== ADMIN_EMAIL) {
         const snap = await db.collection('uzivatele').doc(user.uid).get();
@@ -204,9 +241,10 @@
       nacistVina();
     });
 
-    // ── Firestore listener ────────────────────────────────────
+    // ── Firestore listener (s unsubscribe — fix memory leaku) ──
     function nacistVina() {
-      db.collection('vina')
+      if (unsubVina) unsubVina();
+      unsubVina = db.collection('vina')
         .orderBy('datumPridani', 'desc')
         .onSnapshot(snapshot => {
           vsechnaVina = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -220,15 +258,22 @@
         });
     }
 
+    // Uvolni listener při zavření stránky
+    window.addEventListener('beforeunload', () => {
+      if (unsubVina) unsubVina();
+    });
+
     // ── Dynamické naplnění filtrů ─────────────────────────────
     function naplnitFiltry() {
       const rocniky    = [...new Set(vsechnaVina.map(v => v.rocnik).filter(Boolean))].sort((a,b) => b-a);
       const zeme       = [...new Set(vsechnaVina.map(v => v.zemePouvodu).filter(Boolean))].sort();
       const privlastky = [...new Set(vsechnaVina.map(v => v.privlastek).filter(Boolean))].sort();
+      const tagy       = [...new Set(vsechnaVina.flatMap(v => Array.isArray(v.tagy) ? v.tagy : []))].sort();
 
       naplnitSelect('fRocnik',    rocniky,    'Ročník — vše');
       naplnitSelect('fZeme',      zeme,       'Země — vše');
       naplnitSelect('fPrivlastek', privlastky, 'Přívlastek — vše');
+      naplnitSelect('fTag',       tagy,       'Tag — vše');
     }
 
     function naplnitSelect(id, hodnoty, placeholder) {
@@ -247,11 +292,18 @@
       const fRocnik     = document.getElementById('fRocnik').value;
       const fZeme       = document.getElementById('fZeme').value;
       const fPrivlastek = document.getElementById('fPrivlastek').value;
+      const fTag        = document.getElementById('fTag').value;
 
       let seznam = vsechnaVina;
 
+      // Tab filter
       if (aktualniTab === 'moje') {
-        seznam = seznam.filter(v => v.userId === aktualniUser.uid);
+        seznam = seznam.filter(v => v.userId === aktualniUser.uid && !v.wishlist);
+      } else if (aktualniTab === 'wishlist') {
+        seznam = seznam.filter(v => v.userId === aktualniUser.uid && v.wishlist);
+      } else {
+        // všechna — bez wishlist (ty patří jen vlastníkovi)
+        seznam = seznam.filter(v => !v.wishlist);
       }
 
       if (hledani) {
@@ -263,9 +315,10 @@
           hledatV(v.zemePouvodu,       hledani) ||
           hledatV(v.vinarskaOblast,    hledani) ||
           hledatV(v.vinarskaPodoblast, hledani) ||
-          hledatV(v.vinacniTrat,       hledani) ||
+          hledatV(ctiVinicniTrat(v),   hledani) ||
           hledatV(v.typVina,           hledani) ||
-          hledatV(String(v.rocnik||''), hledani)
+          hledatV(String(v.rocnik||''), hledani) ||
+          (Array.isArray(v.tagy) && v.tagy.some(t => hledatV(t, hledani)))
         );
       }
 
@@ -274,14 +327,15 @@
       if (fRocnik)     seznam = seznam.filter(v => String(v.rocnik || '') === fRocnik);
       if (fZeme)       seznam = seznam.filter(v => v.zemePouvodu === fZeme);
       if (fPrivlastek) seznam = seznam.filter(v => v.privlastek === fPrivlastek);
+      if (fTag)        seznam = seznam.filter(v => Array.isArray(v.tagy) && v.tagy.includes(fTag));
 
-      ['fBarva','fHodnoceni','fRocnik','fZeme','fPrivlastek'].forEach(id => {
+      ['fBarva','fHodnoceni','fRocnik','fZeme','fPrivlastek','fTag'].forEach(id => {
         document.getElementById(id).classList.toggle('active', !!document.getElementById(id).value);
       });
 
       const grid  = document.getElementById('winesGrid');
       const empty = document.getElementById('emptyState');
-      const maNekteriFiltry = fBarva || fHodnoceni || fRocnik || fZeme || fPrivlastek;
+      const maNekteriFiltry = fBarva || fHodnoceni || fRocnik || fZeme || fPrivlastek || fTag;
 
       aktualizovatDashboard(seznam);
 
@@ -290,9 +344,11 @@
         document.getElementById('emptyText').textContent =
           (hledani || maNekteriFiltry)
             ? 'Žádné výsledky — zkuste upravit filtry.'
-            : aktualniTab === 'moje'
-              ? 'Zatím žádná vína. Přidejte první kliknutím na +!'
-              : 'Žádná vína v databázi.';
+            : aktualniTab === 'wishlist'
+              ? 'Wishlist je prázdný. Přidejte víno na seznam přání kliknutím na +.'
+              : aktualniTab === 'moje'
+                ? 'Zatím žádná vína. Přidejte první kliknutím na +!'
+                : 'Žádná vína v databázi.';
         empty.style.display = 'block';
       } else {
         empty.style.display = 'none';
@@ -311,9 +367,13 @@
       const privlastekHtml = v.privlastek
         ? `<div class="wine-privlastek">${esc(v.privlastek)}</div>` : '';
       const lahveHtml = (v.pocetLahvi || 0) > 0
-        ? `<div class="wine-lahve">🍾 ${v.pocetLahvi} lahví</div>` : '';
+        ? `<div class="wine-lahve">🍾 ${v.pocetLahvi} ${sklonujLahev(v.pocetLahvi)}</div>` : '';
+      const tagyHtml = Array.isArray(v.tagy) && v.tagy.length
+        ? `<div class="wine-tags-row">${v.tagy.slice(0, 4).map(t => `<span class="wine-tag-mini">${esc(t)}</span>`).join('')}</div>`
+        : '';
+      const wishCls = v.wishlist ? ' is-wishlist' : '';
       return `
-        <a class="wine-card" href="vino.html?id=${v.id}">
+        <a class="wine-card${wishCls}" href="vino.html?id=${v.id}">
           <div class="wine-card-top">
             <div class="wine-name">${esc(v.nazev || 'Bez názvu')}</div>
             ${barvaCls ? `<div class="color-dot ${barvaCls}"></div>` : ''}
@@ -324,6 +384,7 @@
           ${v.zemePouvodu ? `<div class="wine-meta">${esc(v.zemePouvodu)}</div>` : ''}
           <div class="stars-row">${hvezdy}</div>
           ${lahveHtml}
+          ${tagyHtml}
           ${owner}
         </a>`;
     }
@@ -357,7 +418,7 @@
         document.getElementById('pitNyniList').innerHTML = pitNyni.map(v =>
           `<a class="pit-nyni-item" href="vino.html?id=${v.id}">
             <span>${esc(v.nazev || '—')}${v.rocnik ? ' (' + v.rocnik + ')' : ''}</span>
-            <span class="pit-nyni-info">🍾 ${v.pocetLahvi} lah. · ${v.pitOd}–${v.pitDo}</span>
+            <span class="pit-nyni-info">🍾 ${v.pocetLahvi} ${sklonujLahev(v.pocetLahvi)} · ${v.pitOd}–${v.pitDo}</span>
           </a>`
         ).join('');
       } else {
@@ -381,6 +442,23 @@
       document.getElementById('statZeme').textContent   = zkratit(topVal(seznam.map(v => v.zemePouvodu)) || '—', 12);
       document.getElementById('statOdruda').textContent = zkratit(topVal(seznam.map(v => v.odruda)) || '—', 12);
 
+      // ── Hodnota sklepa (#7) ──────────────────────────────────
+      const sCenou = seznam.filter(v => v.cena && (v.pocetLahvi || 0) > 0 && !v.wishlist);
+      const hodnota = sCenou.reduce((s, v) => s + (v.cena * (v.pocetLahvi || 0)), 0);
+      const pocetLahvi = seznam
+        .filter(v => !v.wishlist)
+        .reduce((s, v) => s + (v.pocetLahvi || 0), 0);
+      const valueCard = document.getElementById('valueCard');
+      if (hodnota > 0) {
+        valueCard.style.display = 'block';
+        document.getElementById('statHodnota').textContent =
+          new Intl.NumberFormat('cs-CZ').format(Math.round(hodnota)) + ' Kč';
+        document.getElementById('statHodnotaSub').textContent =
+          `${pocetLahvi} ${sklonujLahev(pocetLahvi)} ve sklepě${sCenou.length < seznam.filter(v=>!v.wishlist&&(v.pocetLahvi||0)>0).length ? ' (z částečných cen)' : ''}`;
+      } else {
+        valueCard.style.display = 'none';
+      }
+
       // Hodnocení
       const maxH = Math.max(...[1,2,3,4,5].map(r => seznam.filter(v => v.hodnoceni === r).length), 1);
       document.getElementById('chartHodnoceni').innerHTML = [5,4,3,2,1].map(r => {
@@ -391,21 +469,24 @@
           <div class="chart-bar-count">${c}</div></div>`;
       }).join('');
 
-      // Barvy
+      // Barvy (vč. šumivých)
       const bDef = [
         { k: 'červené',  cls: 'cervene', lbl: 'Červené' },
         { k: 'bílé',     cls: 'bile',    lbl: 'Bílé' },
         { k: 'rosé',     cls: 'rose',    lbl: 'Rosé' },
         { k: 'oranžové', cls: 'oranzove',lbl: 'Oranžové' },
+        { k: 'šumivé',   cls: 'sumive',  lbl: 'Šumivé' },
       ];
       const maxB = Math.max(...bDef.map(b => seznam.filter(v => v.barva === b.k).length), 1);
-      document.getElementById('chartBarvy').innerHTML = bDef.map(b => {
-        const c = seznam.filter(v => v.barva === b.k).length;
-        return `<div class="chart-bar-row">
-          <div class="chart-bar-label">${b.lbl}</div>
-          <div class="chart-bar-track"><div class="chart-bar-fill ${b.cls}" style="width:${Math.round(c/maxB*100)}%"></div></div>
-          <div class="chart-bar-count">${c}</div></div>`;
-      }).join('');
+      document.getElementById('chartBarvy').innerHTML = bDef
+        .filter(b => seznam.some(v => v.barva === b.k))
+        .map(b => {
+          const c = seznam.filter(v => v.barva === b.k).length;
+          return `<div class="chart-bar-row">
+            <div class="chart-bar-label">${b.lbl}</div>
+            <div class="chart-bar-track"><div class="chart-bar-fill ${b.cls}" style="width:${Math.round(c/maxB*100)}%"></div></div>
+            <div class="chart-bar-count">${c}</div></div>`;
+        }).join('') || '<div style="font-size:11px;color:var(--text-light)">Žádná data</div>';
 
       // Ročníky
       const rokySDaty = [...new Set(seznam.map(v => v.rocnik).filter(r => r && r >= nyni-15 && r <= nyni))]
@@ -432,6 +513,10 @@
               <div class="top-wine-stars">${'★'.repeat(v.hodnoceni)}</div>
             </a>`).join('')
         : '<div style="font-size:12px;color:var(--text-light)">Žádná hodnocení</div>';
+
+      // Mapa původu (#11) + Časová osa (#12)
+      renderMapu(seznam);
+      renderCasovouOsu(seznam);
     }
 
     function topVal(arr) {
@@ -443,12 +528,163 @@
       return s && s.length > max ? s.slice(0, max) + '…' : (s || '—');
     }
 
+    // ── Mapa původu (#11) ─────────────────────────────────────
+    // Souřadnice nejčastějších vinařských zemí (centroidy)
+    const ZEME_COORDS = {
+      'česká republika':  [49.74, 15.34], 'česko':           [49.74, 15.34],
+      'morava':           [49.20, 16.62], 'czechia':         [49.74, 15.34],
+      'slovensko':        [48.66, 19.69], 'slovakia':        [48.66, 19.69],
+      'rakousko':         [47.50, 14.55], 'austria':         [47.50, 14.55],
+      'německo':          [51.16, 10.45], 'germany':         [51.16, 10.45],
+      'francie':          [46.23,  2.21], 'france':          [46.23,  2.21],
+      'itálie':           [41.87, 12.57], 'italy':           [41.87, 12.57],
+      'španělsko':        [40.46, -3.75], 'spain':           [40.46, -3.75],
+      'portugalsko':      [39.40, -8.22], 'portugal':        [39.40, -8.22],
+      'maďarsko':         [47.16, 19.50], 'hungary':         [47.16, 19.50],
+      'řecko':            [39.07, 21.82], 'greece':          [39.07, 21.82],
+      'gruzie':           [42.32, 43.36], 'georgia':         [42.32, 43.36],
+      'argentina':        [-38.42, -63.62], 'chile':         [-35.68, -71.54],
+      'jižní afrika':     [-30.56, 22.94], 'south africa':   [-30.56, 22.94],
+      'austrálie':        [-25.27, 133.78], 'australia':     [-25.27, 133.78],
+      'kalifornie':       [36.78, -119.42], 'usa':           [38.00, -97.00],
+      'nový zéland':      [-40.90, 174.89], 'new zealand':   [-40.90, 174.89],
+      'rumunsko':         [45.94, 24.97], 'bulharsko':       [42.73, 25.49],
+      'chorvatsko':       [45.10, 15.20], 'slovinsko':       [46.15, 14.99],
+      'moldavsko':        [47.41, 28.37], 'srbsko':          [44.02, 21.01],
+    };
+
+    function renderMapu(seznam) {
+      const sec = document.getElementById('mapSection');
+      const skupiny = {};
+      seznam.forEach(v => {
+        const k = (v.zemePouvodu || '').trim().toLowerCase();
+        const c = ZEME_COORDS[k];
+        if (!c) return;
+        if (!skupiny[k]) skupiny[k] = { c, vina: [], nazev: v.zemePouvodu };
+        skupiny[k].vina.push(v);
+      });
+      const klice = Object.keys(skupiny);
+      if (!klice.length || typeof L === 'undefined') {
+        sec.style.display = 'none';
+        return;
+      }
+      sec.style.display = 'block';
+
+      // Inicializace mapy poprvé
+      if (!mapaInstance) {
+        mapaInstance = L.map('originsMap', {
+          zoomControl: true,
+          scrollWheelZoom: false,
+          dragging: !L.Browser.mobile,
+        }).setView([49.74, 15.34], 4);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap',
+          maxZoom: 18,
+        }).addTo(mapaInstance);
+      }
+
+      // Vyčisti staré markery
+      mapaMarkery.forEach(m => mapaInstance.removeLayer(m));
+      mapaMarkery = [];
+
+      // Markery + bounds
+      const bounds = [];
+      klice.forEach(k => {
+        const g = skupiny[k];
+        const m = L.circleMarker(g.c, {
+          radius: 6 + Math.min(g.vina.length, 8),
+          color: '#722F37',
+          fillColor: '#722F37',
+          fillOpacity: 0.55,
+          weight: 2,
+        });
+        const list = g.vina.slice(0, 4).map(v =>
+          `• <a href="vino.html?id=${v.id}" style="color:#722F37">${esc(v.nazev || 'Bez názvu')}</a>`
+        ).join('<br>');
+        const dalsi = g.vina.length > 4 ? `<br><em>+${g.vina.length - 4} dalších</em>` : '';
+        m.bindPopup(`<strong>${esc(g.nazev)}</strong>${list}${dalsi}`);
+        m.addTo(mapaInstance);
+        mapaMarkery.push(m);
+        bounds.push(g.c);
+      });
+
+      if (bounds.length > 1) mapaInstance.fitBounds(bounds, { padding: [20, 20], maxZoom: 6 });
+      else mapaInstance.setView(bounds[0], 5);
+
+      // Trick — Leaflet potřebuje invalidate po display:block
+      setTimeout(() => mapaInstance.invalidateSize(), 80);
+    }
+
+    // ── Časová osa otevírání (#12) ─────────────────────────────
+    async function renderCasovouOsu(seznam) {
+      const sec  = document.getElementById('timelineSection');
+      const list = document.getElementById('timelineList');
+
+      // Použij jen vína z aktuálního seznamu (filtru) jako kontext
+      const vinaMap = Object.fromEntries(seznam.map(v => [v.id, v]));
+
+      try {
+        // Posledních ~50 záznamů degustace (dle uživatele/tabu omezíme klientsky)
+        const snap = await db.collection('degustace')
+          .orderBy('casovaZnamka', 'desc')
+          .limit(60)
+          .get();
+        let zaznamy = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        // Filtr dle aktuálního tabu (jen "moje" omezíme na svého uživatele)
+        if (aktualniTab !== 'vsechna') {
+          zaznamy = zaznamy.filter(z => z.userId === aktualniUser.uid);
+        }
+        // Jen ty, jejichž víno je v aktuálním filtrovaném seznamu
+        zaznamy = zaznamy.filter(z => vinaMap[z.vinoId]);
+
+        if (!zaznamy.length) { sec.style.display = 'none'; return; }
+        sec.style.display = 'block';
+
+        // Group by měsíc
+        const skupiny = {};
+        zaznamy.slice(0, 30).forEach(z => {
+          const dt = z.datum
+            ? new Date(z.datum)
+            : (z.casovaZnamka ? new Date(z.casovaZnamka.seconds * 1000) : null);
+          if (!dt) return;
+          const klic = dt.toLocaleDateString('cs-CZ', { month: 'long', year: 'numeric' });
+          if (!skupiny[klic]) skupiny[klic] = [];
+          skupiny[klic].push({ z, dt });
+        });
+
+        list.innerHTML = Object.entries(skupiny).map(([mes, polozky]) =>
+          `<div class="timeline-row">
+             <div class="timeline-month">${esc(mes.charAt(0).toUpperCase() + mes.slice(1))}</div>
+             ${polozky.map(({z, dt}) => {
+               const vino = vinaMap[z.vinoId];
+               const den  = dt.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' });
+               const stars = z.hodnoceni ? '★'.repeat(z.hodnoceni) : '';
+               return `<a class="timeline-item" href="vino.html?id=${z.vinoId}">
+                 <span class="date-mini">${den}</span>${esc(vino.nazev || '—')}
+                 ${stars ? `<span class="stars-mini"> ${stars}</span>` : ''}
+               </a>`;
+             }).join('')}
+           </div>`
+        ).join('');
+      } catch (e) {
+        console.warn('Timeline failed:', e);
+        sec.style.display = 'none';
+      }
+    }
+
     // ── Helpers ───────────────────────────────────────────────
     function prepnoutTab(tab) {
       aktualniTab = tab;
-      document.getElementById('tabMoje').classList.toggle('active',    tab === 'moje');
-      document.getElementById('tabVsechna').classList.toggle('active', tab === 'vsechna');
+      document.getElementById('tabMoje').classList.toggle('active',     tab === 'moje');
+      document.getElementById('tabWishlist').classList.toggle('active', tab === 'wishlist');
+      document.getElementById('tabVsechna').classList.toggle('active',  tab === 'vsechna');
       zobrazitVina();
+    }
+
+    function pridatVino() {
+      window.location.href = aktualniTab === 'wishlist'
+        ? 'vino.html?wishlist=1' : 'vino.html';
     }
 
     function prepnoutFiltry() {
@@ -458,17 +694,20 @@
     }
 
     function resetFiltry() {
-      ['fBarva','fHodnoceni','fRocnik','fZeme','fPrivlastek'].forEach(id => {
+      ['fBarva','fHodnoceni','fRocnik','fZeme','fPrivlastek','fTag'].forEach(id => {
         document.getElementById(id).value = '';
         document.getElementById(id).classList.remove('active');
       });
       zobrazitVina();
     }
 
-    function odhlasit() { auth.signOut().then(() => window.location.href = 'index.html'); }
+    function odhlasit() {
+      if (unsubVina) { unsubVina(); unsubVina = null; }
+      auth.signOut().then(() => window.location.href = 'index.html');
+    }
     function hledatV(hodnota, h) { return (hodnota || '').toLowerCase().includes(h); }
     function barvaTridaNazev(barva) {
-      return { 'červené':'cervene','bílé':'bile','rosé':'rose','oranžové':'oranzove' }[barva] || '';
+      return { 'červené':'cervene','bílé':'bile','rosé':'rose','oranžové':'oranzove','šumivé':'sumive' }[barva] || '';
     }
     function esc(s) {
       const d = document.createElement('div'); d.textContent = s; return d.innerHTML;

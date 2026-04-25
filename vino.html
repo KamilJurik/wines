@@ -35,6 +35,15 @@
 
     <div id="appMsg" class="msg error"></div>
 
+    <!-- Wishlist toggle (jen u editace nebo při zakládání) -->
+    <div class="wishlist-toggle-row" id="wishlistRow">
+      <label>
+        <input type="checkbox" id="f_wishlist" onchange="prepnoutWishlist()">
+        🌟 Toto je víno na seznamu přání (nemám ho na skladě)
+      </label>
+      <span class="hint">Wishlist vína se zobrazují odděleně v přehledu.</span>
+    </div>
+
     <!-- ── Online vyhledávání (celá šířka, jen pro nové víno) ── -->
     <div class="online-panel" id="onlinePanel" style="display:none">
       <h3>🔍 Předvyplnit z internetu</h3>
@@ -43,6 +52,7 @@
         <button class="mini-tab active" id="mtSearch" onclick="prepnoutVyhledavaniTab('search')">Hledat dle názvu</button>
         <button class="mini-tab"        id="mtUrl"    onclick="prepnoutVyhledavaniTab('url')">Načíst z URL</button>
         <button class="mini-tab"        id="mtOcr"    onclick="prepnoutVyhledavaniTab('ocr')">Foto / sken</button>
+        <button class="mini-tab"        id="mtEan"    onclick="prepnoutVyhledavaniTab('ean')">Čárový kód</button>
       </div>
 
       <!-- Hledání názvu -->
@@ -71,6 +81,18 @@
 
       <!-- OCR z fotky -->
       <div id="tabOcr" style="display:none">
+        <div class="ocr-provider-row" id="ocrProviderRow">
+          <label>
+            <input type="radio" name="ocrProvider" value="claude" id="ocrProviderClaude">
+            🤖 Claude Vision
+            <span class="ocr-provider-hint">— přesnější, vyžaduje API klíč v profilu</span>
+          </label>
+          <label>
+            <input type="radio" name="ocrProvider" value="tesseract" id="ocrProviderTesseract" checked>
+            📖 Tesseract
+            <span class="ocr-provider-hint">— offline, slabší na lesklých etiketách</span>
+          </label>
+        </div>
         <div class="ocr-zone" id="ocrZone"
              ondragover="event.preventDefault();this.classList.add('drag')"
              ondragleave="this.classList.remove('drag')"
@@ -86,6 +108,27 @@
           <img id="ocrImg" src="" alt="náhled">
         </div>
         <div id="ocrResults"></div>
+      </div>
+
+      <!-- EAN scanner -->
+      <div id="tabEan" style="display:none">
+        <div class="online-row">
+          <input type="text" class="search-input" id="eanInput" inputmode="numeric"
+                 placeholder="EAN/UPC (např. 8594054991234)…"
+                 onkeydown="if(event.key==='Enter') hledatPodleEan()">
+          <button class="btn btn-primary btn-sm" id="eanSubmitBtn" onclick="hledatPodleEan()">Hledat</button>
+          <button class="btn btn-secondary btn-sm" id="eanScanBtn" onclick="spustitEanScanner()">📷 Skenovat</button>
+        </div>
+        <div class="form-hint" style="margin-top:6px">Zadejte čárový kód ručně nebo jej naskenujte kamerou. Lookup probíhá v Open Food Facts a mojelahve.cz.</div>
+        <div class="ean-zone" id="eanZone" style="display:none;margin-top:10px">
+          <video id="eanVideo" autoplay muted playsinline></video>
+          <div class="ean-overlay"></div>
+          <div class="ean-status" id="eanStatus">Namiřte kameru na čárový kód…</div>
+          <div style="text-align:center;margin-top:8px">
+            <button class="btn btn-secondary btn-sm" onclick="zastavitEanScanner()">Zrušit</button>
+          </div>
+        </div>
+        <div id="eanResults"></div>
       </div>
     </div>
 
@@ -130,6 +173,7 @@
                   <option value="bílé">Bílé</option>
                   <option value="rosé">Rosé</option>
                   <option value="oranžové">Oranžové</option>
+                  <option value="šumivé">Šumivé</option>
                 </select>
               </div>
             </div>
@@ -161,6 +205,15 @@
                   <option value="Oranžové">
                 </datalist>
               </div>
+            </div>
+            <div class="form-group">
+              <label for="f_tagy_input">Tagy / štítky</label>
+              <div class="tag-input-wrap" id="tagWrap" onclick="document.getElementById('f_tagy_input').focus()">
+                <input type="text" id="f_tagy_input"
+                       placeholder="Např. svatba 2024, dárek od Pavla… (Enter pro přidání)"
+                       onkeydown="tagyKeydown(event)" onblur="tagyPridatZInputu()">
+              </div>
+              <div class="form-hint">Vlastní volné štítky pro vyhledávání (např. „svatba", „letní pití", „darek").</div>
             </div>
           </div>
         </div><!-- /Základní informace -->
@@ -275,8 +328,12 @@
               <div class="cellar-count-row">
                 <input type="number" id="f_pocetLahvi" min="0" max="999" placeholder="0">
                 <button type="button" id="otevritBtn" class="btn-otevrit"
-                        onclick="otevritLahev()" style="display:none">
+                        onclick="otevritLahevModal()" style="display:none">
                   🍾 Otevřít láhev
+                </button>
+                <button type="button" id="historieBtn" class="btn-otevrit"
+                        onclick="zobrazitHistorii()" style="display:none">
+                  📜 Historie
                 </button>
               </div>
             </div>
@@ -342,6 +399,64 @@
     <div id="readonlyMsg" class="msg info" style="margin-top:16px">
       Toto víno přidal(a) jiný uživatel — nelze upravovat.
     </div>
+
+    <!-- Podobná vína (jen v editaci/detailu, ne při zakládání) -->
+    <div class="fcard" id="similarCard" style="display:none;margin-top:18px">
+      <div class="fcard-header">
+        <span class="fcard-icon">🔗</span> Podobná vína
+      </div>
+      <div class="fcard-body" id="similarList">
+        <div style="font-size:13px;color:var(--text-light)">Hledám podobná…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Otevřít láhev s rychlým hodnocením -->
+  <div class="modal-overlay" id="otevritModal" style="display:none" onclick="if(event.target===this)zavritModal('otevritModal')">
+    <div class="modal-box">
+      <div class="modal-title">🍾 Otevřít láhev</div>
+      <div class="modal-sub" id="otevritSub">—</div>
+
+      <div class="form-group">
+        <label>Hodnocení této láhve (volitelné)</label>
+        <div class="star-input-row" id="otModalStars">
+          <button class="star-btn" data-val="1" onclick="otModalRating(1)">★</button>
+          <button class="star-btn" data-val="2" onclick="otModalRating(2)">★</button>
+          <button class="star-btn" data-val="3" onclick="otModalRating(3)">★</button>
+          <button class="star-btn" data-val="4" onclick="otModalRating(4)">★</button>
+          <button class="star-btn" data-val="5" onclick="otModalRating(5)">★</button>
+          <span class="star-label" id="otModalStarsLabel">— bez hodnocení</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="otModalKomentar">Komentář k degustaci (volitelné)</label>
+        <textarea id="otModalKomentar" placeholder="První dojem, párování, chuť…" style="min-height:70px"></textarea>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="otModalAktualizovatHlavni" checked>
+          Přepsat tímto i hlavní hodnocení/komentář vína
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="zavritModal('otevritModal')">Zrušit</button>
+        <button class="btn btn-primary" id="otModalConfirmBtn" onclick="potvrditOtevreni()">Otevřít láhev</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Historie degustací -->
+  <div class="modal-overlay" id="historieModal" style="display:none" onclick="if(event.target===this)zavritModal('historieModal')">
+    <div class="modal-box">
+      <div class="modal-title">📜 Historie degustací</div>
+      <div class="modal-sub">Záznamy o otevření jednotlivých lahví tohoto vína.</div>
+      <div class="history-list" id="historieList">
+        <div class="history-empty">Načítám…</div>
+      </div>
+      <div class="modal-actions" style="margin-top:14px">
+        <button class="btn btn-secondary" onclick="zavritModal('historieModal')">Zavřít</button>
+      </div>
+    </div>
   </div>
 
   <footer class="app-footer">
@@ -351,15 +466,21 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
   <script src="js/config.js"></script>
   <script>
     document.getElementById('footerVersion').textContent = 'v' + APP_VERSION;
 
     let aktualniUser = null;
     let vinoId       = null;
-    let fotoBase64   = null;   // base64 komprimovaná fotka
+    let fotoBase64   = null;   // base64 nově nahrané (nezpracované)
+    let fotoUrl      = null;   // existující URL ze Storage
+    let fotoSmazana  = false;  // uživatel kliknul Odebrat
     let hodnoceni    = 0;
     let jeVlastnik   = false;
+    let aktualniVino = null;   // celý objekt v editaci
+    let tagy         = [];     // pole stringů
+    let otModalRatingValue = 0;
 
     const POPISKY_HVEZD = ['— bez hodnocení', '★ Slabé', '★★ Průměrné', '★★★ Dobré', '★★★★ Velmi dobré', '★★★★★ Vynikající'];
 
@@ -409,6 +530,14 @@
       } else {
         // Nové víno — zobraz panel pro předvyplnění + nápovědu pro přidání
         document.getElementById('onlinePanel').style.display = 'block';
+        document.getElementById('similarCard').style.display = 'none';
+        document.getElementById('historieBtn').style.display = 'none';
+        // Wishlist — pokud URL obsahuje ?wishlist=1, předvybrat
+        if (new URLSearchParams(location.search).get('wishlist') === '1') {
+          pole('f_wishlist').checked = true;
+          prepnoutWishlist();
+        }
+        vykreslitTagy();
         nastavitNapovedu('nova');
       }
     });
@@ -421,7 +550,8 @@
           zobrazMsg('Víno nenalezeno.', 'error');
           return;
         }
-        const v = doc.data();
+        const v = { id: doc.id, ...doc.data() };
+        aktualniVino = v;
         naplnitFormular(v);
 
         jeVlastnik = v.userId === aktualniUser.uid;
@@ -431,21 +561,72 @@
           document.getElementById('deleteBtn').style.display = 'inline-flex';
           document.getElementById('onlinePanel').style.display = 'none';
           nastavitNapovedu('editace', v);
-          // Zobraz tlačítko Otevřít láhev pokud je víno na skladě
           if ((v.pocetLahvi || 0) > 0) {
             document.getElementById('otevritBtn').style.display = 'inline-flex';
           }
+          document.getElementById('historieBtn').style.display = 'inline-flex';
         } else {
           // Readonly
           document.getElementById('pageTitle').textContent = v.nazev || 'Víno';
           document.getElementById('onlinePanel').style.display = 'none';
           document.getElementById('formActions').style.display = 'none';
+          document.getElementById('wishlistRow').style.display = 'none';
           document.getElementById('readonlyMsg').style.display = 'block';
           setReadonly(true);
         }
+
+        // Podobná vína (vždy v editaci/detailu)
+        nacistPodobnaVina(v);
       } catch (err) {
         console.error(err);
         zobrazMsg('Nepodařilo se načíst víno.', 'error');
+      }
+    }
+
+    // ── Podobná vína (#14) ─────────────────────────────────────
+    async function nacistPodobnaVina(v) {
+      try {
+        const card = document.getElementById('similarCard');
+        const list = document.getElementById('similarList');
+        card.style.display = 'block';
+
+        const snap = await db.collection('vina').limit(300).get();
+        const vse  = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(x => x.id !== v.id);
+
+        const score = (x) => {
+          let s = 0;
+          if (x.odruda      && v.odruda      && x.odruda.toLowerCase()      === v.odruda.toLowerCase())      s += 4;
+          if (x.zemePouvodu && v.zemePouvodu && x.zemePouvodu.toLowerCase() === v.zemePouvodu.toLowerCase()) s += 2;
+          if (x.barva       && v.barva       && x.barva                     === v.barva)                     s += 2;
+          if (x.privlastek  && v.privlastek  && x.privlastek                === v.privlastek)                s += 1;
+          if (x.vinarstvi   && v.vinarstvi   && x.vinarstvi.toLowerCase()   === v.vinarstvi.toLowerCase())   s += 3;
+          // Bonus za hodnocení
+          if (x.hodnoceni) s += x.hodnoceni * 0.1;
+          return s;
+        };
+
+        const top = vse.map(x => ({ x, s: score(x) }))
+          .filter(o => o.s >= 2)
+          .sort((a, b) => b.s - a.s)
+          .slice(0, 6)
+          .map(o => o.x);
+
+        if (!top.length) {
+          list.innerHTML = '<div style="font-size:13px;color:var(--text-light)">Zatím nemáte podobná vína v archivu.</div>';
+          return;
+        }
+        list.innerHTML = `<div class="similar-wines">${top.map(x => {
+          const stars = x.hodnoceni ? '★'.repeat(x.hodnoceni) : '';
+          const meta  = [x.rocnik, x.odruda].filter(Boolean).join(' · ');
+          return `<a class="similar-wine-card" href="vino.html?id=${x.id}">
+            <div class="similar-wine-name">${esc(x.nazev || 'Bez názvu')}</div>
+            ${meta ? `<div class="similar-wine-meta">${esc(meta)}</div>` : ''}
+            ${stars ? `<div class="similar-wine-stars">${stars}</div>` : ''}
+          </a>`;
+        }).join('')}</div>`;
+      } catch (e) {
+        console.warn('Podobná vína selhala:', e);
+        document.getElementById('similarCard').style.display = 'none';
       }
     }
 
@@ -460,7 +641,7 @@
       pole('f_zeme').value       = v.zemePouvodu  || '';
       pole('f_oblast').value     = v.vinarskaOblast    || '';
       pole('f_podoblast').value  = v.vinarskaPodoblast || '';
-      pole('f_trat').value       = v.vinacniTrat  || '';
+      pole('f_trat').value       = ctiVinicniTrat(v);
       pole('f_alkohol').value    = v.alkohol != null ? v.alkohol : '';
       pole('f_cukr').value       = v.zbytkCukr   != null ? v.zbytkCukr   : '';
       pole('f_kyseliny').value   = v.kyseliny    != null ? v.kyseliny    : '';
@@ -473,10 +654,18 @@
       setDatum(v.datumDegustace);
       pole('f_komentar').value   = v.komentar    || '';
       if (v.hodnoceni) nastavHodnoceni(v.hodnoceni);
-      // Fotka
-      if (v.foto) {
-        fotoBase64 = v.foto;
-        document.getElementById('fotoPreview').src = v.foto;
+      // Tagy
+      tagy = Array.isArray(v.tagy) ? v.tagy.slice() : [];
+      vykreslitTagy();
+      // Wishlist
+      pole('f_wishlist').checked = !!v.wishlist;
+      prepnoutWishlist();
+      // Fotka — preferuj fotoUrl (Storage), fallback na foto (base64)
+      const src = v.fotoUrl || v.foto;
+      if (src) {
+        fotoUrl = v.fotoUrl || null;
+        fotoBase64 = v.fotoUrl ? null : (v.foto || null);
+        document.getElementById('fotoPreview').src = src;
         document.getElementById('fotoPreviewWrap').style.display = 'flex';
         document.getElementById('fotoEmpty').style.display = 'none';
       }
@@ -553,6 +742,8 @@
       const nazev = pole('f_nazev').value.trim();
       if (!nazev) { zobrazMsg('Vyplňte prosím název vína.', 'error'); return; }
 
+      tagyPridatZInputu();  // zachytíme rozepsaný tag
+
       const btn = document.getElementById('saveBtn');
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span> Ukládám…';
@@ -568,7 +759,8 @@
         zemePouvodu:         pole('f_zeme').value.trim(),
         vinarskaOblast:      pole('f_oblast').value.trim(),
         vinarskaPodoblast:   pole('f_podoblast').value.trim(),
-        vinacniTrat:         pole('f_trat').value.trim(),
+        vinicniTrat:         pole('f_trat').value.trim(),
+        vinacniTrat:         firebase.firestore.FieldValue.delete(), // legacy cleanup
         alkohol:             desetCislo(pole('f_alkohol').value),
         zbytkCukr:           desetCislo(pole('f_cukr').value),
         kyseliny:            desetCislo(pole('f_kyseliny').value),
@@ -581,10 +773,33 @@
         hodnoceni:           hodnoceni || null,
         datumDegustace:      getDatum(),
         komentar:            pole('f_komentar').value.trim(),
-        foto:                fotoBase64 || null,
+        tagy:                tagy.slice(),
+        wishlist:            !!pole('f_wishlist').checked,
       };
 
       try {
+        // Foto handling — upload do Storage při změně, jinak ponechat URL
+        if (fotoSmazana) {
+          // Smaž ze Storage pokud existoval URL
+          if (aktualniVino?.fotoUrl) { try { await smazatFotoZeStorage(aktualniVino.fotoUrl); } catch(e){} }
+          data.fotoUrl = null;
+          data.foto    = firebase.firestore.FieldValue.delete();
+        } else if (fotoBase64) {
+          // Nově nahraná fotka — upload do Storage
+          const cilovyId = vinoId || 'tmp_' + Date.now();
+          const url = await nahratFotoDoStorage(fotoBase64, cilovyId);
+          data.fotoUrl = url;
+          data.foto    = firebase.firestore.FieldValue.delete();
+        } else if (fotoUrl) {
+          // Beze změny — neaktualizujeme
+        }
+
+        // Pro novou (ulož bez delete)
+        if (!vinoId) {
+          delete data.vinacniTrat;
+          if (data.foto && typeof data.foto === 'object') delete data.foto;
+        }
+
         if (vinoId) {
           await db.collection('vina').doc(vinoId).update(data);
         } else {
@@ -600,6 +815,79 @@
         btn.disabled = false;
         btn.textContent = vinoId ? 'Uložit změny' : 'Uložit víno';
       }
+    }
+
+    // ── Tagy / štítky (#20) ──────────────────────────────────
+    function vykreslitTagy() {
+      const wrap = document.getElementById('tagWrap');
+      const inp  = document.getElementById('f_tagy_input');
+      // odstraň existující chips
+      wrap.querySelectorAll('.tag-chip').forEach(el => el.remove());
+      const frag = document.createDocumentFragment();
+      tagy.forEach((t, i) => {
+        const span = document.createElement('span');
+        span.className = 'tag-chip';
+        span.innerHTML = `${esc(t)}<button type="button" class="tag-chip-x" onclick="odebratTag(${i})" aria-label="Odebrat">×</button>`;
+        frag.appendChild(span);
+      });
+      wrap.insertBefore(frag, inp);
+    }
+
+    function tagyKeydown(e) {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        tagyPridatZInputu();
+      } else if (e.key === 'Backspace' && !e.target.value && tagy.length) {
+        tagy.pop();
+        vykreslitTagy();
+      }
+    }
+
+    function tagyPridatZInputu() {
+      const inp = document.getElementById('f_tagy_input');
+      const raw = inp.value.trim().replace(/,$/, '').trim();
+      if (!raw) return;
+      raw.split(',').map(s => s.trim()).filter(Boolean).forEach(t => {
+        if (!tagy.includes(t) && tagy.length < 20) tagy.push(t);
+      });
+      inp.value = '';
+      vykreslitTagy();
+    }
+
+    function odebratTag(i) {
+      tagy.splice(i, 1);
+      vykreslitTagy();
+    }
+
+    // ── Wishlist toggle (#19) ─────────────────────────────────
+    function prepnoutWishlist() {
+      const je = pole('f_wishlist').checked;
+      // Když je víno na wishlistu, počet lahví je vždy 0
+      const lahvi = pole('f_pocetLahvi');
+      if (je) {
+        lahvi.value = 0;
+        lahvi.disabled = true;
+      } else {
+        lahvi.disabled = false;
+      }
+    }
+
+    // ── Foto Storage (#bug 4) ─────────────────────────────────
+    async function nahratFotoDoStorage(dataUrl, vinoIdent) {
+      if (!storage) throw new Error('Storage není dostupný');
+      const blob = await (await fetch(dataUrl)).blob();
+      const path = `vina/${aktualniUser.uid}/${vinoIdent}_${Date.now()}.jpg`;
+      const ref  = storage.ref().child(path);
+      await ref.put(blob, { contentType: 'image/jpeg' });
+      return await ref.getDownloadURL();
+    }
+
+    async function smazatFotoZeStorage(url) {
+      if (!storage || !url) return;
+      try {
+        const ref = storage.refFromURL(url);
+        await ref.delete();
+      } catch (e) { /* mohla být base64 nebo již smazaná */ }
     }
 
     // ── Smazání ───────────────────────────────────────────────
@@ -625,12 +913,14 @@
 
     // ── Přepínání tabů vyhledávání ────────────────────────────
     function prepnoutVyhledavaniTab(tab) {
-      document.getElementById('tabSearch').style.display = tab === 'search' ? 'block' : 'none';
-      document.getElementById('tabUrl').style.display    = tab === 'url'    ? 'block' : 'none';
-      document.getElementById('tabOcr').style.display    = tab === 'ocr'    ? 'block' : 'none';
-      document.getElementById('mtSearch').classList.toggle('active', tab === 'search');
-      document.getElementById('mtUrl').classList.toggle('active',    tab === 'url');
-      document.getElementById('mtOcr').classList.toggle('active',    tab === 'ocr');
+      ['search','url','ocr','ean'].forEach(t => {
+        const id = 'tab' + t.charAt(0).toUpperCase() + t.slice(1);
+        const mt = 'mt'  + t.charAt(0).toUpperCase() + t.slice(1);
+        document.getElementById(id).style.display = (t === tab) ? 'block' : 'none';
+        document.getElementById(mt).classList.toggle('active', t === tab);
+      });
+      // Pokud opouštíme EAN, zastav skener
+      if (tab !== 'ean') zastavitEanScanner();
     }
 
     // ── OCR z fotky (Tesseract.js) ────────────────────────────
@@ -653,10 +943,18 @@
       };
       reader.readAsDataURL(file);
 
-      res.innerHTML = '<p style="font-size:13px;color:#7A6560;margin-top:10px"><span class="spinner" style="border-color:rgba(114,47,55,.3);border-top-color:var(--wine)"></span> Rozpoznávám text…</p>';
+      const provider = document.querySelector('input[name=ocrProvider]:checked')?.value || 'tesseract';
 
+      if (provider === 'claude') {
+        await ocrPresClaudeVision(file, res);
+      } else {
+        await ocrPresTesseract(file, res);
+      }
+    }
+
+    async function ocrPresTesseract(file, res) {
+      res.innerHTML = '<p style="font-size:13px;color:#7A6560;margin-top:10px"><span class="spinner" style="border-color:rgba(114,47,55,.3);border-top-color:var(--wine)"></span> Rozpoznávám text (Tesseract)…</p>';
       try {
-        // Načíst Tesseract.js dynamicky
         if (!window.Tesseract) {
           await new Promise((resolve, reject) => {
             const s = document.createElement('script');
@@ -665,7 +963,6 @@
             document.head.appendChild(s);
           });
         }
-
         const { data: { text } } = await Tesseract.recognize(file, 'ces+eng', {
           logger: m => {
             if (m.status === 'recognizing text') {
@@ -674,21 +971,116 @@
             }
           }
         });
-
         const data = extrahovatZTextu(text);
         aplikovatExtrahovanaData(data, res);
-
-        // Zobraz rozpoznaný text pro kontrolu
         if (text.trim().length > 10) {
           res.innerHTML += `<details style="margin-top:8px;font-size:12px;color:var(--text-light)">
             <summary style="cursor:pointer">Rozpoznaný text (pro kontrolu)</summary>
             <pre style="white-space:pre-wrap;margin-top:6px;font-size:11px;background:#f8f0e3;padding:8px;border-radius:6px;max-height:120px;overflow-y:auto">${esc(text.trim())}</pre>
           </details>`;
         }
-
       } catch (err) {
         console.error(err);
         res.innerHTML = '<p style="font-size:13px;color:#991B1B;margin-top:10px">Rozpoznání textu selhalo. Zkuste jinou fotku nebo zadejte data ručně.</p>';
+      }
+    }
+
+    // ── Claude Vision (#15) ───────────────────────────────────
+    async function ocrPresClaudeVision(file, res) {
+      const apiKey = localStorage.getItem('vinora_claude_api_key');
+      if (!apiKey) {
+        res.innerHTML = `<p style="font-size:13px;color:#991B1B;margin-top:10px">
+          Pro Claude Vision potřebujete API klíč. Nastavte ho v
+          <a href="profil.html" style="color:var(--wine);text-decoration:underline">profilu</a>,
+          nebo pokračujte s Tesseractem.
+        </p>`;
+        return;
+      }
+
+      res.innerHTML = '<p style="font-size:13px;color:#7A6560;margin-top:10px"><span class="spinner" style="border-color:rgba(114,47,55,.3);border-top-color:var(--wine)"></span> Analyzuji etiketu (Claude Vision)…</p>';
+
+      try {
+        const compressed = await komprimovatObrazek(file, 1600, 0.85);
+        const base64 = compressed.replace(/^data:image\/[^;]+;base64,/, '');
+        const mediaType = (compressed.match(/^data:(image\/[^;]+)/) || [,'image/jpeg'])[1];
+
+        const prompt = `Toto je fotka etikety vína. Extrahuj všechny dostupné informace a vrať JSON v přesně tomto formátu (bez komentářů, jen čistý JSON):
+{
+  "nazev": "název vína (např. Ryzlink rýnský Nechory)",
+  "vinarstvi": "název vinařství",
+  "odruda": "odrůda hroznů",
+  "rocnik": 2022,
+  "barva": "červené | bílé | rosé | oranžové | šumivé",
+  "privlastek": "Kabinet | Pozdní sběr | Výběr z hroznů | Výběr z bobulí | Výběr z cibéb | Ledové víno | Slámové víno | Zemské víno | nebo prázdný řetězec",
+  "typVina": "Suché | Polosuché | Polosladké | Sladké | nebo prázdný řetězec",
+  "zemePouvodu": "země původu (např. Česká republika)",
+  "vinarskaOblast": "vinařská oblast (např. Morava)",
+  "vinarskaPodoblast": "podoblast (např. Slovácká)",
+  "vinicniTrat": "viniční trať",
+  "alkohol": 12.5,
+  "zbytkCukr": 4.2,
+  "kyseliny": 6.8,
+  "objem": 0.75,
+  "cisloSarze": "číslo šarže"
+}
+Pokud něco není na etiketě vidět, vynechej to (ne null, prostě nezahrň pole). Čísla vrať jako čísla, ne stringy.`;
+
+        const r = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true',
+          },
+          body: JSON.stringify({
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 1024,
+            messages: [{
+              role: 'user',
+              content: [
+                { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+                { type: 'text', text: prompt },
+              ],
+            }],
+          }),
+        });
+
+        if (!r.ok) {
+          const err = await r.text();
+          throw new Error(`HTTP ${r.status}: ${err.slice(0, 200)}`);
+        }
+
+        const json = await r.json();
+        const text = (json.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+        // Extrahuj JSON (model může obklopit markdownem)
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error('Model nevrátil JSON');
+        const data = JSON.parse(jsonMatch[0]);
+
+        // Mapuj klíče (Claude vrací stejné názvy, jen "zeme" → "zemePouvodu" už je sjednocené)
+        const mapped = {
+          nazev: data.nazev,
+          vinarstvi: data.vinarstvi,
+          odruda: data.odruda,
+          rocnik: data.rocnik,
+          barva: data.barva,
+          privlastek: data.privlastek,
+          typVina: data.typVina,
+          zeme: data.zemePouvodu,
+          vinarskaOblast: data.vinarskaOblast,
+          vinarskaPodoblast: data.vinarskaPodoblast,
+          vinicniTrat: data.vinicniTrat,
+          alkohol: data.alkohol,
+          zbytkCukr: data.zbytkCukr,
+          kyseliny: data.kyseliny,
+          objem: data.objem,
+          cisloSarze: data.cisloSarze,
+        };
+        aplikovatExtrahovanaData(mapped, res);
+      } catch (err) {
+        console.error(err);
+        res.innerHTML = `<p style="font-size:13px;color:#991B1B;margin-top:10px">Claude Vision selhalo: ${esc(err.message)}<br>Zkuste Tesseract nebo zadejte data ručně.</p>`;
       }
     }
 
@@ -1284,24 +1676,232 @@
       return '';
     }
 
-    // ── Otevřít láhev ─────────────────────────────────────────
-    async function otevritLahev() {
+    // ── Otevřít láhev — modal s rychlým hodnocením (#21) ──────
+    function otevritLahevModal() {
       const stavaju = parseInt(pole('f_pocetLahvi').value) || 0;
       if (stavaju <= 0) return;
       const novy = stavaju - 1;
-      const skl = novy === 1 ? 'láhev' : novy < 5 ? 'láhve' : 'lahví';
-      if (!confirm(`Otevřít láhev? Zbyde ${novy} ${skl} na skladě.`)) return;
-      const btn = document.getElementById('otevritBtn');
+      const skl = sklonujLahev(novy);
+      document.getElementById('otevritSub').textContent =
+        `Po otevření zbyde ${novy} ${skl} na skladě.`;
+      // Reset modal stavů
+      otModalRatingValue = 0;
+      document.querySelectorAll('#otModalStars .star-btn').forEach(b => b.classList.remove('on'));
+      document.getElementById('otModalStarsLabel').textContent = '— bez hodnocení';
+      document.getElementById('otModalKomentar').value = '';
+      document.getElementById('otModalAktualizovatHlavni').checked = true;
+      document.getElementById('otevritModal').style.display = 'flex';
+    }
+
+    function otModalRating(val) {
+      otModalRatingValue = val;
+      document.querySelectorAll('#otModalStars .star-btn').forEach(b => {
+        b.classList.toggle('on', parseInt(b.dataset.val) <= val);
+      });
+      document.getElementById('otModalStarsLabel').textContent = POPISKY_HVEZD[val] || '';
+    }
+
+    async function potvrditOtevreni() {
+      const stavaju = parseInt(pole('f_pocetLahvi').value) || 0;
+      if (stavaju <= 0) { zavritModal('otevritModal'); return; }
+      const novy = stavaju - 1;
+      const komentar = document.getElementById('otModalKomentar').value.trim();
+      const aktualizovat = document.getElementById('otModalAktualizovatHlavni').checked;
+      const btn = document.getElementById('otModalConfirmBtn');
       btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Ukládám…';
+
       try {
-        await db.collection('vina').doc(vinoId).update({ pocetLahvi: novy });
+        // 1) Update vína (pocetLahvi)
+        const updateData = { pocetLahvi: novy };
+        if (aktualizovat) {
+          if (otModalRatingValue) updateData.hodnoceni = otModalRatingValue;
+          if (komentar)           updateData.komentar  = komentar;
+          updateData.datumDegustace = new Date().toISOString().slice(0, 10);
+        }
+        await db.collection('vina').doc(vinoId).update(updateData);
+
+        // 2) Záznam do degustace (historie)
+        await db.collection('degustace').add({
+          vinoId:     vinoId,
+          userId:     aktualniUser.uid,
+          uzivatelJmeno: aktualniUser.displayName || aktualniUser.email,
+          datum:      new Date().toISOString().slice(0, 10),
+          casovaZnamka: firebase.firestore.FieldValue.serverTimestamp(),
+          hodnoceni:  otModalRatingValue || null,
+          komentar:   komentar || null,
+        });
+
+        // 3) UI update
         pole('f_pocetLahvi').value = novy;
-        if (novy === 0) btn.style.display = 'none';
-        zobrazMsg(novy > 0 ? `✓ Láhev otevřena. Zbývá: ${novy}` : '✓ Poslední láhev otevřena — sklep prázdný.', 'success');
+        if (aktualizovat) {
+          if (otModalRatingValue) nastavHodnoceni(otModalRatingValue);
+          if (komentar) pole('f_komentar').value = komentar;
+        }
+        if (novy === 0) document.getElementById('otevritBtn').style.display = 'none';
+
+        const skl = sklonujLahev(novy);
+        zavritModal('otevritModal');
+        zobrazMsg(novy > 0
+          ? `✓ Láhev otevřena. Zbývá: ${novy} ${skl}.`
+          : '✓ Poslední láhev otevřena — sklep prázdný.', 'success');
       } catch (err) {
-        zobrazMsg('Nepodařilo se aktualizovat zásoby.', 'error');
+        console.error(err);
+        zobrazMsg('Nepodařilo se otevřít láhev: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Otevřít láhev';
       }
-      btn.disabled = false;
+    }
+
+    // ── Historie degustací ────────────────────────────────────
+    async function zobrazitHistorii() {
+      document.getElementById('historieModal').style.display = 'flex';
+      const list = document.getElementById('historieList');
+      list.innerHTML = '<div class="history-empty">Načítám…</div>';
+      try {
+        const snap = await db.collection('degustace')
+          .where('vinoId', '==', vinoId)
+          .get();
+        const zaznamy = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => (b.casovaZnamka?.seconds || 0) - (a.casovaZnamka?.seconds || 0));
+        if (!zaznamy.length) {
+          list.innerHTML = '<div class="history-empty">Zatím žádné záznamy. Při dalším otevření láhve se uloží.</div>';
+          return;
+        }
+        list.innerHTML = zaznamy.map(z => {
+          const dt = z.datum || (z.casovaZnamka
+            ? new Date(z.casovaZnamka.seconds * 1000).toLocaleDateString('cs-CZ') : '—');
+          const stars = z.hodnoceni ? '★'.repeat(z.hodnoceni) : '— bez hodnocení';
+          return `<div class="history-row">
+            <div class="history-date">${esc(dt)}</div>
+            <div class="history-body">
+              <div class="history-rating">${stars}</div>
+              ${z.komentar ? `<div class="history-comment">${esc(z.komentar)}</div>` : ''}
+            </div>
+          </div>`;
+        }).join('');
+      } catch (e) {
+        console.error(e);
+        list.innerHTML = '<div class="history-empty" style="color:#991B1B">Nepodařilo se načíst historii.</div>';
+      }
+    }
+
+    function zavritModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
+    // ── EAN čárový kód (#18) ──────────────────────────────────
+    let eanReader = null;
+
+    async function spustitEanScanner() {
+      try {
+        if (!window.ZXing && !window.ZXingBrowser) {
+          await new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = 'https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js';
+            s.onload = resolve; s.onerror = reject;
+            document.head.appendChild(s);
+          });
+        }
+        document.getElementById('eanZone').style.display = 'block';
+        document.getElementById('eanStatus').textContent = 'Namiřte kameru na čárový kód…';
+
+        const ZX = window.ZXing || window.ZXingBrowser;
+        eanReader = new ZX.BrowserMultiFormatReader();
+        const video = document.getElementById('eanVideo');
+        eanReader.decodeFromVideoDevice(null, video, (result) => {
+          if (result) {
+            const ean = result.getText();
+            document.getElementById('eanInput').value = ean;
+            document.getElementById('eanStatus').textContent = '✓ Naskenováno: ' + ean;
+            zastavitEanScanner();
+            hledatPodleEan();
+          }
+        });
+      } catch (e) {
+        console.error(e);
+        document.getElementById('eanStatus').textContent = '⚠ Kamera selhala — zadejte kód ručně.';
+      }
+    }
+
+    function zastavitEanScanner() {
+      if (eanReader) {
+        try { eanReader.reset(); } catch(e){}
+        try { eanReader.stopContinuousDecode?.(); } catch(e){}
+        eanReader = null;
+      }
+      const video = document.getElementById('eanVideo');
+      if (video?.srcObject) {
+        video.srcObject.getTracks().forEach(t => t.stop());
+        video.srcObject = null;
+      }
+      document.getElementById('eanZone').style.display = 'none';
+    }
+
+    async function hledatPodleEan() {
+      const ean = document.getElementById('eanInput').value.trim();
+      if (!ean || !/^\d{8,14}$/.test(ean)) {
+        document.getElementById('eanResults').innerHTML =
+          '<p style="font-size:13px;color:#991B1B;margin-top:8px">Zadejte platný EAN/UPC (8–14 číslic).</p>';
+        return;
+      }
+      const btn = document.getElementById('eanSubmitBtn');
+      const res = document.getElementById('eanResults');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>';
+      res.innerHTML = '<p style="font-size:13px;color:#7A6560;margin-top:8px">Vyhledávám v databázích…</p>';
+
+      try {
+        // Open Food Facts má přesný lookup podle EAN
+        const r = await fetch(`https://world.openfoodfacts.org/api/v2/product/${ean}.json`);
+        const j = await r.json();
+        if (j.status === 1 && j.product) {
+          const p = j.product;
+          window._eanProduct = p;
+          res.innerHTML = `<div class="search-dropdown" style="margin-top:8px">
+            <div class="sr-item" onclick="aplikovatEanProdukt()">
+              <div class="sr-item-name">${esc(p.product_name || '—')}</div>
+              <div class="sr-item-sub">${esc([p.brands, p.origins, p.quantity].filter(Boolean).join(' · '))}</div>
+            </div>
+          </div>`;
+          return;
+        }
+        // Fallback: zkusíme jako search query na MLH
+        const mlh = await hledatNaMojelahve(ean);
+        if (mlh.length) {
+          window._mlhVysledky = mlh;
+          res.innerHTML = `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--wine);margin:10px 0 4px">mojelahve.cz</div>
+            <div class="search-dropdown">${mlh.map((v, i) => `
+              <div class="sr-item" onclick="aplikovatMLH(${i})">
+                <div class="sr-item-name">${esc(v.nazev)}</div>
+                <div class="sr-item-sub">${esc([v.vinarstvi, v.barva, v.rocnik].filter(Boolean).join(' · '))}</div>
+              </div>`).join('')}</div>`;
+          return;
+        }
+        res.innerHTML = '<p style="font-size:13px;color:#7A6560;margin-top:8px">Kód nenalezen. Zkuste hledání podle názvu.</p>';
+      } catch (e) {
+        console.error(e);
+        res.innerHTML = '<p style="font-size:13px;color:#991B1B;margin-top:8px">Chyba při vyhledávání.</p>';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Hledat';
+      }
+    }
+
+    function aplikovatEanProdukt() {
+      const p = window._eanProduct;
+      if (!p) return;
+      const set = (id, val) => { if (val != null && val !== '') { pole(id).value = val; zvyraznitPole(id); } };
+      set('f_nazev', p.product_name);
+      if (p.brands) set('f_vinarstvi', p.brands.split(',')[0].trim());
+      const zeme = p.origins || (p.countries_tags||[]).map(t=>t.replace('en:','')).join(', ');
+      set('f_zeme', zeme);
+      set('f_objem', parseObjem(p.quantity));
+      set('f_alkohol', p.nutriments?.['alcohol_100g']);
+      set('f_barva', parseBarva(p.categories_tags || []));
+      document.getElementById('eanResults').innerHTML =
+        '<p style="font-size:13px;color:#166534;margin-top:8px">✓ Data z Open Food Facts předvyplněna.</p>';
     }
 
     // ── Fotka etikety ─────────────────────────────────────────
@@ -1314,8 +1914,9 @@
 
     async function fotoNacist(file) {
       if (!file) return;
-      const compressed = await komprimovatObrazek(file, 900, 0.78);
+      const compressed = await komprimovatObrazek(file, 1200, 0.82);
       fotoBase64 = compressed;
+      fotoSmazana = false;
       document.getElementById('fotoPreview').src = compressed;
       document.getElementById('fotoPreviewWrap').style.display = 'flex';
       document.getElementById('fotoEmpty').style.display = 'none';
@@ -1323,6 +1924,8 @@
 
     function smazatFoto() {
       fotoBase64 = null;
+      fotoUrl    = null;
+      fotoSmazana = true;
       document.getElementById('fotoPreview').src = '';
       document.getElementById('fotoPreviewWrap').style.display = 'none';
       document.getElementById('fotoEmpty').style.display = 'flex';
@@ -1355,6 +1958,7 @@
     function pole(id)         { return document.getElementById(id); }
     function cislo(v)         { const n = parseInt(v); return isNaN(n) ? null : n; }
     function desetCislo(v)    { const n = parseFloat(v); return isNaN(n) ? null : n; }
+    function sklonujLahev(n)  { return n === 1 ? 'láhev' : (n >= 2 && n <= 4) ? 'láhve' : 'lahví'; }
 
     // Dočasné zvýraznění pole po automatickém vyplnění
     function zvyraznitPole(id) {
