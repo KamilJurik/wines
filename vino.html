@@ -466,7 +466,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
   <script src="js/config.js"></script>
   <script>
     document.getElementById('footerVersion').textContent = 'v' + APP_VERSION;
@@ -778,26 +777,22 @@
       };
 
       try {
-        // Foto handling — upload do Storage při změně, jinak ponechat URL
-        if (fotoSmazana) {
-          // Smaž ze Storage pokud existoval URL
-          if (aktualniVino?.fotoUrl) { try { await smazatFotoZeStorage(aktualniVino.fotoUrl); } catch(e){} }
-          data.fotoUrl = null;
-          data.foto    = firebase.firestore.FieldValue.delete();
-        } else if (fotoBase64) {
-          // Nově nahraná fotka — upload do Storage
-          const cilovyId = vinoId || 'tmp_' + Date.now();
-          const url = await nahratFotoDoStorage(fotoBase64, cilovyId);
-          data.fotoUrl = url;
-          data.foto    = firebase.firestore.FieldValue.delete();
-        } else if (fotoUrl) {
-          // Beze změny — neaktualizujeme
-        }
-
-        // Pro novou (ulož bez delete)
-        if (!vinoId) {
-          delete data.vinacniTrat;
-          if (data.foto && typeof data.foto === 'object') delete data.foto;
+        // Foto handling — base64 přímo ve Firestore (Spark plan)
+        if (vinoId) {
+          // Editace
+          if (fotoSmazana) {
+            data.foto    = firebase.firestore.FieldValue.delete();
+            data.fotoUrl = firebase.firestore.FieldValue.delete();
+          } else if (fotoBase64) {
+            data.foto = fotoBase64;
+            // Vyčistit případný legacy fotoUrl ze Storage pokusu
+            if (aktualniVino?.fotoUrl) data.fotoUrl = firebase.firestore.FieldValue.delete();
+          }
+          // jinak nic — fotka beze změny
+        } else {
+          // Nové víno — pošli base64, pokud je
+          delete data.vinacniTrat;  // legacy delete operace nesmí v create payloadu
+          if (fotoBase64) data.foto = fotoBase64;
         }
 
         if (vinoId) {
@@ -872,23 +867,6 @@
       }
     }
 
-    // ── Foto Storage (#bug 4) ─────────────────────────────────
-    async function nahratFotoDoStorage(dataUrl, vinoIdent) {
-      if (!storage) throw new Error('Storage není dostupný');
-      const blob = await (await fetch(dataUrl)).blob();
-      const path = `vina/${aktualniUser.uid}/${vinoIdent}_${Date.now()}.jpg`;
-      const ref  = storage.ref().child(path);
-      await ref.put(blob, { contentType: 'image/jpeg' });
-      return await ref.getDownloadURL();
-    }
-
-    async function smazatFotoZeStorage(url) {
-      if (!storage || !url) return;
-      try {
-        const ref = storage.refFromURL(url);
-        await ref.delete();
-      } catch (e) { /* mohla být base64 nebo již smazaná */ }
-    }
 
     // ── Smazání ───────────────────────────────────────────────
     async function smazat() {
@@ -1914,7 +1892,8 @@ Pokud něco není na etiketě vidět, vynechej to (ne null, prostě nezahrň pol
 
     async function fotoNacist(file) {
       if (!file) return;
-      const compressed = await komprimovatObrazek(file, 1200, 0.82);
+      // 900 px / 0.78 — bezpečně pod 1 MB limit Firestore dokumentu (base64 ~30 % overhead)
+      const compressed = await komprimovatObrazek(file, 900, 0.78);
       fotoBase64 = compressed;
       fotoSmazana = false;
       document.getElementById('fotoPreview').src = compressed;
