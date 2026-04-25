@@ -81,7 +81,8 @@
 
       <!-- OCR z fotky -->
       <div id="tabOcr" style="display:none">
-        <div class="ocr-provider-row" id="ocrProviderRow">
+        <!-- Claude Vision dočasně skryto — odhalí se až bude API klíč nasazen -->
+        <div class="ocr-provider-row" id="ocrProviderRow" style="display:none">
           <label>
             <input type="radio" name="ocrProvider" value="claude" id="ocrProviderClaude">
             🤖 Claude Vision
@@ -921,7 +922,10 @@
       };
       reader.readAsDataURL(file);
 
-      const provider = document.querySelector('input[name=ocrProvider]:checked')?.value || 'tesseract';
+      // Claude Vision je dočasně skryté — vždy Tesseract.
+      // Pro odemčení: smaž `style="display:none"` v ocrProviderRow + odhal kartu v profil.html
+      // a vrať: const provider = document.querySelector('input[name=ocrProvider]:checked')?.value || 'tesseract';
+      const provider = 'tesseract';
 
       if (provider === 'claude') {
         await ocrPresClaudeVision(file, res);
