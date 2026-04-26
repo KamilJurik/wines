@@ -22,15 +22,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 
-  <!-- MailerLite Universal -->
-  <script>
-  (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[])
-  .push(arguments);},l=d.createElement(e),l.async=1,l.src=u,
-  n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})
-  (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
-  ml('account', '2294529');
-  </script>
-  <!-- End MailerLite Universal -->
 
   <style>
     :root {
@@ -489,45 +480,169 @@
     }
     .form-foot svg { color: var(--gold); width: 14px; height: 14px; }
 
-    /* ──── MailerLite form override (Vinora dark/gold) ──── */
-    .ml-embedded { background: transparent !important; }
-    .ml-form-embedContent,
-    .ml-form-embedContainer,
-    .ml-form-embedWrapper,
-    .ml-form-embedBody,
-    .ml-form-formContent,
-    .ml-form-align-center { background: transparent !important; box-shadow: none !important; padding: 0 !important; border: none !important; }
+    /* ╔══════════════════════════════════════════════╗ */
+    /* ║  MailerLite form — Vinora dark/gold styling  ║ */
+    /* ╚══════════════════════════════════════════════╝ */
+
+    /* Container reset */
+    .ml-form-embedContainer { width: 100% !important; max-width: none !important; }
+    .ml-form-embedContainer * { box-sizing: border-box; }
+    .ml-form-embedWrapper {
+      background: transparent !important;
+      border: none !important;
+      width: 100% !important;
+      max-width: none !important;
+      box-shadow: none !important;
+    }
+    .ml-form-embedBody { padding: 0 !important; }
+    .ml-form-formContent { margin: 0 !important; }
+    .ml-form-align-center { text-align: left !important; display: block !important; }
+
+    /* Field rows */
+    .ml-form-embedContainer .ml-form-fieldRow {
+      margin: 0 0 10px 0 !important;
+      width: 100%;
+    }
+
+    /* Field labels */
+    .ml-form-embedContainer .ml-field-group > label,
+    .ml-form-embedContainer .ml-block-form .ml-field-group label {
+      display: block !important;
+      font-size: 12px !important;
+      font-weight: 500 !important;
+      letter-spacing: 0.04em !important;
+      color: var(--text-2) !important;
+      margin-bottom: 6px !important;
+      font-family: var(--sans) !important;
+      font-style: normal !important;
+      text-transform: none !important;
+      line-height: 1.4 !important;
+    }
+
     /* Email input */
-    .ml-embedded input[type=email],
-    .ml-embedded input[type=text] {
+    .ml-form-embedContainer input[type=email],
+    .ml-form-embedContainer input[type=text],
+    .ml-form-embedContainer .ml-form-fieldRow input {
       width: 100% !important;
       padding: 12px 16px !important;
       background: var(--bg) !important;
+      color: var(--text) !important;
       border: 1px solid var(--border) !important;
       border-radius: var(--r-sm) !important;
-      color: var(--text) !important;
       font-family: var(--sans) !important;
       font-size: 15px !important;
+      line-height: 1.4 !important;
       box-shadow: none !important;
       transition: border-color .15s !important;
     }
-    .ml-embedded input[type=email]:focus,
-    .ml-embedded input[type=text]:focus {
+    .ml-form-embedContainer input[type=email]:focus,
+    .ml-form-embedContainer input[type=text]:focus {
       outline: none !important;
       border-color: var(--gold) !important;
     }
-    .ml-embedded input::placeholder { color: var(--text-3) !important; opacity: 1 !important; }
+    .ml-form-embedContainer input::placeholder { color: var(--text-3) !important; opacity: 1 !important; }
+
+    /* Custom select (dropdown) */
+    .ml-form-embedContainer select.custom-select,
+    .ml-form-embedContainer .ml-form-fieldRow .custom-select {
+      width: 100% !important;
+      padding: 12px 36px 12px 16px !important;
+      background: var(--bg) !important;
+      color: var(--text) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: var(--r-sm) !important;
+      font-family: var(--sans) !important;
+      font-size: 15px !important;
+      line-height: 1.4 !important;
+      box-shadow: none !important;
+      cursor: pointer !important;
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      appearance: none !important;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B675F' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+      background-repeat: no-repeat !important;
+      background-position: right 14px center !important;
+      background-size: 12px !important;
+    }
+    .ml-form-embedContainer select.custom-select:focus {
+      outline: none !important;
+      border-color: var(--gold) !important;
+    }
+    .ml-form-embedContainer select.custom-select option { background: var(--bg-elev) !important; color: var(--text) !important; }
+
+    /* Confirmation checkbox row */
+    .ml-form-embedContainer .ml-form-checkboxRow {
+      margin: 12px 0 !important;
+      padding: 12px 14px !important;
+      background: var(--bg) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: var(--r-sm) !important;
+      width: 100% !important;
+      float: none !important;
+      transition: border-color .15s !important;
+    }
+    .ml-form-embedContainer .ml-form-checkboxRow:hover { border-color: var(--border-2) !important; }
+    .ml-form-embedContainer .ml-form-checkboxRow label.checkbox {
+      display: flex !important;
+      align-items: flex-start !important;
+      gap: 10px !important;
+      cursor: pointer !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      min-height: 0 !important;
+      font-weight: normal !important;
+    }
+    .ml-form-embedContainer .ml-form-checkboxRow input[type=checkbox] {
+      flex-shrink: 0 !important;
+      width: 16px !important;
+      height: 16px !important;
+      margin: 2px 0 0 0 !important;
+      padding: 0 !important;
+      accent-color: var(--gold) !important;
+      cursor: pointer !important;
+      position: static !important;
+      opacity: 1 !important;
+      z-index: auto !important;
+    }
+    .ml-form-embedContainer .ml-form-checkboxRow .label-description {
+      flex: 1 !important;
+      font-size: 13px !important;
+      line-height: 1.5 !important;
+      color: var(--text-2) !important;
+      font-family: var(--sans) !important;
+      font-style: normal !important;
+      text-align: left !important;
+      margin: 0 !important;
+    }
+    .ml-form-embedContainer .ml-form-checkboxRow .label-description p {
+      color: var(--text-2) !important;
+      font-family: var(--sans) !important;
+      font-size: 13px !important;
+      font-weight: normal !important;
+      line-height: 1.5 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    .ml-form-embedContainer .ml-form-checkboxRow .label-description p a {
+      color: var(--gold) !important;
+      text-decoration: underline !important;
+    }
 
     /* Submit button */
-    .ml-embedded .ml-form-embedSubmit button[type=submit],
-    .ml-embedded button[type=submit].primary,
-    .ml-embedded button.primary {
+    .ml-form-embedContainer .ml-form-embedSubmit {
+      margin: 0 !important;
+      width: 100% !important;
+      float: none !important;
+    }
+    .ml-form-embedContainer .ml-form-embedSubmit button.primary,
+    .ml-form-embedContainer button.primary,
+    .ml-form-embedContainer button[type=submit] {
       width: 100% !important;
       padding: 12px 22px !important;
       background: var(--wine) !important;
-      color: white !important;
       border: none !important;
       border-radius: var(--r-sm) !important;
+      color: white !important;
       font-family: var(--sans) !important;
       font-size: 14px !important;
       font-weight: 600 !important;
@@ -535,97 +650,106 @@
       cursor: pointer !important;
       transition: background .15s !important;
       box-shadow: none !important;
+      line-height: 1.4 !important;
+      height: auto !important;
     }
-    .ml-embedded button[type=submit]:hover { background: #B73C50 !important; }
-
-    /* Loading spinner button */
-    .ml-embedded .loadingMessage,
-    .ml-embedded button.loading { background: var(--bg-elev-2) !important; }
-
-    /* Field rows + labels */
-    .ml-embedded .ml-form-fieldRow,
-    .ml-embedded .ml-form-formContent .ml-form-fieldRow { margin-bottom: 10px !important; padding: 0 !important; }
-    .ml-embedded label,
-    .ml-embedded .label-description {
-      color: var(--text-2) !important;
-      font-family: var(--sans) !important;
-      font-size: 13px !important;
-      line-height: 1.5 !important;
+    .ml-form-embedContainer button.primary:hover,
+    .ml-form-embedContainer button[type=submit]:hover {
+      background: #B73C50 !important;
     }
-    .ml-embedded label a, .ml-embedded p a {
-      color: var(--gold) !important;
-      text-decoration: underline !important;
-      text-decoration-color: rgba(220,179,120,0.4) !important;
-    }
-    .ml-embedded label a:hover { text-decoration-color: var(--gold) !important; }
 
-    /* Checkboxes (privacy + confirmation) */
-    .ml-embedded .ml-form-checkboxRow {
-      display: flex !important;
-      align-items: flex-start !important;
-      gap: 10px !important;
-      margin: 8px 0 !important;
-      padding: 10px 12px !important;
-      background: var(--bg) !important;
+    /* Loading button */
+    .ml-form-embedContainer button.loading {
+      width: 100% !important;
+      padding: 12px 22px !important;
+      background: var(--bg-elev-2) !important;
       border: 1px solid var(--border) !important;
       border-radius: var(--r-sm) !important;
-    }
-    .ml-embedded .ml-form-checkboxRow input[type=checkbox] {
-      accent-color: var(--gold) !important;
-      width: 16px !important;
-      height: 16px !important;
-      margin-top: 2px !important;
-      cursor: pointer !important;
-    }
-    .ml-embedded .ml-form-checkboxRow label {
-      font-size: 12.5px !important;
-      cursor: pointer !important;
       color: var(--text-2) !important;
     }
-
-    /* Success / error states */
-    .ml-embedded .ml-form-successBody,
-    .ml-embedded .ml-form-successContent {
-      background: rgba(125,181,138,0.06) !important;
-      border: 1px solid rgba(125,181,138,0.3) !important;
-      border-radius: var(--r-sm) !important;
-      padding: 16px 20px !important;
-      color: var(--text) !important;
-      text-align: center !important;
+    .ml-form-embedContainer .ml-form-embedSubmitLoad:after {
+      width: 14px !important;
+      height: 14px !important;
+      border: 2px solid var(--gold) !important;
+      border-color: var(--gold) transparent transparent transparent !important;
     }
-    .ml-embedded .ml-form-successBody h4 {
+
+    /* Success state */
+    .ml-form-embedContainer .ml-form-successBody {
+      padding: 18px 22px !important;
+      background: linear-gradient(135deg, rgba(125,181,138,0.10) 0%, rgba(22,21,27,0.5) 100%) !important;
+      border: 1px solid rgba(125,181,138,0.3) !important;
+      border-left: 3px solid var(--success) !important;
+      border-radius: var(--r-sm) !important;
+      text-align: left !important;
+    }
+    .ml-form-embedContainer .ml-form-successBody h4,
+    .ml-form-embedContainer .ml-form-successContent h4 {
+      font-size: 18px !important;
+      font-weight: 500 !important;
       color: var(--success) !important;
       font-family: var(--sans) !important;
-      font-size: 17px !important;
-      font-weight: 500 !important;
-      margin-bottom: 6px !important;
+      margin: 0 0 6px 0 !important;
+      text-align: left !important;
+      letter-spacing: -0.01em !important;
     }
-    .ml-embedded .ml-form-successBody p {
+    .ml-form-embedContainer .ml-form-successBody p,
+    .ml-form-embedContainer .ml-form-successContent p {
+      font-size: 14px !important;
+      line-height: 1.55 !important;
       color: var(--text-2) !important;
       font-family: var(--sans) !important;
-      font-size: 14px !important;
+      margin: 0 !important;
+      text-align: left !important;
+    }
+    .ml-form-embedContainer .ml-form-successBody p em.italic {
+      font-family: var(--serif-italic) !important;
+      color: var(--gold) !important;
     }
 
-    /* Error/validation */
-    .ml-embedded .ml-error-message,
-    .ml-embedded .ml-form-error {
+    /* Error state */
+    .ml-form-embedContainer .ml-error input,
+    .ml-form-embedContainer .ml-error select,
+    .ml-form-embedContainer .ml-error textarea,
+    .ml-form-embedContainer .ml-form-checkboxRow.ml-error {
+      border-color: var(--wine) !important;
+    }
+    .ml-form-embedContainer .ml-error label,
+    .ml-form-embedContainer .ml-error .label-description,
+    .ml-form-embedContainer .ml-error .label-description p {
       color: var(--wine) !important;
-      font-size: 12px !important;
-      margin-top: 4px !important;
     }
 
     /* Hide MailerLite default heading (we have our own context) */
-    .ml-embedded .ml-form-embedContent h1,
-    .ml-embedded .ml-form-embedContent h2,
-    .ml-embedded .ml-form-embedContent h4 { display: none !important; }
-    .ml-embedded .ml-form-embedContent p:not(.ml-form-successBody p) { display: none !important; }
+    .ml-form-embedContainer .ml-form-embedContent { display: none !important; }
+    .ml-form-embedContainer .ml-form-embedHeader { display: none !important; }
 
-    /* Powered by MailerLite — necháme, ale zdecentníme */
-    .ml-form-embedFooter {
-      opacity: 0.4 !important;
-      font-size: 11px !important;
-      margin-top: 16px !important;
-      text-align: center !important;
+    /* Spinner animation (keep) */
+    .ml-form-embedSubmitLoad {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+    }
+    .ml-form-embedSubmitLoad:after {
+      content: " ";
+      display: block;
+      width: 12px;
+      height: 12px;
+      margin: 1px;
+      border-radius: 50%;
+      animation: ml-form-spin 1.2s linear infinite;
+    }
+    @keyframes ml-form-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      border: 0;
     }
 
     .hero-discount {
@@ -1958,8 +2082,59 @@
 
         <!-- Waitlist form -->
         <div class="form-card" id="waitlist">
-          <!-- MailerLite embedded form -->
-          <div class="ml-embedded" data-form="T9Fcbg"></div>
+          <!-- MailerLite HTML embedded form (custom-styled) -->
+          <div id="mlb2-40430232" class="ml-form-embedContainer ml-subscribe-form ml-subscribe-form-40430232">
+            <div class="ml-form-align-center">
+              <div class="ml-form-embedWrapper embedForm">
+                <div class="ml-form-embedBody ml-form-embedBodyDefault row-form">
+                  <form class="ml-block-form" action="https://assets.mailerlite.com/jsonp/2294529/forms/185808107551589392/subscribe" data-code="" method="post" target="_blank">
+                    <div class="ml-form-formContent">
+                      <div class="ml-form-fieldRow">
+                        <div class="ml-field-group ml-field-email ml-validate-email ml-validate-required">
+                          <label>E-mail</label>
+                          <input aria-label="email" aria-required="true" type="email" class="form-control" name="fields[email]" placeholder="vas@email.cz" autocomplete="email">
+                        </div>
+                      </div>
+                      <div class="ml-form-fieldRow ml-last-item">
+                        <div class="ml-field-group ml-field-name ml-validate-required">
+                          <label>Velikost sklepa</label>
+                          <select class="custom-select" name="fields[name]" aria-label="name" aria-required="true">
+                            <option value="">— vyberte —</option>
+                            <option>0–10 lahví</option>
+                            <option>10–50 lahví</option>
+                            <option>50+ lahví</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="ml-form-checkboxRow ml-validate-required">
+                      <label class="checkbox">
+                        <input type="checkbox">
+                        <div class="label-description">
+                          <p>Souhlasím s odběrem informací o spuštění Vinory a občasných updatech (max. 1× měsíčně).</p>
+                        </div>
+                      </label>
+                    </div>
+                    <input type="hidden" name="ml-submit" value="1">
+                    <div class="ml-form-embedSubmit">
+                      <button type="submit" class="primary">Dej mi vědět →</button>
+                      <button disabled="disabled" style="display: none;" type="button" class="loading">
+                        <div class="ml-form-embedSubmitLoad"></div>
+                        <span class="sr-only">Loading…</span>
+                      </button>
+                    </div>
+                    <input type="hidden" name="anticsrf" value="true">
+                  </form>
+                </div>
+                <div class="ml-form-successBody row-success" style="display: none">
+                  <div class="ml-form-successContent">
+                    <h4>✓ Děkujeme.</h4>
+                    <p>Pošleme vám potvrzovací e-mail. Klikněte v něm na odkaz a budete na waitlistu. <em class="italic">Spuštění Q3 2026.</em></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="form-foot">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             Žádný spam. Jeden e-mail při launchi a hotovo.
@@ -2626,8 +2801,59 @@
       </p>
 
       <div class="form-card">
-        <!-- MailerLite embedded form -->
-        <div class="ml-embedded" data-form="T9Fcbg"></div>
+        <!-- MailerLite HTML embedded form (duplicate, unique ID) -->
+        <div id="mlb2-40430232b" class="ml-form-embedContainer ml-subscribe-form ml-subscribe-form-40430232">
+          <div class="ml-form-align-center">
+            <div class="ml-form-embedWrapper embedForm">
+              <div class="ml-form-embedBody ml-form-embedBodyDefault row-form">
+                <form class="ml-block-form" action="https://assets.mailerlite.com/jsonp/2294529/forms/185808107551589392/subscribe" data-code="" method="post" target="_blank">
+                  <div class="ml-form-formContent">
+                    <div class="ml-form-fieldRow">
+                      <div class="ml-field-group ml-field-email ml-validate-email ml-validate-required">
+                        <label>E-mail</label>
+                        <input aria-label="email" aria-required="true" type="email" class="form-control" name="fields[email]" placeholder="vas@email.cz" autocomplete="email">
+                      </div>
+                    </div>
+                    <div class="ml-form-fieldRow ml-last-item">
+                      <div class="ml-field-group ml-field-name ml-validate-required">
+                        <label>Velikost sklepa</label>
+                        <select class="custom-select" name="fields[name]" aria-label="name" aria-required="true">
+                          <option value="">— vyberte —</option>
+                          <option>0–10 lahví</option>
+                          <option>10–50 lahví</option>
+                          <option>50+ lahví</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ml-form-checkboxRow ml-validate-required">
+                    <label class="checkbox">
+                      <input type="checkbox">
+                      <div class="label-description">
+                        <p>Souhlasím s odběrem informací o spuštění Vinory a občasných updatech (max. 1× měsíčně).</p>
+                      </div>
+                    </label>
+                  </div>
+                  <input type="hidden" name="ml-submit" value="1">
+                  <div class="ml-form-embedSubmit">
+                    <button type="submit" class="primary">Dej mi vědět →</button>
+                    <button disabled="disabled" style="display: none;" type="button" class="loading">
+                      <div class="ml-form-embedSubmitLoad"></div>
+                      <span class="sr-only">Loading…</span>
+                    </button>
+                  </div>
+                  <input type="hidden" name="anticsrf" value="true">
+                </form>
+              </div>
+              <div class="ml-form-successBody row-success" style="display: none">
+                <div class="ml-form-successContent">
+                  <h4>✓ Děkujeme.</h4>
+                  <p>Pošleme vám potvrzovací e-mail. Klikněte v něm na odkaz a budete na waitlistu. <em class="italic">Spuštění Q3 2026.</em></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="form-foot">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
           Bez kreditky · Žádný závazek
@@ -2654,6 +2880,27 @@
       </div>
     </div>
   </footer>
+
+  <!-- MailerLite form validation + submission handler -->
+  <script>
+    // Success callback — volá MailerLite po úspěšném submitnutí formuláře.
+    // Selektor používá class (ne ID), takže swap proběhne na obou formulářích současně.
+    function ml_webform_success_40430232() {
+      var $ = window.ml_jQuery || window.jQuery;
+      if ($) {
+        $('.ml-subscribe-form-40430232 .row-success').show();
+        $('.ml-subscribe-form-40430232 .row-form').hide();
+      } else {
+        // Fallback bez jQuery
+        document.querySelectorAll('.ml-subscribe-form-40430232 .row-success').forEach(function(el){ el.style.display = 'block'; });
+        document.querySelectorAll('.ml-subscribe-form-40430232 .row-form').forEach(function(el){ el.style.display = 'none'; });
+      }
+    }
+  </script>
+  <script src="https://groot.mailerlite.com/js/w/webforms.min.js?vb397d78ebaa8a0f631d35384c46d781b" type="text/javascript"></script>
+  <script>
+    fetch("https://assets.mailerlite.com/jsonp/2294529/forms/185808107551589392/takel");
+  </script>
 
 </body>
 </html>
