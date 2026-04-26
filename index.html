@@ -52,7 +52,10 @@
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;  /* offset pro sticky nav (~51 px) + breathing space */
+    }
 
     body {
       font-family: var(--sans);
