@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tiráž · Vinora</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0E0D12; --bg-elev: #16151B;
+      --text: #F2EDE3; --text-2: #A09A8E; --text-3: #6B675F;
+      --border: #28262F; --wine: #D4485D; --gold: #DCB378;
+      --sans: 'Inter', sans-serif;
+      --serif: 'Cormorant Garamond', Georgia, serif;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    a { color: var(--gold); }
+    .nav { padding: 18px 24px; border-bottom: 1px solid var(--border); }
+    .brand { max-width: 760px; margin: 0 auto; display: inline-flex; align-items: baseline; font-size: 20px; font-weight: 500; letter-spacing: -0.015em; color: var(--text); text-decoration: none; }
+    .brand em { font-family: var(--serif); font-style: italic; color: var(--wine); }
+    .brand-dot { width: 4px; height: 4px; background: var(--wine); border-radius: 50%; margin-left: 4px; align-self: flex-end; margin-bottom: 4px; }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 56px 24px 80px; }
+    h1 { font-size: 42px; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 8px; }
+    h1 em { font-family: var(--serif); font-style: italic; color: var(--wine); font-weight: 500; }
+    .lead { font-family: var(--serif); font-style: italic; color: var(--text-2); font-size: 18px; margin-bottom: 40px; }
+    h2 { font-size: 18px; font-weight: 500; letter-spacing: -0.01em; margin: 28px 0 10px; color: var(--gold); }
+    p { color: var(--text-2); margin-bottom: 8px; }
+    .info-row { display: flex; gap: 16px; padding: 8px 0; font-size: 14px; align-items: baseline; }
+    .info-row .l { color: var(--text-3); width: 140px; flex-shrink: 0; }
+    .info-row .v { color: var(--text); }
+    .todo { display: inline-block; background: rgba(220,179,120,0.12); color: var(--gold); padding: 1px 8px; border-radius: 3px; font-family: ui-monospace, monospace; font-size: 13px; }
+    .footer { max-width: 760px; margin: 60px auto 0; padding: 24px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-3); text-align: center; }
+    .footer a { color: var(--text-2); text-decoration: none; margin: 0 8px; }
+    .footer a:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="brand">
+      Vin<em>ora</em><span class="brand-dot"></span>
+    </a>
+  </nav>
+
+  <div class="wrap">
+    <h1><em>Tiráž</em></h1>
+    <p class="lead">Identifikace provozovatele podle českého práva.</p>
+
+    <h2>Provozovatel</h2>
+    <div class="info-row"><span class="l">Jméno</span><span class="v"><span class="todo">Kamil Juřík</span></span></div>
+    <div class="info-row"><span class="l">IČO</span><span class="v"><span class="todo">DOPLNIT IČO</span></span></div>
+    <div class="info-row"><span class="l">DIČ</span><span class="v"><span class="todo">DOPLNIT (pokud plátce DPH)</span></span></div>
+    <div class="info-row"><span class="l">Adresa</span><span class="v"><span class="todo">DOPLNIT ADRESU</span></span></div>
+    <div class="info-row"><span class="l">Forma podnikání</span><span class="v"><span class="todo">OSVČ / s.r.o.</span></span></div>
+
+    <h2>Kontakt</h2>
+    <div class="info-row"><span class="l">E-mail</span><span class="v"><a href="mailto:kamil.jurik@easyportal365.com">kamil.jurik@easyportal365.com</a></span></div>
+    <div class="info-row"><span class="l">Web</span><span class="v"><a href="https://vinora.cz">vinora.cz</a></span></div>
+    <div class="info-row"><span class="l">Telefon</span><span class="v"><span class="todo">DOPLNIT (volitelné)</span></span></div>
+
+    <h2>Registrace</h2>
+    <div class="info-row"><span class="l">Živnostenský úřad</span><span class="v"><span class="todo">DOPLNIT MĚSTO</span></span></div>
+    <div class="info-row"><span class="l">Číslo živn. listu</span><span class="v"><span class="todo">DOPLNIT (pokud máte)</span></span></div>
+
+    <h2>Mimosoudní řešení sporů</h2>
+    <p>
+      V případě, že dojde mezi provozovatelem a spotřebitelem ke sporu, který se nepodaří
+      vyřešit vzájemnou dohodou, může spotřebitel podat návrh na mimosoudní řešení sporu
+      určenému subjektu mimosoudního řešení spotřebitelských sporů, kterým je
+      <a href="https://www.coi.cz" target="_blank" rel="noopener">Česká obchodní inspekce</a>.
+    </p>
+
+    <h2>Dozorové orgány</h2>
+    <ul style="margin: 0 0 0 24px; color: var(--text-2);">
+      <li><a href="https://www.uoou.cz" target="_blank" rel="noopener">Úřad pro ochranu osobních údajů</a> (GDPR)</li>
+      <li><a href="https://www.coi.cz" target="_blank" rel="noopener">Česká obchodní inspekce</a> (spotřebitelská práva)</li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    <a href="index.html">Vinora</a>
+    <a href="privacy.html">Soukromí</a>
+    <a href="terms.html">Podmínky</a>
+    <a href="mailto:kamil.jurik@easyportal365.com">Kontakt</a>
+  </div>
+</body>
+</html>

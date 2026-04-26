@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vinora — Vinný deník · Příběh v každé skleničce</title>
+  <meta name="description" content="Vinora je vinný deník pro lidi, kteří si chtějí pamatovat, co kdy a s kým pili. Sklep, hodnocení, okno pití, sdílení. Spuštění Q3 2026.">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Vinora — Vinný deník">
+  <meta property="og:description" content="Příběh v každé skleničce. Vinný deník pro lidi se sbírkou. Spuštění Q3 2026.">
+  <meta property="og:url" content="https://vinora.cz">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="cs_CZ">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Vinora — Vinný deník">
+  <meta name="twitter:description" content="Příběh v každé skleničce.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:           #0E0D12;
+      --bg-elev:      #16151B;
+      --bg-elev-2:    #1D1B23;
+      --bg-elev-3:    #25232C;
+      --border:       #28262F;
+      --border-2:     #38353F;
+      --text:         #F2EDE3;
+      --text-2:       #A09A8E;
+      --text-3:       #6B675F;
+      --text-4:       #45413B;
+      --wine:         #D4485D;
+      --wine-soft:    rgba(212,72,93,0.12);
+      --wine-deep:    #7B1F2E;
+      --gold:         #DCB378;
+      --gold-soft:    rgba(220,179,120,0.14);
+      --success:      #7DB58A;
+
+      --r-sm: 6px;
+      --r-md: 10px;
+      --r-lg: 14px;
+
+      --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --serif-italic: 'Cormorant Garamond', Georgia, serif;
+      --mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      letter-spacing: -0.005em;
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; cursor: pointer; }
+    input, textarea { font-family: inherit; font-size: inherit; }
+
+    .num { font-variant-numeric: tabular-nums; }
+    .mono { font-family: var(--mono); font-size: 12px; letter-spacing: 0; }
+    .italic { font-family: var(--serif-italic); font-style: italic; }
+
+    /* ──── Navigation ──── */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(14,13,18,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+    }
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: baseline;
+      font-size: 22px;
+      font-weight: 500;
+      letter-spacing: -0.015em;
+      line-height: 1;
+    }
+    .brand em { font-family: var(--serif-italic); font-style: italic; color: var(--wine); font-weight: 500; }
+    .brand-dot {
+      width: 5px; height: 5px;
+      background: var(--wine);
+      border-radius: 50%;
+      margin-left: 4px;
+      align-self: flex-end;
+      margin-bottom: 4px;
+    }
+    .nav-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: var(--wine);
+      color: white;
+      border-radius: 99px;
+      border: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background .15s;
+    }
+    .nav-cta:hover { background: #B73C50; }
+
+    /* ──── Sections ──── */
+    section {
+      padding: 80px 0;
+    }
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ──── HERO ──── */
+    .hero {
+      padding: 140px 0 100px;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse 800px 600px at 30% 20%, rgba(212,72,93,0.10), transparent 60%),
+        radial-gradient(ellipse 600px 400px at 70% 80%, rgba(220,179,120,0.07), transparent 60%);
+    }
+    .hero-grid-lines {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(to right, rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 80px 80px;
+      mask-image: radial-gradient(ellipse 800px 700px at 50% 50%, black, transparent 70%);
+      -webkit-mask-image: radial-gradient(ellipse 800px 700px at 50% 50%, black, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-inner { position: relative; z-index: 1; text-align: center; max-width: 720px; margin: 0 auto; }
+
+    .hero-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11.5px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 28px;
+      padding: 6px 14px;
+      background: var(--gold-soft);
+      border: 1px solid rgba(220,179,120,0.2);
+      border-radius: 99px;
+    }
+    .hero-kicker-dot {
+      width: 6px; height: 6px;
+      background: var(--gold);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--gold);
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    .hero h1 {
+      font-size: clamp(48px, 7vw, 84px);
+      font-weight: 500;
+      line-height: 0.98;
+      letter-spacing: -0.03em;
+      margin-bottom: 24px;
+    }
+    .hero h1 em {
+      font-family: var(--serif-italic);
+      font-style: italic;
+      color: var(--wine);
+      font-weight: 500;
+    }
+
+    .hero-lead {
+      font-family: var(--serif-italic);
+      font-style: italic;
+      font-size: clamp(20px, 2.4vw, 26px);
+      color: var(--text-2);
+      line-height: 1.5;
+      max-width: 540px;
+      margin: 0 auto 40px;
+    }
+
+    /* ──── Form ──── */
+    .form-card {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 18px;
+      background: var(--bg-elev);
+      border: 1px solid var(--border-2);
+      border-radius: var(--r-md);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+    }
+    .form-row {
+      display: flex;
+      gap: 8px;
+    }
+    .form-row input[type=email] {
+      flex: 1;
+      padding: 12px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      color: var(--text);
+      font-size: 15px;
+    }
+    .form-row input[type=email]:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+    .form-row input[type=email]::placeholder { color: var(--text-3); }
+    .form-cta {
+      padding: 12px 22px;
+      background: var(--wine);
+      color: white;
+      border: none;
+      border-radius: var(--r-sm);
+      font-size: 14px;
+      font-weight: 600;
+      transition: background .15s;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .form-cta:hover { background: #B73C50; }
+
+    .form-foot {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--text-3);
+    }
+    .form-foot svg { color: var(--gold); width: 14px; height: 14px; }
+
+    .hero-discount {
+      margin-top: 28px;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 14px;
+      background: var(--bg-elev-2);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      font-size: 13px;
+      color: var(--text-2);
+    }
+    .hero-discount strong {
+      color: var(--gold);
+      font-weight: 600;
+    }
+    .hero-discount-label {
+      font-size: 9.5px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--gold);
+      padding: 3px 8px;
+      background: var(--gold-soft);
+      border-radius: 99px;
+    }
+
+    /* ──── Problem section ──── */
+    .problem {
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .section-kicker {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+    .problem h2 {
+      font-size: clamp(36px, 5vw, 56px);
+      font-weight: 500;
+      letter-spacing: -0.025em;
+      line-height: 1.05;
+      margin-bottom: 24px;
+    }
+    .problem h2 em {
+      font-family: var(--serif-italic);
+      font-style: italic;
+      color: var(--wine);
+      font-weight: 500;
+    }
+    .problem-text {
+      font-family: var(--serif-italic);
+      font-style: italic;
+      font-size: 19px;
+      color: var(--text-2);
+      line-height: 1.6;
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    /* ──── Features ──── */
+    .features {
+      background: linear-gradient(180deg, transparent, rgba(22,21,27,0.5));
+    }
+    .features-head {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto 56px;
+    }
+    .features-head h2 {
+      font-size: clamp(32px, 4vw, 44px);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 14px;
+    }
+    .features-head h2 em {
+      font-family: var(--serif-italic);
+      font-style: italic;
+      color: var(--wine);
+      font-weight: 500;
+    }
+    .features-head p {
+      font-family: var(--serif-italic);
+      font-style: italic;
+      color: var(--text-2);
+      font-size: 18px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+    .feature {
+      padding: 24px 22px;
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      transition: all .18s;
+    }
+    .feature:hover {
+      border-color: var(--border-2);
+      transform: translateY(-3px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+    }
+    .feature-icon {
+      width: 40px; height: 40px;
+      border-radius: var(--r-sm);
+      background: var(--gold-soft);
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+    .feature-icon svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 1.6; fill: none; }
+    .feature h3 {
+      font-size: 17px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      margin-bottom: 6px;
+    }
+    .feature p {
+      font-size: 13.5px;
+      color: var(--text-2);
+      line-height: 1.55;
+    }
+
+    /* ──── Showcase (mock cellar dashboard) ──── */
+    .showcase-head {
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto 48px;
+    }
+    .showcase-head h2 {
+      font-size: clamp(32px, 4vw, 44px);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+    }
+    .showcase-head h2 em {
+      font-family: var(--serif-italic);
+      font-style: italic;
+      color: var(--wine);
+      font-weight: 500;
+    }
+    .showcase-head p {
+      font-family: var(--serif-italic);
+      font-style: italic;
+      color: var(--text-2);
+      font-size: 17px;
+    }
+
+    /* Mini dashboard mockup */
+    .mockup {
+      max-width: 920px;
+      margin: 0 auto;
+      background: var(--bg-elev);
+      border: 1px solid var(--border-2);
+      border-radius: var(--r-lg);
+      padding: 22px;
+      box-shadow:
+        0 32px 80px rgba(0,0,0,0.5),
+        0 0 0 1px rgba(220,179,120,0.04);
+      position: relative;
+      overflow: hidden;
+    }
+    .mockup::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 28px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      display: block;
+    }
+    .mockup::after {
+      content: '';
+      position: absolute;
+      top: 9px; left: 14px;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #FF5F57;
+      box-shadow: 18px 0 0 #FEBC2E, 36px 0 0 #28C840;
+    }
+    .mockup-inner { padding-top: 36px; }
+
+    .mock-pick {
+      padding: 14px 16px;
+      background: linear-gradient(135deg, rgba(212,72,93,0.18) 0%, transparent 100%);
+      border: 1px solid rgba(212,72,93,0.3);
+      border-radius: var(--r-md);
+      margin-bottom: 14px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+    .mock-pick-kicker {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--wine);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .mock-pick-name { font-size: 18px; font-weight: 500; letter-spacing: -0.01em; }
+    .mock-pick-name em { font-family: var(--serif-italic); font-style: italic; color: var(--wine); }
+    .mock-pick-meta { font-size: 12px; color: var(--text-2); font-family: var(--serif-italic); font-style: italic; margin-top: 2px; }
+    .mock-pick-cta {
+      padding: 8px 14px;
+      background: var(--wine);
+      color: white;
+      border-radius: var(--r-sm);
+      font-size: 12px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mock-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+    .mock-stat {
+      background: var(--bg-elev);
+      padding: 12px 14px;
+    }
+    .mock-stat-label {
+      font-size: 9.5px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 4px;
+    }
+    .mock-stat-v { font-size: 22px; font-weight: 600; letter-spacing: -0.015em; }
+    .mock-stat-v small { font-size: 11px; color: var(--text-3); margin-left: 3px; font-weight: 500; }
+
+    .mock-list {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      overflow: hidden;
+    }
+    .mock-row {
+      display: grid;
+      grid-template-columns: 14px 1fr auto auto;
+      gap: 12px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+    }
+    .mock-row:last-child { border-bottom: none; }
+    .mock-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .mock-dot-red { background: var(--wine); box-shadow: 0 0 0 2px rgba(212,72,93,0.18); }
+    .mock-dot-white { background: var(--gold); box-shadow: 0 0 0 2px rgba(220,179,120,0.2); }
+    .mock-row-name { font-size: 13px; font-weight: 500; }
+    .mock-row-name em { font-family: var(--serif-italic); font-style: italic; color: var(--wine); }
+    .mock-row-name small { color: var(--text-3); margin-left: 4px; font-weight: 400; }
+    .mock-row-meta { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+    .mock-row-stars { color: var(--gold); font-size: 11px; letter-spacing: 1px; }
+    .mock-row-stars .off { color: var(--text-4); }
+    .mock-row-bottles { font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+
+    /* ──── Why Vinora ──── */
+    .why {
+      background: linear-gradient(180deg, transparent, rgba(22,21,27,0.5));
+    }
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 40px;
+    }
+    .why-card {
+      padding: 22px;
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+    }
+    .why-card-tag {
+      display: inline-block;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      padding: 3px 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      margin-bottom: 12px;
+    }
+    .why-card h4 {
+      font-size: 17px;
+      font-weight: 500;
+      letter-spacing: -0.005em;
+      margin-bottom: 8px;
+    }
+    .why-card h4 em { font-family: var(--serif-italic); font-style: italic; color: var(--wine); }
+    .why-card p { font-size: 13.5px; color: var(--text-2); line-height: 1.55; }
+
+    /* ──── Pricing ──── */
+    .pricing-head {
+      text-align: center;
+      max-width: 640px;
+      margin: 0 auto 48px;
+    }
+    .pricing-head h2 {
+      font-size: clamp(32px, 4vw, 44px);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+    }
+    .pricing-head h2 em { font-family: var(--serif-italic); font-style: italic; color: var(--wine); font-weight: 500; }
+    .pricing-head p { font-family: var(--serif-italic); font-style: italic; color: var(--text-2); font-size: 17px; }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    .plan {
+      padding: 28px 30px;
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      position: relative;
+    }
+    .plan-pro {
+      background:
+        radial-gradient(ellipse 400px 200px at 80% 0%, rgba(220,179,120,0.08), transparent 60%),
+        var(--bg-elev);
+      border-color: rgba(220,179,120,0.3);
+    }
+    .plan-badge {
+      position: absolute;
+      top: 14px; right: 14px;
+      font-size: 9.5px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--gold);
+      padding: 3px 10px;
+      background: var(--gold-soft);
+      border-radius: 99px;
+    }
+    .plan-name {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 14px;
+    }
+    .plan-pro .plan-name { color: var(--gold); }
+    .plan-price {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .plan-price-num {
+      font-size: 44px;
+      font-weight: 600;
+      letter-spacing: -0.025em;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .plan-pro .plan-price-num { color: var(--gold); }
+    .plan-price-unit {
+      color: var(--text-2);
+      font-size: 14px;
+      font-family: var(--serif-italic);
+      font-style: italic;
+    }
+    .plan-price-strike {
+      text-decoration: line-through;
+      color: var(--text-3);
+      font-size: 16px;
+      font-weight: 400;
+    }
+    .plan-price-yearly {
+      font-size: 12px;
+      color: var(--text-3);
+      margin-bottom: 18px;
+    }
+    .plan-features {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      border-top: 1px solid var(--border);
+      padding-top: 18px;
+    }
+    .plan-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 6px 0;
+      font-size: 13.5px;
+      color: var(--text-2);
+    }
+    .plan-features li svg {
+      flex-shrink: 0;
+      width: 14px; height: 14px;
+      margin-top: 4px;
+      color: var(--success);
+      stroke: currentColor; stroke-width: 2; fill: none;
+    }
+    .plan-pro .plan-features li svg { color: var(--gold); }
+    .plan-features li.muted { color: var(--text-3); }
+    .plan-features li.muted svg { color: var(--text-4); }
+
+    .plan-cta {
+      display: block;
+      text-align: center;
+      padding: 12px;
+      background: transparent;
+      border: 1px solid var(--border-2);
+      color: var(--text);
+      border-radius: var(--r-sm);
+      font-size: 13.5px;
+      font-weight: 500;
+      margin-top: 20px;
+      transition: all .15s;
+    }
+    .plan-cta:hover { background: var(--bg-elev-2); border-color: var(--text-2); }
+    .plan-pro .plan-cta {
+      background: var(--wine);
+      color: white;
+      border-color: var(--wine);
+    }
+    .plan-pro .plan-cta:hover {
+      background: #B73C50;
+    }
+
+    /* ──── About ──── */
+    .about {
+      max-width: 720px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .about-avatar {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--wine) 0%, var(--wine-deep) 100%);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--serif-italic);
+      font-style: italic;
+      font-weight: 600;
+      font-size: 28px;
+      margin: 0 auto 18px;
+      box-shadow: 0 8px 24px rgba(123,31,46,0.4);
+    }
+    .about h3 {
+      font-size: 22px;
+      font-weight: 500;
+      letter-spacing: -0.015em;
+      margin-bottom: 4px;
+    }
+    .about-role {
+      font-family: var(--serif-italic);
+      font-style: italic;
+      color: var(--gold);
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    .about-text {
+      font-family: var(--serif-italic);
+      font-style: italic;
+      font-size: 19px;
+      line-height: 1.6;
+      color: var(--text-2);
+      margin-bottom: 18px;
+    }
+    .about-text em { color: var(--text); font-style: italic; }
+
+    /* ──── Final CTA ──── */
+    .final-cta {
+      background:
+        radial-gradient(ellipse 700px 400px at 50% 50%, rgba(212,72,93,0.12), transparent 70%);
+      text-align: center;
+    }
+    .final-cta h2 {
+      font-size: clamp(34px, 4.5vw, 52px);
+      font-weight: 500;
+      letter-spacing: -0.025em;
+      line-height: 1.05;
+      margin-bottom: 16px;
+    }
+    .final-cta h2 em { font-family: var(--serif-italic); font-style: italic; color: var(--wine); font-weight: 500; }
+    .final-cta-sub {
+      font-family: var(--serif-italic);
+      font-style: italic;
+      font-size: 18px;
+      color: var(--text-2);
+      margin-bottom: 32px;
+      max-width: 540px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ──── Footer ──── */
+    .footer {
+      padding: 40px 0 60px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+    .footer-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+    }
+    .footer-brand {
+      font-size: 18px;
+      letter-spacing: -0.015em;
+    }
+    .footer-brand em { font-family: var(--serif-italic); font-style: italic; color: var(--wine); }
+    .footer-links {
+      display: flex;
+      gap: 18px;
+      font-size: 12.5px;
+      color: var(--text-3);
+    }
+    .footer-links a:hover { color: var(--text); }
+    .footer-meta {
+      font-size: 11.5px;
+      color: var(--text-4);
+      font-family: var(--serif-italic);
+      font-style: italic;
+    }
+
+    /* ──── Responsive ──── */
+    @media (max-width: 700px) {
+      .pricing-grid { grid-template-columns: 1fr; }
+      .form-row { flex-direction: column; }
+      .form-row input[type=email] { width: 100%; }
+      .form-cta { width: 100%; justify-content: center; }
+      .mock-stats { grid-template-columns: 1fr 1fr; }
+      .hero { padding: 100px 0 80px; }
+      section { padding: 60px 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="#">
+        Vin<em>ora</em><span class="brand-dot"></span>
+      </a>
+      <a href="#waitlist" class="nav-cta">
+        Vstoupit na waitlist
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-grid-lines"></div>
+    <div class="container">
+      <div class="hero-inner">
+        <div class="hero-kicker">
+          <span class="hero-kicker-dot"></span>
+          Spuštění Q3 2026
+        </div>
+
+        <h1>Příběh<br>v každé <em>skleničce.</em></h1>
+
+        <p class="hero-lead">
+          Vinný deník pro lidi, kteří si chtějí pamatovat, co kdy a s kým pili —
+          a&nbsp;mít nad svým sklepem klid.
+        </p>
+
+        <!-- Waitlist form -->
+        <div class="form-card" id="waitlist">
+          <!-- ▼▼▼ MAILERLITE EMBED START ▼▼▼ -->
+          <!-- Po vytvoření formuláře v MailerLite vyměň tento blok za jejich embed kód -->
+          <form class="form-row" onsubmit="event.preventDefault(); alert('Po napojení MailerLite tady proběhne odeslání. Zatím placeholder.');">
+            <input type="email" required placeholder="vas@email.cz" autocomplete="email">
+            <button type="submit" class="form-cta">
+              Dej mi vědět
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </button>
+          </form>
+          <!-- ▲▲▲ MAILERLITE EMBED END ▲▲▲ -->
+          <div class="form-foot">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Žádný spam. Jeden e-mail při launchi a hotovo.
+          </div>
+        </div>
+
+        <div class="hero-discount">
+          <span class="hero-discount-label">Early bird</span>
+          <span>Prvních <strong>100 přihlášených</strong> dostane Pro za <strong>495 Kč/rok</strong> navždy <span style="color:var(--text-3);text-decoration:line-through">990 Kč</span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEM -->
+  <section>
+    <div class="container">
+      <div class="problem">
+        <span class="section-kicker">Důvod</span>
+        <h2>Vaše láhve si vás <em>nepamatují.</em></h2>
+        <p class="problem-text">
+          Stojí v regále nebo ve sklepě.
+          Nevíte, kdy je otevřít. Nepamatujete si, jak chutnaly. Komu zachutnaly nejvíc.
+          <br><br>
+          Vinora si pamatuje za vás.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features">
+    <div class="container">
+      <div class="features-head">
+        <span class="section-kicker">Co Vinora umí</span>
+        <h2>Vše, co od vinného <em>deníku</em> čekáte.</h2>
+        <p>Bez sociálního feedu. Bez nutnosti začít používat ještě další app.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></svg>
+          </div>
+          <h3>Sken etikety</h3>
+          <p>Vyfoťte etiketu telefonem nebo screenshot z e-shopu — Vinora vyplní pole sama.</p>
+        </div>
+
+        <div class="feature">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <h3>Hodnocení a vzpomínky</h3>
+          <p>Hvězdičky, komentář, datum. Pamatuje si, co a s kým jste pili — i deset let zpět.</p>
+        </div>
+
+        <div class="feature">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <h3>Sklep s rytmem</h3>
+          <p>Vyplňte počet láhví a okno pití. Vinora vám připomene, když má víno otevírat.</p>
+        </div>
+
+        <div class="feature">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+          </div>
+          <h3>Veřejné sdílení</h3>
+          <p>Pošlete kamarádovi odkaz na vaše hodnocení. Bez registrace, bez aplikace, bez stažení.</p>
+        </div>
+
+        <div class="feature">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
+          </div>
+          <h3>Statistika &amp; mapa</h3>
+          <p>Kalendář degustací, párování s jídlem, vinařské oblasti — vše, co se dá z vašich vín spočítat.</p>
+        </div>
+
+        <div class="feature">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 22s-8-7.58-8-13a8 8 0 0 1 16 0c0 5.42-8 13-8 13z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          </div>
+          <h3>Soukromé. Vaše.</h3>
+          <p>Vaše vína vidíte jen vy. Žádný sociální feed. Žádné reklamy. Žádné prodávání dat.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SHOWCASE / Mockup -->
+  <section>
+    <div class="container">
+      <div class="showcase-head">
+        <span class="section-kicker">Vzhled</span>
+        <h2>Krásný. Klidný. <em>Tvůj.</em></h2>
+        <p>Inspirovaný Things 3 a Linear — sklep si zaslouží stejnou estetiku jako jeho víno.</p>
+      </div>
+
+      <div class="mockup">
+        <div class="mockup-inner">
+          <!-- Pick today -->
+          <div class="mock-pick">
+            <div>
+              <div class="mock-pick-kicker">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                PÍT DNES · VOLBA NA VEČER
+              </div>
+              <div class="mock-pick-name"><em>Frankovka</em> 2021</div>
+              <div class="mock-pick-meta">Vincúr Tesařík · vrchol pití · 4 láhve na skladě</div>
+            </div>
+            <button class="mock-pick-cta">
+              Otevřít láhev
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+
+          <!-- Stats -->
+          <div class="mock-stats">
+            <div class="mock-stat">
+              <div class="mock-stat-label">Lahví</div>
+              <div class="mock-stat-v">5</div>
+            </div>
+            <div class="mock-stat">
+              <div class="mock-stat-label">Hodnota</div>
+              <div class="mock-stat-v">650<small>Kč</small></div>
+            </div>
+            <div class="mock-stat">
+              <div class="mock-stat-label">Průměr</div>
+              <div class="mock-stat-v">3.0<small style="color:var(--gold)">★</small></div>
+            </div>
+            <div class="mock-stat">
+              <div class="mock-stat-label">Top region</div>
+              <div class="mock-stat-v" style="font-size:14px;line-height:1.4">Slovácká</div>
+            </div>
+          </div>
+
+          <!-- Wine list -->
+          <div class="mock-list">
+            <div class="mock-row">
+              <span class="mock-dot mock-dot-red"></span>
+              <div>
+                <div class="mock-row-name"><em>Frankovka</em> <small>2021</small></div>
+                <div class="mock-row-meta">Vincúr Tesařík · Slovácká · 13,0%</div>
+              </div>
+              <span class="mock-row-stars">★★★★<span class="off">★</span></span>
+              <span class="mock-row-bottles">4 láhve</span>
+            </div>
+            <div class="mock-row">
+              <span class="mock-dot mock-dot-white"></span>
+              <div>
+                <div class="mock-row-name"><em>Pinot blanc</em> Reserva <small>2023</small></div>
+                <div class="mock-row-meta">Vincúr Tesařík · Slovácká · 12,5%</div>
+              </div>
+              <span class="mock-row-stars">★★★<span class="off">★</span><span class="off">★</span></span>
+              <span class="mock-row-bottles">1 láhev</span>
+            </div>
+            <div class="mock-row" style="opacity:0.55">
+              <span class="mock-dot mock-dot-red"></span>
+              <div>
+                <div class="mock-row-name"><em>Frankovka</em> <small>2018</small></div>
+                <div class="mock-row-meta">vypito 28. února · ★★★★★</div>
+              </div>
+              <span class="mock-row-stars">★★★★★</span>
+              <span class="mock-row-bottles" style="color:var(--text-3)">vypito</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY VINORA -->
+  <section class="why">
+    <div class="container">
+      <div class="features-head">
+        <span class="section-kicker">Proč Vinora</span>
+        <h2>Když ostatní vinné appky <em>nezapadnou.</em></h2>
+        <p>Vinora není pro objevování — je pro lidi, co už svůj vkus znají.</p>
+      </div>
+
+      <div class="why-grid">
+        <div class="why-card">
+          <span class="why-card-tag">Ne jako Vivino</span>
+          <h4>Není to <em>sociální feed.</em></h4>
+          <p>Žádné polemika v komentářích, žádný discovery feed cizích vín. Vinora drží váš sklep — soukromý, váš.</p>
+        </div>
+
+        <div class="why-card">
+          <span class="why-card-tag">Ne jako CellarTracker</span>
+          <h4>Z roku 2026, ne <em>2008.</em></h4>
+          <p>Detailní cellar management — ale s estetikou, kterou byste čekali u moderní designové appky. Bez funkce navíc, bez funkce méně.</p>
+        </div>
+
+        <div class="why-card">
+          <span class="why-card-tag">Lokální</span>
+          <h4>Pro <em>moravský</em> i světový sklep.</h4>
+          <p>Slovácká, Mikulovská, Velkopavlovická, Znojemská — i Bordeaux, Toskánsko, Rioja. Plnohodnotně, bez ústupků.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section>
+    <div class="container">
+      <div class="pricing-head">
+        <span class="section-kicker">Cena</span>
+        <h2>Začněte zdarma. Plaťte, až <em>poznáte hodnotu.</em></h2>
+        <p>Bez triku, bez dotaznících „jakou kreditku použijete na trial".</p>
+      </div>
+
+      <div class="pricing-grid">
+        <!-- FREE -->
+        <div class="plan">
+          <div class="plan-name">Free</div>
+          <div class="plan-price">
+            <span class="plan-price-num">0</span>
+            <span class="plan-price-unit">Kč</span>
+          </div>
+          <div class="plan-price-yearly">Navždy zdarma</div>
+          <ul class="plan-features">
+            <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Až 10 vín v archivu</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Hodnocení &amp; komentáře</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Sklep &amp; okno pití</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Wishlist</li>
+            <li class="muted"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>Bez OCR scanu etiket</li>
+            <li class="muted"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>Bez veřejného sdílení</li>
+          </ul>
+          <a href="#waitlist" class="plan-cta">Vstoupit na waitlist</a>
+        </div>
+
+        <!-- PRO -->
+        <div class="plan plan-pro">
+          <span class="plan-badge">Doporučeno</span>
+          <div class="plan-name">Pro</div>
+          <div class="plan-price">
+            <span class="plan-price-num">99</span>
+            <span class="plan-price-unit">Kč/měs</span>
+          </div>
+          <div class="plan-price-yearly">
+            nebo <strong>990 Kč/rok</strong>
+            <span style="color:var(--gold)">·</span>
+            <em class="italic">early bird 495 Kč/rok navždy</em>
+          </div>
+          <ul class="plan-features">
+            <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><strong style="color:var(--text)">Neomezeně vín</strong></li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>OCR sken etiket (Claude Vision)</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Veřejné sdílení (read-only odkazy)</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Statistika, mapa, kalendář degustací</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Export sbírky (JSON, CSV)</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Notifikace · vrchol pití</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Prioritní podpora</li>
+          </ul>
+          <a href="#waitlist" class="plan-cta">Získat early bird cenu</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section>
+    <div class="container">
+      <div class="about">
+        <div class="about-avatar">K</div>
+        <h3>Kamil Juřík</h3>
+        <div class="about-role">Sběratel · Vývojář</div>
+        <p class="about-text">
+          Začal jsem stavět <em>pro sebe</em> — sbírám moravské víno a chtěl jsem appku,
+          která mi pomůže držet ve sklepě pořádek.
+        </p>
+        <p class="about-text">
+          Sběratelé z mého okolí říkali, že chybí. Tak ji teď otevírám i ostatním.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final-cta">
+    <div class="container">
+      <h2>Připraven psát <em>svůj</em> vinný deník?</h2>
+      <p class="final-cta-sub">
+        Spuštění Q3 2026. Vlož e-mail a dáme ti vědět první.
+      </p>
+
+      <div class="form-card">
+        <!-- ▼▼▼ MAILERLITE EMBED START (duplicate) ▼▼▼ -->
+        <form class="form-row" onsubmit="event.preventDefault(); alert('Po napojení MailerLite tady proběhne odeslání. Zatím placeholder.');">
+          <input type="email" required placeholder="vas@email.cz" autocomplete="email">
+          <button type="submit" class="form-cta">
+            Dej mi vědět
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </button>
+        </form>
+        <!-- ▲▲▲ MAILERLITE EMBED END ▲▲▲ -->
+        <div class="form-foot">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+          Bez kreditky · Žádný závazek
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">Vin<em>ora</em></div>
+      <div class="footer-links">
+        <a href="privacy.html">Soukromí</a>
+        <span style="color:var(--text-4)">·</span>
+        <a href="terms.html">Podmínky</a>
+        <span style="color:var(--text-4)">·</span>
+        <a href="imprint.html">Tiráž</a>
+        <span style="color:var(--text-4)">·</span>
+        <a href="mailto:kamil.jurik@easyportal365.com">Kontakt</a>
+      </div>
+      <div class="footer-meta">
+        © Kamil Juřík · 2026 · Vyrobeno s láskou v Česku
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

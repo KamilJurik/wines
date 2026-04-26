@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Podmínky · Vinora</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0E0D12; --bg-elev: #16151B;
+      --text: #F2EDE3; --text-2: #A09A8E; --text-3: #6B675F;
+      --border: #28262F; --wine: #D4485D; --gold: #DCB378;
+      --sans: 'Inter', sans-serif;
+      --serif: 'Cormorant Garamond', Georgia, serif;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    a { color: var(--gold); }
+    .nav { padding: 18px 24px; border-bottom: 1px solid var(--border); }
+    .brand { max-width: 760px; margin: 0 auto; display: inline-flex; align-items: baseline; font-size: 20px; font-weight: 500; letter-spacing: -0.015em; color: var(--text); text-decoration: none; }
+    .brand em { font-family: var(--serif); font-style: italic; color: var(--wine); }
+    .brand-dot { width: 4px; height: 4px; background: var(--wine); border-radius: 50%; margin-left: 4px; align-self: flex-end; margin-bottom: 4px; }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 56px 24px 80px; }
+    h1 { font-size: 42px; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 8px; }
+    h1 em { font-family: var(--serif); font-style: italic; color: var(--wine); font-weight: 500; }
+    .lead { font-family: var(--serif); font-style: italic; color: var(--text-2); font-size: 18px; margin-bottom: 6px; }
+    .meta { font-size: 12px; color: var(--text-3); letter-spacing: 0.04em; margin-bottom: 40px; }
+    h2 { font-size: 22px; font-weight: 500; letter-spacing: -0.015em; margin: 36px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 16px; font-weight: 600; margin: 20px 0 8px; }
+    p { color: var(--text-2); margin-bottom: 12px; }
+    ul { margin: 8px 0 16px 24px; color: var(--text-2); }
+    li { margin-bottom: 4px; }
+    .todo { display: inline-block; background: rgba(220,179,120,0.12); color: var(--gold); padding: 1px 8px; border-radius: 3px; font-family: ui-monospace, monospace; font-size: 13px; }
+    .footer { max-width: 760px; margin: 60px auto 0; padding: 24px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-3); text-align: center; }
+    .footer a { color: var(--text-2); text-decoration: none; margin: 0 8px; }
+    .footer a:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="brand">
+      Vin<em>ora</em><span class="brand-dot"></span>
+    </a>
+  </nav>
+
+  <div class="wrap">
+    <h1>Obchodní <em>podmínky</em></h1>
+    <p class="lead">Pravidla použití aplikace Vinora.</p>
+    <p class="meta">Účinnost: <span class="todo">DOPLNIT DATUM</span> · Verze 1.0</p>
+
+    <h2>1. Kdo to provozuje</h2>
+    <p>
+      Aplikaci Vinora („služba") provozuje <span class="todo">DOPLNIT JMÉNO</span>,
+      IČO <span class="todo">DOPLNIT</span>, se sídlem <span class="todo">DOPLNIT</span>
+      (dále jen „provozovatel").
+    </p>
+
+    <h2>2. Co služba poskytuje</h2>
+    <p>
+      Vinora je webová aplikace pro vedení vinného deníku — zápis vín, hodnocení,
+      sledování sklepa, sdílení vín přes veřejné odkazy. Služba je dostupná na adrese
+      <a href="https://vinora.cz">vinora.cz</a>.
+    </p>
+
+    <h2>3. Registrace a účet</h2>
+    <ul>
+      <li>K používání služby je nutná registrace s platným e-mailem.</li>
+      <li>Uživatel je povinen poskytnout pravdivé údaje a chránit přístupové heslo.</li>
+      <li>Provozovatel neodpovídá za škody způsobené zneužitím účtu třetí osobou (např. sdílením hesla).</li>
+      <li>Jeden uživatel = jeden účet. Pro rodinný sklep je nutný samostatný účet pro každého člena (pokud není explicitně podporován Family plán).</li>
+    </ul>
+
+    <h2>4. Plán Free</h2>
+    <ul>
+      <li>Plán Free je <strong>bezplatný</strong> a poskytuje omezenou funkcionalitu (max. 10 vín v archivu, bez OCR, bez veřejného sdílení).</li>
+      <li>Provozovatel si vyhrazuje právo limity Free plánu kdykoli změnit s upozorněním 30 dní předem.</li>
+      <li>Uživatel může kdykoli upgradovat na placený plán nebo účet smazat.</li>
+    </ul>
+
+    <h2>5. Plán Pro (placený)</h2>
+    <ul>
+      <li>Plán Pro je hrazen měsíčně (99 Kč/měs) nebo ročně (990 Kč/rok).</li>
+      <li>Platby zpracovává <a href="https://www.lemonsqueezy.com/" target="_blank" rel="noopener">Lemon Squeezy</a> jako Merchant of Record. Faktury vystavuje Lemon Squeezy.</li>
+      <li>Předplatné se obnovuje automaticky. Uživatel ho může kdykoli zrušit ve svém Lemon Squeezy zákaznickém portálu (link v profilu).</li>
+      <li>Po zrušení předplatné běží do konce zaplaceného období, pak účet přechází na Free plán.</li>
+      <li>Refund: do 14 dní od koupě bez udání důvodu (právo EU spotřebitele). Po této lhůtě jen v případě výrazné technické chyby.</li>
+    </ul>
+
+    <h2>6. Early bird cena</h2>
+    <p>
+      Prvních 100 přihlášených na waitlist (do <span class="todo">DATUM LAUNCH</span>)
+      získá Pro za 495 Kč/rok navždy (50% z běžné ceny). Tato cena platí dokud je předplatné
+      aktivní a obnovuje se. Pokud předplatné zrušíte a později obnovíte, platí běžná cena.
+    </p>
+
+    <h2>7. Vlastní obsah uživatele</h2>
+    <ul>
+      <li>Vína, fotky, hodnocení a komentáře, které do služby nahrajete, zůstávají vaším vlastnictvím.</li>
+      <li>Provozovatel získává pouze omezenou licenci k uložení a zobrazení vašeho obsahu vám (a osobám, kterým sdílíte odkaz).</li>
+      <li>Provozovatel <strong>nikdy</strong> váš obsah nepublikuje, neprodává ani nepoužívá pro reklamu.</li>
+    </ul>
+
+    <h2>8. Veřejné sdílení</h2>
+    <ul>
+      <li>Pokud aktivujete veřejné sdílení vína, generuje se náhodný odkaz, kterým může víno zobrazit kdokoli.</li>
+      <li>Sdílený obsah obsahuje název vína, vinařství, region, hodnocení, komentář a fotku. <strong>Nezahrnuje</strong> počet láhví, cenu, šarži ani historii degustací.</li>
+      <li>Sdílecí odkaz můžete kdykoli deaktivovat. Po deaktivaci přestane fungovat do 5 minut.</li>
+      <li>Jste odpovědní za obsah, který sdílíte (např. že váš komentář neporušuje práva třetích stran).</li>
+    </ul>
+
+    <h2>9. Co se nesmí</h2>
+    <ul>
+      <li>Nahrávat obsah, který porušuje práva třetích stran (autorská práva, soukromí, atd.).</li>
+      <li>Pokoušet se o neoprávněný přístup k cizím účtům nebo serveru.</li>
+      <li>Používat službu pro automatizované hromadné stahování nebo scraping.</li>
+      <li>Vytvářet falešné účty.</li>
+    </ul>
+    <p>
+      Při porušení si provozovatel vyhrazuje právo účet zablokovat bez náhrady.
+    </p>
+
+    <h2>10. Dostupnost a omezení</h2>
+    <ul>
+      <li>Provozovatel se zavazuje udržovat službu dostupnou v rozumné míře, ale negarantuje 100% uptime.</li>
+      <li>Plánovaná údržba je oznamována e-mailem 24 hodin předem (s výjimkou kritických bezpečnostních patchů).</li>
+      <li>Provozovatel neodpovídá za škody způsobené nedostupností služby (např. nemožnost zapsat víno).</li>
+    </ul>
+
+    <h2>11. Omezení odpovědnosti</h2>
+    <p>
+      Služba je poskytována „jak je". Provozovatel neodpovídá za:
+    </p>
+    <ul>
+      <li>Ztrátu dat (přestože pravidelně zálohuje) — důrazně doporučujeme používat funkci Export</li>
+      <li>Nepřesnosti v automaticky vyplněných datech (OCR, online vyhledávání)</li>
+      <li>Škody nepřímé povahy (ušlý zisk, výpadek byznysu, atd.)</li>
+    </ul>
+    <p>
+      Maximální odpovědnost provozovatele odpovídá výši zaplaceného předplatného za posledních 12 měsíců.
+    </p>
+
+    <h2>12. Změny podmínek</h2>
+    <p>
+      Provozovatel může podmínky změnit. Významné změny oznámí e-mailem 30 dní předem.
+      Pokud s úpravou nesouhlasíte, máte právo účet zrušit.
+    </p>
+
+    <h2>13. Rozhodné právo</h2>
+    <p>
+      Tyto podmínky se řídí právním řádem České republiky. Příslušným soudem je
+      soud podle sídla provozovatele.
+    </p>
+
+    <h2>14. Kontakt</h2>
+    <p>
+      <span class="todo">DOPLNIT JMÉNO + ADRESU + IČO</span><br>
+      <a href="mailto:kamil.jurik@easyportal365.com">kamil.jurik@easyportal365.com</a>
+    </p>
+  </div>
+
+  <div class="footer">
+    <a href="index.html">Vinora</a>
+    <a href="privacy.html">Soukromí</a>
+    <a href="imprint.html">Tiráž</a>
+    <a href="mailto:kamil.jurik@easyportal365.com">Kontakt</a>
+  </div>
+</body>
+</html>
