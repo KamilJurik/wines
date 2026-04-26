@@ -1,0 +1,2323 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vinora — Koncept UI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper:        #F6EFE0;
+      --paper-soft:   #FBF6EA;
+      --paper-deep:   #EBDFC8;
+      --ink:          #1C1216;
+      --ink-soft:     #4B3940;
+      --muted:        #8B7B6E;
+      --muted-soft:   #B0A091;
+      --bordeaux:     #4F1A26;
+      --wine:         #7E2839;
+      --wine-light:   #A8526A;
+      --gold:         #A0762E;
+      --gold-light:   #C4A576;
+      --gold-warm:    #E0C594;
+      --rose:         #D9A6B3;
+      --hairline:     #DCC9AB;
+      --hairline-soft:#E8DBC0;
+      --serif:        'Cormorant Garamond', Georgia, serif;
+      --sans:         'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --shadow-card:  0 1px 0 rgba(28,18,22,0.04), 0 12px 28px -16px rgba(79,26,38,0.18);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      color: var(--ink);
+      background: var(--paper);
+      line-height: 1.55;
+      font-size: 14.5px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Paper grain */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 800px 600px at 12% 8%, rgba(160,118,46,0.05), transparent 60%),
+        radial-gradient(ellipse 700px 500px at 90% 92%, rgba(92,31,46,0.06), transparent 55%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; cursor: pointer; }
+
+    h1, h2, h3, h4 { font-family: var(--serif); font-weight: 500; letter-spacing: -0.015em; line-height: 1.05; color: var(--ink); }
+    .serif-italic   { font-family: var(--serif); font-style: italic; font-weight: 400; }
+
+    .kicker {
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .kicker--ink { color: var(--ink-soft); }
+
+    .num {
+      font-family: var(--serif);
+      font-weight: 500;
+      font-feature-settings: "tnum","lnum";
+    }
+
+    /* ────────── Concept switcher ────────── */
+    .concept-switcher {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      background: rgba(28,18,22,0.92);
+      backdrop-filter: blur(12px);
+      color: var(--paper);
+      padding: 5px;
+      border-radius: 999px;
+      display: flex;
+      gap: 2px;
+      box-shadow: 0 8px 32px rgba(28,18,22,0.4);
+      font-size: 11.5px;
+      font-weight: 500;
+      letter-spacing: 0.4px;
+    }
+    .concept-switcher button {
+      background: none;
+      border: none;
+      color: rgba(246,239,224,0.65);
+      padding: 7px 14px;
+      border-radius: 999px;
+      transition: all .2s;
+    }
+    .concept-switcher button.active {
+      background: var(--gold-warm);
+      color: var(--ink);
+      font-weight: 600;
+    }
+    .concept-switcher button:hover:not(.active) { color: var(--paper); }
+
+    /* ────────── Views ────────── */
+    .view { display: none; min-height: 100vh; position: relative; z-index: 1; }
+    .view.active { display: block; animation: fadein .4s ease; }
+    @keyframes fadein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+    .container { max-width: 1320px; margin: 0 auto; padding: 0 40px; }
+
+    /* ╔══════════════════════════════════════════════╗ */
+    /* ║  VIEW 1 · LOGIN                              ║ */
+    /* ╚══════════════════════════════════════════════╝ */
+    .login-page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      background: var(--bordeaux);
+      color: var(--paper);
+    }
+    .login-hero {
+      padding: 80px 64px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(155deg, rgba(28,12,16,0.55) 0%, rgba(79,26,38,0.0) 70%),
+        radial-gradient(ellipse 600px 400px at 80% 20%, rgba(160,118,46,0.18), transparent 60%),
+        var(--bordeaux);
+    }
+    .login-hero::after {
+      content: '';
+      position: absolute;
+      bottom: -40%;
+      right: -20%;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      border: 1px solid rgba(224,197,148,0.18);
+    }
+    .login-hero::before {
+      content: '';
+      position: absolute;
+      top: 35%;
+      right: -10%;
+      width: 350px;
+      height: 350px;
+      border-radius: 50%;
+      border: 1px solid rgba(224,197,148,0.10);
+    }
+    .login-mark {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      position: relative;
+      z-index: 2;
+    }
+    .login-mark .num-mark {
+      font-family: var(--serif);
+      font-size: 13px;
+      letter-spacing: 0.3em;
+      color: var(--gold-warm);
+      opacity: 0.7;
+    }
+    .login-mark .name {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 18px;
+      color: var(--paper);
+    }
+    .login-headline {
+      position: relative;
+      z-index: 2;
+      max-width: 560px;
+    }
+    .login-headline .kicker {
+      color: var(--gold-warm);
+      margin-bottom: 24px;
+      display: block;
+    }
+    .login-headline h1 {
+      font-size: clamp(56px, 7vw, 96px);
+      font-weight: 500;
+      color: var(--paper);
+      margin-bottom: 28px;
+    }
+    .login-headline h1 em {
+      font-style: italic;
+      color: var(--gold-warm);
+      font-weight: 400;
+    }
+    .login-headline p {
+      font-family: var(--serif);
+      font-size: 22px;
+      font-style: italic;
+      color: rgba(246,239,224,0.78);
+      max-width: 420px;
+      line-height: 1.5;
+    }
+    .login-quote {
+      position: relative;
+      z-index: 2;
+      padding-top: 28px;
+      border-top: 1px solid rgba(224,197,148,0.18);
+      max-width: 380px;
+    }
+    .login-quote .qmark {
+      font-family: var(--serif);
+      font-size: 64px;
+      line-height: 1;
+      color: var(--gold-warm);
+      opacity: 0.5;
+      margin-bottom: -14px;
+      display: block;
+    }
+    .login-quote p {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 16px;
+      color: rgba(246,239,224,0.85);
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+    .login-quote .attr {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(224,197,148,0.7);
+    }
+
+    .login-form-side {
+      background: var(--paper-soft);
+      color: var(--ink);
+      padding: 80px 64px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+    .login-form-side::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 1px;
+      background: linear-gradient(180deg, transparent, rgba(160,118,46,0.4), transparent);
+    }
+    .login-form-inner {
+      max-width: 360px;
+      width: 100%;
+    }
+    .login-form-inner .kicker { margin-bottom: 12px; }
+    .login-form-inner h2 {
+      font-size: 44px;
+      margin-bottom: 8px;
+    }
+    .login-form-inner > p.lead {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 18px;
+      color: var(--muted);
+      margin-bottom: 36px;
+    }
+    .field {
+      margin-bottom: 18px;
+    }
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      margin-bottom: 8px;
+    }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      padding: 12px 0;
+      border: none;
+      border-bottom: 1px solid var(--hairline);
+      background: transparent;
+      color: var(--ink);
+      font-family: var(--serif);
+      font-size: 22px;
+      font-weight: 500;
+      transition: border-color .2s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      outline: none;
+      border-bottom-color: var(--wine);
+    }
+    .field input::placeholder { color: var(--muted-soft); font-style: italic; }
+    .field textarea { resize: vertical; min-height: 80px; padding: 8px 0; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px 28px;
+      border: none;
+      border-radius: 0;
+      font-family: var(--sans);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      transition: all .2s;
+    }
+    .btn-primary {
+      background: var(--ink);
+      color: var(--paper);
+    }
+    .btn-primary:hover {
+      background: var(--bordeaux);
+      transform: translateY(-1px);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--hairline);
+    }
+    .btn-ghost:hover {
+      border-color: var(--wine);
+      color: var(--wine);
+    }
+    .btn-gold {
+      background: var(--gold);
+      color: var(--paper);
+    }
+    .btn-gold:hover {
+      background: var(--bordeaux);
+    }
+    .btn-arrow::after {
+      content: '→';
+      font-family: var(--serif);
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+    .btn-full { width: 100%; }
+
+    .or-divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 28px 0;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .or-divider::before, .or-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--hairline);
+    }
+
+    /* ╔══════════════════════════════════════════════╗ */
+    /* ║  TOP BAR (used in cellar/detail/etc)         ║ */
+    /* ╚══════════════════════════════════════════════╝ */
+    .topbar {
+      position: sticky;
+      top: 0;
+      background: rgba(246,239,224,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--hairline-soft);
+      z-index: 50;
+    }
+    .topbar-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 18px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+    .brand .num-mark {
+      font-family: var(--serif);
+      font-size: 11px;
+      letter-spacing: 0.32em;
+      color: var(--gold);
+    }
+    .brand .name {
+      font-family: var(--serif);
+      font-size: 24px;
+      font-weight: 500;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+    .brand .name em {
+      font-style: italic;
+      color: var(--wine);
+    }
+    .topbar-nav {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+    .topbar-nav a {
+      color: var(--ink-soft);
+      transition: color .15s;
+      padding: 4px 0;
+      border-bottom: 1px solid transparent;
+    }
+    .topbar-nav a:hover, .topbar-nav a.active {
+      color: var(--ink);
+      border-bottom-color: var(--gold);
+    }
+    .topbar-user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-left: 20px;
+      border-left: 1px solid var(--hairline);
+    }
+    .topbar-user .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--wine);
+      color: var(--paper);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    .topbar-user .name {
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .topbar-user .name span {
+      display: block;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 400;
+    }
+
+    /* ╔══════════════════════════════════════════════╗ */
+    /* ║  VIEW 2 · CELLAR                             ║ */
+    /* ╚══════════════════════════════════════════════╝ */
+    .cellar-hero {
+      padding: 64px 0 48px;
+      border-bottom: 1px solid var(--hairline-soft);
+    }
+    .cellar-hero-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: end;
+    }
+    .cellar-hero h1 {
+      font-size: clamp(64px, 8vw, 112px);
+      font-weight: 500;
+      letter-spacing: -0.025em;
+      margin-bottom: 0;
+    }
+    .cellar-hero h1 em {
+      font-style: italic;
+      color: var(--wine);
+    }
+    .cellar-hero-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 19px;
+      color: var(--ink-soft);
+      line-height: 1.4;
+      max-width: 380px;
+      padding-bottom: 12px;
+    }
+    .cellar-hero-meta::before {
+      content: '';
+      width: 32px;
+      height: 1px;
+      background: var(--gold);
+      margin-bottom: 6px;
+    }
+    .cellar-hero-meta .small {
+      font-family: var(--sans);
+      font-style: normal;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .stats-band {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid var(--hairline);
+      border-bottom: 1px solid var(--hairline);
+      margin: 48px 0 56px;
+    }
+    .stats-band .stat {
+      padding: 28px 24px;
+      border-right: 1px solid var(--hairline);
+      text-align: left;
+    }
+    .stats-band .stat:last-child { border-right: none; }
+    .stats-band .kicker { display: block; margin-bottom: 12px; }
+    .stats-band .num {
+      font-size: 56px;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    .stats-band .num em {
+      font-family: var(--serif);
+      font-style: italic;
+      color: var(--gold);
+      font-size: 0.42em;
+      vertical-align: middle;
+      margin-left: 8px;
+      font-weight: 500;
+    }
+    .stats-band .sub {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      font-style: italic;
+      font-family: var(--serif);
+      font-size: 14px;
+    }
+
+    /* Search/filter bar */
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 16px;
+      margin-bottom: 28px;
+      align-items: center;
+    }
+    .search-input {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      border: 1px solid var(--hairline);
+      background: var(--paper-soft);
+      transition: border-color .2s;
+    }
+    .search-input:focus-within { border-color: var(--wine); }
+    .search-input input {
+      border: none;
+      outline: none;
+      background: transparent;
+      flex: 1;
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 18px;
+      color: var(--ink);
+    }
+    .search-input input::placeholder { color: var(--muted-soft); }
+    .search-icon { color: var(--muted); font-size: 16px; }
+
+    .pill-group {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--hairline);
+    }
+    .pill {
+      background: transparent;
+      border: none;
+      padding: 14px 20px;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      font-weight: 500;
+      transition: all .15s;
+      border-right: 1px solid var(--hairline);
+    }
+    .pill:last-child { border-right: none; }
+    .pill.active {
+      background: var(--ink);
+      color: var(--paper);
+    }
+    .pill:hover:not(.active) {
+      background: var(--paper-soft);
+      color: var(--ink);
+    }
+
+    .icon-btn {
+      width: 50px;
+      height: 50px;
+      border: 1px solid var(--hairline);
+      background: var(--paper-soft);
+      color: var(--ink-soft);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .15s;
+    }
+    .icon-btn:hover { border-color: var(--wine); color: var(--wine); }
+
+    /* Wine grid */
+    .wine-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 0;
+      border-top: 1px solid var(--hairline-soft);
+    }
+    .wine-card {
+      padding: 32px 28px 28px;
+      border-bottom: 1px solid var(--hairline-soft);
+      border-right: 1px solid var(--hairline-soft);
+      position: relative;
+      transition: background .2s;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 260px;
+    }
+    .wine-card:hover {
+      background: var(--paper-soft);
+    }
+    .wine-card .top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .color-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--ink-soft);
+    }
+    .color-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .color-dot.red    { background: #7B1A28; }
+    .color-dot.white  { background: #C9A84C; }
+    .color-dot.rose   { background: #D9A6B3; }
+    .color-dot.orange { background: #C8772A; }
+    .color-dot.sparkling { background: #5B8EA6; }
+
+    .vintage {
+      font-family: var(--serif);
+      font-size: 14px;
+      color: var(--muted);
+      font-feature-settings: "tnum";
+    }
+    .wine-card h3 {
+      font-size: 28px;
+      line-height: 1.05;
+      margin-bottom: 4px;
+    }
+    .wine-winery {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 16px;
+      color: var(--wine);
+    }
+    .wine-region {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+    .wine-card .stars {
+      display: flex;
+      gap: 1px;
+      margin-top: 10px;
+      color: var(--gold);
+      font-size: 14px;
+    }
+    .wine-card .stars .off { color: var(--hairline); }
+
+    .wine-card-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px dashed var(--hairline);
+      font-size: 12px;
+      color: var(--ink-soft);
+    }
+    .wine-card-foot .bottles {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--serif);
+      font-size: 14px;
+    }
+    .wine-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 10px;
+    }
+    .tag-pill {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      background: var(--paper-deep);
+      color: var(--ink-soft);
+      font-weight: 500;
+    }
+    .wishlist-tag {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: var(--gold);
+      color: var(--paper);
+      padding: 4px 10px;
+      font-size: 9.5px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    /* Section: Dashboard charts */
+    .section {
+      padding: 72px 0;
+      border-top: 1px solid var(--hairline-soft);
+    }
+    .section-head {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: end;
+      margin-bottom: 40px;
+    }
+    .section-head h2 {
+      font-size: clamp(40px, 5vw, 64px);
+      letter-spacing: -0.02em;
+    }
+    .section-head h2 em {
+      color: var(--wine);
+      font-style: italic;
+    }
+    .section-head p {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 380px;
+    }
+
+    .charts-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      border: 1px solid var(--hairline);
+    }
+    .chart-block {
+      padding: 28px;
+      border-right: 1px solid var(--hairline);
+    }
+    .chart-block:last-child { border-right: none; }
+    .chart-block h4 {
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 24px;
+      font-family: var(--sans);
+      font-weight: 600;
+    }
+    .bar-row {
+      display: grid;
+      grid-template-columns: 60px 1fr 30px;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+    .bar-label { color: var(--ink-soft); font-family: var(--serif); font-size: 15px; }
+    .bar-track {
+      height: 1px;
+      background: var(--hairline);
+      position: relative;
+    }
+    .bar-fill {
+      position: absolute;
+      top: -4px;
+      left: 0;
+      height: 9px;
+      background: var(--wine);
+    }
+    .bar-fill.gold { background: var(--gold); }
+    .bar-fill.bordeaux { background: var(--bordeaux); }
+    .bar-fill.rose { background: var(--rose); }
+    .bar-count { text-align: right; font-family: var(--serif); color: var(--muted); }
+
+    /* Map + Timeline split */
+    .split {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 40px;
+      margin-top: 56px;
+    }
+    .map-card {
+      border: 1px solid var(--hairline);
+      background: var(--paper-soft);
+      overflow: hidden;
+      position: relative;
+    }
+    .map-card-head {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--hairline);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .map-card-head .kicker { color: var(--gold); }
+    .map-card-head .meta { font-family: var(--serif); font-style: italic; color: var(--muted); font-size: 14px; }
+    .map-fake {
+      height: 320px;
+      background:
+        radial-gradient(circle at 35% 50%, rgba(126,40,57,0.18), transparent 12%),
+        radial-gradient(circle at 30% 38%, rgba(126,40,57,0.14), transparent 8%),
+        radial-gradient(circle at 60% 65%, rgba(160,118,46,0.18), transparent 10%),
+        radial-gradient(circle at 75% 40%, rgba(160,118,46,0.16), transparent 9%),
+        radial-gradient(circle at 25% 70%, rgba(126,40,57,0.16), transparent 8%),
+        linear-gradient(120deg, var(--paper-deep) 0%, var(--paper-soft) 100%);
+      position: relative;
+    }
+    .map-pin {
+      position: absolute;
+      width: 14px; height: 14px;
+      background: var(--wine);
+      border-radius: 50%;
+      transform: translate(-50%,-50%);
+      box-shadow: 0 0 0 4px rgba(126,40,57,0.18);
+    }
+    .map-pin.gold { background: var(--gold); box-shadow: 0 0 0 4px rgba(160,118,46,0.18); }
+
+    .timeline-card {
+      border: 1px solid var(--hairline);
+      background: var(--paper-soft);
+    }
+    .timeline-card-head {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .timeline-list {
+      padding: 18px 24px;
+    }
+    .timeline-month {
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--wine);
+      margin: 14px 0 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--hairline-soft);
+    }
+    .timeline-month:first-child { margin-top: 0; }
+    .timeline-row {
+      display: grid;
+      grid-template-columns: 50px 1fr auto;
+      gap: 10px;
+      padding: 9px 0;
+      align-items: baseline;
+      font-size: 14px;
+      border-bottom: 1px dashed var(--hairline-soft);
+    }
+    .timeline-row:last-child { border-bottom: none; }
+    .timeline-row .day { font-family: var(--serif); color: var(--muted); }
+    .timeline-row .name { font-family: var(--serif); color: var(--ink); }
+    .timeline-row .stars { color: var(--gold); font-size: 11px; letter-spacing: 1px; }
+
+    /* ╔══════════════════════════════════════════════╗ */
+    /* ║  VIEW 3 · DETAIL                             ║ */
+    /* ╚══════════════════════════════════════════════╝ */
+    .crumbs {
+      padding: 24px 0 0;
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .crumbs a { color: var(--ink-soft); }
+    .crumbs a:hover { color: var(--wine); }
+    .crumbs .sep { margin: 0 10px; color: var(--hairline); }
+
+    .detail-hero {
+      padding: 32px 0 56px;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .detail-hero-grid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 60px;
+      align-items: end;
+    }
+    .detail-hero-left .kicker { display: block; margin-bottom: 16px; }
+    .detail-hero h1 {
+      font-size: clamp(64px, 8vw, 120px);
+      letter-spacing: -0.025em;
+      margin-bottom: 12px;
+      line-height: 0.95;
+    }
+    .detail-hero h1 em { font-style: italic; color: var(--wine); }
+    .detail-hero .winery {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 26px;
+      color: var(--wine);
+    }
+    .detail-hero .region {
+      margin-top: 8px;
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+    .detail-hero-right {
+      text-align: right;
+    }
+    .detail-vintage-big {
+      font-family: var(--serif);
+      font-size: clamp(140px, 16vw, 220px);
+      line-height: 0.85;
+      color: var(--gold);
+      font-weight: 500;
+      letter-spacing: -0.03em;
+    }
+    .detail-vintage-big em { font-style: italic; }
+    .detail-hero-right .meta {
+      margin-top: -8px;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .detail-quick-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 32px;
+      flex-wrap: wrap;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 64px;
+      padding: 56px 0;
+    }
+    .detail-card-block {
+      margin-bottom: 56px;
+    }
+    .detail-card-block:last-child { margin-bottom: 0; }
+    .detail-card-block .kicker { display: block; margin-bottom: 14px; }
+    .detail-card-block h3 {
+      font-size: 32px;
+      margin-bottom: 24px;
+      letter-spacing: -0.015em;
+    }
+
+    .specs-table {
+      width: 100%;
+      border-top: 1px solid var(--hairline);
+    }
+    .specs-table tr {
+      border-bottom: 1px solid var(--hairline-soft);
+    }
+    .specs-table th, .specs-table td {
+      padding: 14px 0;
+      text-align: left;
+      font-size: 14px;
+      vertical-align: baseline;
+    }
+    .specs-table th {
+      font-weight: 500;
+      color: var(--muted);
+      width: 38%;
+      letter-spacing: 0.04em;
+    }
+    .specs-table td {
+      font-family: var(--serif);
+      font-size: 18px;
+      color: var(--ink);
+      font-weight: 500;
+    }
+    .specs-table td em {
+      font-style: italic;
+      color: var(--muted);
+      font-size: 14px;
+      margin-left: 6px;
+    }
+
+    .photo-frame {
+      aspect-ratio: 3/4;
+      background:
+        linear-gradient(135deg, rgba(28,18,22,0.06), transparent),
+        linear-gradient(180deg, var(--paper-deep), var(--paper-soft));
+      border: 1px solid var(--hairline);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 15px;
+      box-shadow: var(--shadow-card);
+      position: relative;
+    }
+    .photo-frame::after {
+      content: '';
+      position: absolute;
+      inset: 8px;
+      border: 1px solid rgba(160,118,46,0.2);
+      pointer-events: none;
+    }
+
+    .rating-block {
+      padding: 32px;
+      background: var(--paper-soft);
+      border: 1px solid var(--hairline);
+      margin-bottom: 32px;
+    }
+    .rating-stars-big {
+      font-family: var(--serif);
+      font-size: 48px;
+      color: var(--gold);
+      letter-spacing: 4px;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+    .rating-stars-big .off { color: var(--hairline); }
+    .rating-text {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 16px;
+      color: var(--ink-soft);
+    }
+
+    .comment-pull {
+      padding: 32px 0;
+      border-top: 1px solid var(--hairline);
+      border-bottom: 1px solid var(--hairline);
+      margin-bottom: 32px;
+    }
+    .comment-pull .qmark {
+      font-family: var(--serif);
+      font-size: 80px;
+      line-height: 1;
+      color: var(--gold);
+      opacity: 0.6;
+      margin-bottom: -32px;
+      display: block;
+    }
+    .comment-pull p {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 22px;
+      line-height: 1.5;
+      color: var(--ink);
+    }
+    .comment-pull cite {
+      display: block;
+      margin-top: 16px;
+      font-style: normal;
+      font-family: var(--sans);
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .cellar-card {
+      padding: 28px 32px;
+      background: var(--ink);
+      color: var(--paper);
+      margin-bottom: 24px;
+    }
+    .cellar-card .kicker { color: var(--gold-warm); }
+    .cellar-card .big-num {
+      font-family: var(--serif);
+      font-size: 80px;
+      line-height: 1;
+      color: var(--paper);
+      margin: 12px 0;
+      font-weight: 500;
+    }
+    .cellar-card .big-num em {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 18px;
+      color: var(--gold-warm);
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .cellar-card .drink-window {
+      font-family: var(--serif);
+      font-size: 16px;
+      color: rgba(246,239,224,0.7);
+      margin-bottom: 20px;
+    }
+    .open-bottle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 24px;
+      background: var(--gold);
+      color: var(--ink);
+      border: none;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .open-bottle-btn:hover { background: var(--gold-warm); }
+
+    .similar-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .similar-card {
+      padding: 16px 18px;
+      background: var(--paper-soft);
+      border: 1px solid var(--hairline-soft);
+      transition: border-color .15s;
+    }
+    .similar-card:hover { border-color: var(--gold); }
+    .similar-card h5 {
+      font-family: var(--serif);
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+    .similar-card .meta {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+    .similar-card .stars {
+      margin-top: 6px;
+      color: var(--gold);
+      font-size: 11px;
+      letter-spacing: 1px;
+    }
+
+    /* ╔══════════════════════════════════════════════╗ */
+    /* ║  VIEW 4 · ADD WINE                           ║ */
+    /* ╚══════════════════════════════════════════════╝ */
+    .add-hero {
+      padding: 64px 0 32px;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .add-hero h1 {
+      font-size: clamp(56px, 7vw, 96px);
+      letter-spacing: -0.025em;
+    }
+    .add-hero h1 em { font-style: italic; color: var(--wine); }
+    .add-hero p {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 22px;
+      color: var(--muted);
+      margin-top: 16px;
+      max-width: 620px;
+    }
+
+    /* Import strip */
+    .import-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      margin: 40px 0 56px;
+      border: 1px solid var(--hairline);
+    }
+    .import-tool {
+      padding: 24px 22px;
+      border-right: 1px solid var(--hairline);
+      cursor: pointer;
+      transition: background .15s;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .import-tool:last-child { border-right: none; }
+    .import-tool:hover { background: var(--paper-soft); }
+    .import-tool .num-mark {
+      font-family: var(--serif);
+      font-size: 12px;
+      color: var(--gold);
+      letter-spacing: 0.3em;
+    }
+    .import-tool h4 {
+      font-family: var(--serif);
+      font-size: 22px;
+      letter-spacing: -0.01em;
+    }
+    .import-tool p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    .import-tool.active {
+      background: var(--ink);
+      color: var(--paper);
+    }
+    .import-tool.active .num-mark { color: var(--gold-warm); }
+    .import-tool.active h4 { color: var(--paper); }
+    .import-tool.active p { color: rgba(246,239,224,0.7); }
+
+    /* Form sections */
+    .form-section {
+      padding: 56px 0;
+      border-bottom: 1px solid var(--hairline-soft);
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 60px;
+    }
+    .form-section:last-child { border-bottom: none; }
+    .form-section-head .kicker { display: block; margin-bottom: 12px; }
+    .form-section-head h3 {
+      font-size: 32px;
+      letter-spacing: -0.01em;
+      margin-bottom: 12px;
+    }
+    .form-section-head p {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 240px;
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px 40px;
+    }
+    .form-grid-1 { display: grid; gap: 28px; }
+
+    .photo-upload {
+      aspect-ratio: 3/4;
+      max-width: 280px;
+      border: 1.5px dashed var(--hairline);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      color: var(--muted);
+      transition: all .2s;
+      cursor: pointer;
+      background: var(--paper-soft);
+    }
+    .photo-upload:hover {
+      border-color: var(--gold);
+      color: var(--wine);
+      background: var(--paper);
+    }
+    .photo-upload .glyph {
+      font-family: var(--serif);
+      font-size: 36px;
+    }
+    .photo-upload p {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    /* Star input */
+    .stars-input {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 4px;
+    }
+    .stars-input button {
+      background: none;
+      border: none;
+      font-family: var(--serif);
+      font-size: 36px;
+      color: var(--hairline);
+      transition: color .1s, transform .1s;
+      line-height: 1;
+      padding: 0;
+    }
+    .stars-input button.on { color: var(--gold); }
+    .stars-input button:hover { transform: scale(1.1); color: var(--gold); }
+    .stars-input .label {
+      margin-left: 14px;
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 16px;
+      color: var(--muted);
+    }
+
+    /* Tag input */
+    .tag-input {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--hairline);
+      align-items: center;
+    }
+    .tag-input:focus-within { border-bottom-color: var(--wine); }
+    .tag-pill-input {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 4px 4px 10px;
+      background: var(--ink);
+      color: var(--paper);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+    .tag-pill-input button {
+      background: none;
+      border: none;
+      color: rgba(246,239,224,0.7);
+      padding: 2px 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .tag-input input {
+      border: none;
+      outline: none;
+      background: transparent;
+      font-family: var(--serif);
+      font-size: 18px;
+      flex: 1;
+      min-width: 120px;
+      color: var(--ink);
+    }
+    .tag-input input::placeholder { color: var(--muted-soft); font-style: italic; }
+
+    /* Sticky form footer */
+    .sticky-footer {
+      position: sticky;
+      bottom: 0;
+      background: rgba(246,239,224,0.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--hairline);
+      padding: 20px 0;
+      margin-top: 56px;
+    }
+    .sticky-footer-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sticky-footer .summary {
+      font-family: var(--serif);
+      font-style: italic;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    /* ╔══════════════════════════════════════════════╗ */
+    /* ║  VIEW 5 · ADMIN                              ║ */
+    /* ╚══════════════════════════════════════════════╝ */
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      padding: 56px 0;
+    }
+    .user-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      gap: 16px;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--hairline-soft);
+      align-items: center;
+    }
+    .user-row .avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: var(--wine);
+      color: var(--paper);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--serif);
+      font-size: 18px;
+      font-style: italic;
+    }
+    .user-row .info h5 {
+      font-family: var(--serif);
+      font-size: 20px;
+      letter-spacing: -0.005em;
+    }
+    .user-row .info .email {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+    .user-row .status {
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-weight: 600;
+      padding: 4px 10px;
+    }
+    .status.pending { background: #FEF3C7; color: #92400E; }
+    .status.approved { background: var(--paper-deep); color: var(--gold); }
+    .row-actions { display: flex; gap: 4px; }
+    .btn-tiny {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 8px 14px;
+      font-weight: 600;
+      border: 1px solid var(--hairline);
+      background: var(--paper-soft);
+      color: var(--ink);
+    }
+    .btn-tiny:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .btn-tiny.danger { color: #991B1B; border-color: #FECACA; }
+    .btn-tiny.danger:hover { background: #991B1B; color: var(--paper); border-color: #991B1B; }
+
+    .audit-row {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 16px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--hairline-soft);
+      font-size: 14px;
+      align-items: baseline;
+    }
+    .audit-time {
+      font-family: var(--serif);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .audit-text {
+      font-family: var(--serif);
+      font-size: 16px;
+    }
+    .audit-text strong { color: var(--ink); font-weight: 500; }
+    .audit-action {
+      display: inline-block;
+      font-family: var(--sans);
+      font-size: 9.5px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-weight: 600;
+      padding: 2px 8px;
+      margin-right: 8px;
+    }
+    .audit-action.approve { background: #D1FAE5; color: #065F46; }
+    .audit-action.revoke  { background: #FEF3C7; color: #92400E; }
+    .audit-action.delete  { background: #FECACA; color: #991B1B; }
+
+    /* Footer */
+    .footer-band {
+      margin-top: 80px;
+      padding: 40px 0 60px;
+      border-top: 1px solid var(--hairline);
+      text-align: center;
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .footer-band .num-mark {
+      font-style: normal;
+      font-size: 11px;
+      letter-spacing: 0.32em;
+      color: var(--gold);
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    /* Responsive — minimal */
+    @media (max-width: 900px) {
+      .login-page, .cellar-hero-row, .section-head, .detail-hero-grid, .detail-grid, .form-section, .admin-grid, .split { grid-template-columns: 1fr; gap: 32px; }
+      .stats-band { grid-template-columns: repeat(2, 1fr); }
+      .stats-band .stat:nth-child(2) { border-right: none; }
+      .stats-band .stat:nth-child(1), .stats-band .stat:nth-child(2) { border-bottom: 1px solid var(--hairline); }
+      .charts-row, .import-strip, .similar-strip { grid-template-columns: 1fr; }
+      .chart-block, .import-tool { border-right: none; border-bottom: 1px solid var(--hairline); }
+      .form-grid-2 { grid-template-columns: 1fr; }
+      .container { padding: 0 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="concept-switcher">
+    <button class="active" onclick="showView('login', this)">Přihlášení</button>
+    <button onclick="showView('cellar', this)">Sklep</button>
+    <button onclick="showView('detail', this)">Detail vína</button>
+    <button onclick="showView('add', this)">Nové víno</button>
+    <button onclick="showView('admin', this)">Správa</button>
+  </nav>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!--  VIEW · LOGIN                                -->
+  <!-- ════════════════════════════════════════════ -->
+  <section id="login" class="view active">
+    <div class="login-page">
+      <div class="login-hero">
+        <div class="login-mark">
+          <span class="num-mark">№ 003</span>
+          <span class="name">Vinora</span>
+        </div>
+
+        <div class="login-headline">
+          <span class="kicker">Vinný deník</span>
+          <h1>Příběh<br>v každé <em>skleničce.</em></h1>
+          <p>Sbírka, kde každá láhev má vlastní řádek a vy si pamatujete, čím vás tehdy překvapila.</p>
+        </div>
+
+        <div class="login-quote">
+          <span class="qmark">"</span>
+          <p>V každé láhvi je krajina podzimu, ruce vinaře, trpělivost let — a vzpomínka, kterou si dnes uložíte.</p>
+          <span class="attr">— Z deníku K. J.</span>
+        </div>
+      </div>
+
+      <div class="login-form-side">
+        <div class="login-form-inner">
+          <span class="kicker">Vstup</span>
+          <h2>Vítejte zpět</h2>
+          <p class="lead">Pokračujte ve svém archivu.</p>
+
+          <div class="field">
+            <label>E-mail</label>
+            <input type="email" placeholder="vas@email.cz" value="kamil.jurik@easyportal365.com">
+          </div>
+          <div class="field">
+            <label>Heslo</label>
+            <input type="password" placeholder="••••••••" value="••••••••">
+          </div>
+
+          <button class="btn btn-primary btn-arrow btn-full" style="margin-top: 16px">Pokračovat</button>
+
+          <div class="or-divider">nebo</div>
+
+          <button class="btn btn-ghost btn-full">Vytvořit nový účet</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!--  VIEW · CELLAR                               -->
+  <!-- ════════════════════════════════════════════ -->
+  <section id="cellar" class="view">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="#">
+          <span class="num-mark">№ 003</span>
+          <span class="name">Vin<em>ora</em></span>
+        </a>
+        <nav class="topbar-nav">
+          <a href="#" class="active">Sklep</a>
+          <a href="#">Mapa</a>
+          <a href="#">Degustace</a>
+        </nav>
+        <div class="topbar-user">
+          <div class="avatar">K</div>
+          <div class="name">Kamil <span>Admin</span></div>
+        </div>
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="cellar-hero">
+        <div class="cellar-hero-row">
+          <div>
+            <span class="kicker">Vinný deník · Jaro 2026</span>
+            <h1 style="margin-top: 18px;">Tři <em>láhve,</em><br>tři příběhy.</h1>
+          </div>
+          <div class="cellar-hero-meta">
+            <span>Frankovka, Pinot blanc — a jeden tichý dárek z Vincúr Tesařík.</span>
+            <span class="small">Aktualizováno · 25. dubna 2026</span>
+          </div>
+        </div>
+
+        <div class="stats-band">
+          <div class="stat">
+            <span class="kicker">Lahví ve sklepě</span>
+            <div class="num">5<em>celkem</em></div>
+            <div class="sub">napříč třemi tituly</div>
+          </div>
+          <div class="stat">
+            <span class="kicker">Průměrné hodnocení</span>
+            <div class="num">3.0<em>★</em></div>
+            <div class="sub">z 1 hodnoceného vína</div>
+          </div>
+          <div class="stat">
+            <span class="kicker">Top země</span>
+            <div class="num" style="font-size: 36px;">Česká republika</div>
+            <div class="sub">3 ze 3 láhví</div>
+          </div>
+          <div class="stat">
+            <span class="kicker">Hodnota sklepa</span>
+            <div class="num">650<em>Kč</em></div>
+            <div class="sub">odhad podle vámi zadaných cen</div>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="search-input">
+            <span class="search-icon">⌕</span>
+            <input type="text" placeholder="Hledat víno, vinařství, odrůdu…">
+          </div>
+          <div class="pill-group">
+            <button class="pill active">Můj sklep</button>
+            <button class="pill">Wishlist</button>
+            <button class="pill">Všechna</button>
+          </div>
+          <button class="icon-btn" title="Filtry">≡</button>
+        </div>
+      </div>
+
+      <div class="wine-grid">
+        <a class="wine-card" href="#" onclick="showView('detail', null);return false">
+          <div class="top-row">
+            <div class="color-tag"><span class="color-dot red"></span>Červené</div>
+            <div class="vintage">2021</div>
+          </div>
+          <h3>Frankovka</h3>
+          <div class="wine-winery">Vincúr Tesařík</div>
+          <div class="wine-region">Slovácká podoblast · ČR · Zemské víno</div>
+          <div class="stars">★★★★<span class="off">★</span></div>
+          <div class="wine-tags">
+            <span class="tag-pill">archiv</span>
+            <span class="tag-pill">večeře</span>
+          </div>
+          <div class="wine-card-foot">
+            <div class="bottles">🍾 4 láhve</div>
+            <div>180 Kč/l</div>
+          </div>
+        </a>
+
+        <a class="wine-card" href="#">
+          <div class="top-row">
+            <div class="color-tag"><span class="color-dot white"></span>Bílé</div>
+            <div class="vintage">2023</div>
+          </div>
+          <h3>Pinot blanc Reserva</h3>
+          <div class="wine-winery">Vincúr Tesařík</div>
+          <div class="wine-region">Slovácká podoblast · ČR · Zemské víno</div>
+          <div class="stars">★★★<span class="off">★</span><span class="off">★</span></div>
+          <div class="wine-tags">
+            <span class="tag-pill">aperitiv</span>
+          </div>
+          <div class="wine-card-foot">
+            <div class="bottles">🍾 1 láhev</div>
+            <div>—</div>
+          </div>
+        </a>
+
+        <a class="wine-card" href="#">
+          <div class="top-row">
+            <div class="color-tag"><span class="color-dot red"></span>Červené</div>
+            <div class="vintage">2021</div>
+          </div>
+          <h3>Frankovka</h3>
+          <div class="wine-winery">Vincúr Tesařík</div>
+          <div class="wine-region">Otevřená degustace · březen 2026</div>
+          <div class="stars">★★★<span class="off">★</span><span class="off">★</span></div>
+          <div class="wine-card-foot">
+            <div class="bottles" style="color: var(--muted);">— vypito —</div>
+          </div>
+        </a>
+
+        <a class="wine-card" href="#" style="position: relative">
+          <span class="wishlist-tag">Wishlist</span>
+          <div class="top-row">
+            <div class="color-tag"><span class="color-dot orange"></span>Oranžové</div>
+            <div class="vintage">2022</div>
+          </div>
+          <h3>Pálava na slupkách</h3>
+          <div class="wine-winery">Dobrá vinice</div>
+          <div class="wine-region">Mikulovská · ČR</div>
+          <div class="stars"><span class="off">★</span><span class="off">★</span><span class="off">★</span><span class="off">★</span><span class="off">★</span></div>
+          <div class="wine-tags">
+            <span class="tag-pill">vyzkoušet</span>
+            <span class="tag-pill">tip Pavel</span>
+          </div>
+          <div class="wine-card-foot">
+            <div class="bottles" style="color: var(--gold);">🌟 K vyzkoušení</div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Section: Charts -->
+      <section class="section">
+        <div class="section-head">
+          <h2>Statistika <em>archivu</em></h2>
+          <p>Co o vašem sklepě vědí čísla a kam se nejvíc oblékáte.</p>
+        </div>
+
+        <div class="charts-row">
+          <div class="chart-block">
+            <h4>Hodnocení</h4>
+            <div class="bar-row"><div class="bar-label">★★★★★</div><div class="bar-track"></div><div class="bar-count">0</div></div>
+            <div class="bar-row"><div class="bar-label">★★★★</div><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><div class="bar-count">1</div></div>
+            <div class="bar-row"><div class="bar-label">★★★</div><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><div class="bar-count">2</div></div>
+            <div class="bar-row"><div class="bar-label">★★</div><div class="bar-track"></div><div class="bar-count">0</div></div>
+            <div class="bar-row"><div class="bar-label">★</div><div class="bar-track"></div><div class="bar-count">0</div></div>
+          </div>
+          <div class="chart-block">
+            <h4>Barva</h4>
+            <div class="bar-row"><div class="bar-label">Červené</div><div class="bar-track"><div class="bar-fill bordeaux" style="width:66%"></div></div><div class="bar-count">2</div></div>
+            <div class="bar-row"><div class="bar-label">Bílé</div><div class="bar-track"><div class="bar-fill gold" style="width:33%"></div></div><div class="bar-count">1</div></div>
+            <div class="bar-row"><div class="bar-label">Rosé</div><div class="bar-track"></div><div class="bar-count">0</div></div>
+            <div class="bar-row"><div class="bar-label">Oranžové</div><div class="bar-track"></div><div class="bar-count">0</div></div>
+          </div>
+          <div class="chart-block">
+            <h4>Ročníky</h4>
+            <div class="bar-row"><div class="bar-label">2021</div><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><div class="bar-count">2</div></div>
+            <div class="bar-row"><div class="bar-label">2022</div><div class="bar-track"></div><div class="bar-count">0</div></div>
+            <div class="bar-row"><div class="bar-label">2023</div><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><div class="bar-count">1</div></div>
+          </div>
+        </div>
+
+        <div class="split">
+          <div class="map-card">
+            <div class="map-card-head">
+              <span class="kicker">Mapa · Původ</span>
+              <span class="meta">3 vinice · 1 země</span>
+            </div>
+            <div class="map-fake">
+              <div class="map-pin" style="top:42%; left:45%"></div>
+              <div class="map-pin gold" style="top:48%; left:48%"></div>
+            </div>
+          </div>
+          <div class="timeline-card">
+            <div class="timeline-card-head">
+              <span class="kicker">Časová osa</span>
+            </div>
+            <div class="timeline-list">
+              <div class="timeline-month">Březen 2026</div>
+              <div class="timeline-row">
+                <span class="day">14. 3.</span>
+                <span class="name">Frankovka 2021 — Vincúr Tesařík</span>
+                <span class="stars">★★★</span>
+              </div>
+              <div class="timeline-row">
+                <span class="day">2. 3.</span>
+                <span class="name">Veltlín Sonberk 2020</span>
+                <span class="stars">★★★★</span>
+              </div>
+              <div class="timeline-month">Únor 2026</div>
+              <div class="timeline-row">
+                <span class="day">28. 2.</span>
+                <span class="name">Frankovka 2021 (poprvé)</span>
+                <span class="stars">★★★</span>
+              </div>
+              <div class="timeline-row">
+                <span class="day">14. 2.</span>
+                <span class="name">Pinot blanc Reserva 2023</span>
+                <span class="stars">★★★</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer-band">
+        <span class="num-mark">№ 003 · 2026</span>
+        Vinora — vinný deník · Příběh v každé skleničce
+      </footer>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!--  VIEW · DETAIL                               -->
+  <!-- ════════════════════════════════════════════ -->
+  <section id="detail" class="view">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="#" onclick="showView('cellar', null);return false">
+          <span class="num-mark">№ 003</span>
+          <span class="name">Vin<em>ora</em></span>
+        </a>
+        <nav class="topbar-nav">
+          <a href="#" onclick="showView('cellar', null);return false">Sklep</a>
+          <a href="#">Mapa</a>
+          <a href="#">Degustace</a>
+        </nav>
+        <div class="topbar-user">
+          <div class="avatar">K</div>
+          <div class="name">Kamil <span>Admin</span></div>
+        </div>
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="crumbs">
+        <a href="#" onclick="showView('cellar', null);return false">Sklep</a>
+        <span class="sep">/</span>
+        <a href="#">Červené</a>
+        <span class="sep">/</span>
+        <span>Frankovka 2021</span>
+      </div>
+
+      <div class="detail-hero">
+        <div class="detail-hero-grid">
+          <div class="detail-hero-left">
+            <span class="kicker">Červené · Zemské víno</span>
+            <h1><em>Frankovka</em></h1>
+            <div class="winery">Vincúr Tesařík</div>
+            <div class="region">SLOVÁCKÁ PODOBLAST · ČESKÁ REPUBLIKA</div>
+            <div class="detail-quick-actions">
+              <button class="btn btn-ghost">Upravit</button>
+              <button class="btn btn-gold">Otevřít láhev</button>
+              <button class="btn btn-ghost">Historie degustací</button>
+            </div>
+          </div>
+          <div class="detail-hero-right">
+            <div class="detail-vintage-big">2<em>0</em>21</div>
+            <div class="meta">Ročník</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <!-- LEFT COLUMN -->
+        <div>
+          <div class="detail-card-block">
+            <span class="kicker">Specifikace</span>
+            <h3>Co je v láhvi</h3>
+            <table class="specs-table">
+              <tr><th>Odrůda</th><td>Frankovka <em>(jednoodrůdové)</em></td></tr>
+              <tr><th>Typ vína</th><td>Suché</td></tr>
+              <tr><th>Přívlastek</th><td>Zemské víno</td></tr>
+              <tr><th>Obsah alkoholu</th><td>13,0 <em>%</em></td></tr>
+              <tr><th>Zbytkový cukr</th><td>2,1 <em>g/l</em></td></tr>
+              <tr><th>Kyseliny</th><td>5,8 <em>g/l</em></td></tr>
+              <tr><th>Objem</th><td>0,75 <em>l</em></td></tr>
+              <tr><th>Šarže</th><td>L21/04</td></tr>
+              <tr><th>Cena</th><td>180 <em>Kč</em></td></tr>
+            </table>
+          </div>
+
+          <div class="detail-card-block">
+            <span class="kicker">Původ</span>
+            <h3>Krajina vína</h3>
+            <table class="specs-table">
+              <tr><th>Země</th><td>Česká republika</td></tr>
+              <tr><th>Vinařská oblast</th><td>Morava</td></tr>
+              <tr><th>Podoblast</th><td>Slovácká</td></tr>
+              <tr><th>Viniční trať</th><td><em>Nezadáno</em></td></tr>
+              <tr><th>Vinařství</th><td>Vincúr Tesařík</td></tr>
+            </table>
+          </div>
+
+          <div class="detail-card-block">
+            <span class="kicker">Podobná vína</span>
+            <h3>Z téhož sklepa</h3>
+            <div class="similar-strip">
+              <a class="similar-card" href="#">
+                <h5>Frankovka 2021</h5>
+                <div class="meta">Vincúr Tesařík · vypito</div>
+                <div class="stars">★★★</div>
+              </a>
+              <a class="similar-card" href="#">
+                <h5>Pinot blanc Reserva</h5>
+                <div class="meta">Vincúr Tesařík · 2023</div>
+                <div class="stars">★★★</div>
+              </a>
+              <a class="similar-card" href="#">
+                <h5>Veltlín Sonberk</h5>
+                <div class="meta">Sonberk · 2020</div>
+                <div class="stars">★★★★</div>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div>
+          <div class="photo-frame">Etiketa · náhled</div>
+
+          <div class="cellar-card" style="margin-top: 32px">
+            <span class="kicker">Vinný sklep</span>
+            <div class="big-num">4<em>láhve</em></div>
+            <div class="drink-window">Vhodné k pití · 2024 — 2030</div>
+            <button class="open-bottle-btn">Otevřít láhev →</button>
+          </div>
+
+          <div class="rating-block">
+            <span class="kicker">Vaše hodnocení</span>
+            <div class="rating-stars-big">★★★★<span class="off">★</span></div>
+            <div class="rating-text">„Velmi dobré" — naposledy hodnoceno 14. března 2026</div>
+          </div>
+
+          <div class="comment-pull">
+            <span class="qmark">"</span>
+            <p>Voní po višních a kořeněném dřevě. V ústech kulaté, taniny už změkly, dlouhý dozvuk s tóny tabáku. Tahle láhev byla z těch lepších — možná počkáme s dalšími do podzimu.</p>
+            <cite>— Poznámka 14. března 2026</cite>
+          </div>
+
+          <div>
+            <span class="kicker">Štítky</span>
+            <div class="wine-tags" style="margin-top: 12px">
+              <span class="tag-pill">archiv</span>
+              <span class="tag-pill">večeře</span>
+              <span class="tag-pill">vincúr</span>
+              <span class="tag-pill">moravská klasika</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer-band">
+        <span class="num-mark">№ 003 · Frankovka 2021</span>
+        Záznam přidán 14. ledna 2025 · poslední aktualizace dnes
+      </footer>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!--  VIEW · ADD WINE                             -->
+  <!-- ════════════════════════════════════════════ -->
+  <section id="add" class="view">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="#" onclick="showView('cellar', null);return false">
+          <span class="num-mark">№ 003</span>
+          <span class="name">Vin<em>ora</em></span>
+        </a>
+        <nav class="topbar-nav">
+          <a href="#" onclick="showView('cellar', null);return false">Sklep</a>
+          <a href="#">Mapa</a>
+          <a href="#">Degustace</a>
+        </nav>
+        <div class="topbar-user">
+          <div class="avatar">K</div>
+          <div class="name">Kamil <span>Admin</span></div>
+        </div>
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="crumbs">
+        <a href="#" onclick="showView('cellar', null);return false">Sklep</a>
+        <span class="sep">/</span>
+        <span>Nový záznam</span>
+      </div>
+
+      <div class="add-hero">
+        <span class="kicker">Nový záznam</span>
+        <h1 style="margin-top: 14px">Přidat <em>láhev</em><br>do archivu.</h1>
+        <p>Začněte vyhledáním podle názvu, načtěte stránku z e-shopu, nebo naskenujte etiketu — pole se vyplní samy. Vše zkontrolujete a doladíte.</p>
+      </div>
+
+      <div class="import-strip">
+        <div class="import-tool active">
+          <span class="num-mark">I.</span>
+          <h4>Hledat dle názvu</h4>
+          <p>Prohledá 57 000+ vín na mojelahve.cz a Open Food Facts.</p>
+        </div>
+        <div class="import-tool">
+          <span class="num-mark">II.</span>
+          <h4>Načíst z URL</h4>
+          <p>Odkaz z e-shopu nebo katalogu — extrahuje JSON-LD a meta tagy.</p>
+        </div>
+        <div class="import-tool">
+          <span class="num-mark">III.</span>
+          <h4>Foto / sken etikety</h4>
+          <p>OCR rozpozná text z fotky. Funguje i offline.</p>
+        </div>
+        <div class="import-tool">
+          <span class="num-mark">IV.</span>
+          <h4>Čárový kód</h4>
+          <p>Naskenovat EAN/UPC kamerou nebo zadat ručně.</p>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr auto; gap: 16px; margin-bottom: 56px;">
+        <div class="search-input">
+          <span class="search-icon">⌕</span>
+          <input type="text" placeholder="Frankovka Vincúr Tesařík 2021…" value="Frankovka Vincúr Tesařík">
+        </div>
+        <button class="btn btn-primary">Hledat</button>
+      </div>
+
+      <!-- Form sections -->
+      <div class="form-section">
+        <div class="form-section-head">
+          <span class="kicker">Sekce I.</span>
+          <h3>Identita</h3>
+          <p>Klíčové informace, které vás později navedou na to správné víno.</p>
+        </div>
+        <div>
+          <div class="form-grid-1">
+            <div class="field">
+              <label>Název vína</label>
+              <input type="text" value="Frankovka">
+            </div>
+          </div>
+          <div class="form-grid-2" style="margin-top: 28px">
+            <div class="field">
+              <label>Vinařství</label>
+              <input type="text" value="Vincúr Tesařík">
+            </div>
+            <div class="field">
+              <label>Odrůda</label>
+              <input type="text" value="Frankovka">
+            </div>
+            <div class="field">
+              <label>Ročník</label>
+              <input type="text" value="2021">
+            </div>
+            <div class="field">
+              <label>Barva</label>
+              <select>
+                <option>Červené</option>
+                <option>Bílé</option>
+                <option>Rosé</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Přívlastek</label>
+              <input type="text" value="Zemské víno">
+            </div>
+            <div class="field">
+              <label>Typ vína</label>
+              <input type="text" value="Suché">
+            </div>
+          </div>
+          <div style="margin-top: 28px">
+            <label class="kicker" style="display: block; margin-bottom: 12px">Štítky</label>
+            <div class="tag-input">
+              <span class="tag-pill-input">archiv <button>×</button></span>
+              <span class="tag-pill-input">večeře <button>×</button></span>
+              <span class="tag-pill-input">vincúr <button>×</button></span>
+              <input type="text" placeholder="přidat štítek a Enter…">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-head">
+          <span class="kicker">Sekce II.</span>
+          <h3>Etiketa</h3>
+          <p>Fotka pomůže poznat víno na první pohled, i po letech.</p>
+        </div>
+        <div>
+          <div class="photo-upload">
+            <span class="glyph">⌷</span>
+            <p>Klikněte nebo přetáhněte<br>fotku etikety</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-head">
+          <span class="kicker">Sekce III.</span>
+          <h3>Krajina</h3>
+          <p>Odkud víno přišlo. Stačí to, co vidíte na etiketě.</p>
+        </div>
+        <div class="form-grid-2">
+          <div class="field"><label>Země původu</label><input type="text" value="Česká republika"></div>
+          <div class="field"><label>Vinařská oblast</label><input type="text" value="Morava"></div>
+          <div class="field"><label>Podoblast</label><input type="text" value="Slovácká"></div>
+          <div class="field"><label>Viniční trať</label><input type="text" placeholder="např. Nechory"></div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-head">
+          <span class="kicker">Sekce IV.</span>
+          <h3>Specifikace</h3>
+          <p>Z chemie etikety. Co se nevejde, jednoduše vynechte.</p>
+        </div>
+        <div class="form-grid-2">
+          <div class="field"><label>Alkohol (%)</label><input type="text" value="13,0"></div>
+          <div class="field"><label>Zbytkový cukr (g/l)</label><input type="text" value="2,1"></div>
+          <div class="field"><label>Kyseliny (g/l)</label><input type="text" value="5,8"></div>
+          <div class="field"><label>Objem (l)</label><input type="text" value="0,75"></div>
+          <div class="field"><label>Šarže</label><input type="text" value="L21/04"></div>
+          <div class="field"><label>Cena (Kč)</label><input type="text" value="180"></div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-head">
+          <span class="kicker">Sekce V.</span>
+          <h3>Sklep</h3>
+          <p>Kolik máte láhví a kdy je vhodný čas otevřít.</p>
+        </div>
+        <div class="form-grid-2">
+          <div class="field"><label>Počet lahví</label><input type="text" value="4"></div>
+          <div class="field"><label>Cena za láhev</label><input type="text" value="180"></div>
+          <div class="field"><label>Pít od (rok)</label><input type="text" value="2024"></div>
+          <div class="field"><label>Pít do (rok)</label><input type="text" value="2030"></div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-head">
+          <span class="kicker">Sekce VI.</span>
+          <h3>Hodnocení &amp; komentář</h3>
+          <p>Vaše osobní vzpomínka, ke které se budete vracet.</p>
+        </div>
+        <div>
+          <div class="field">
+            <label>Hodnocení</label>
+            <div class="stars-input">
+              <button class="on">★</button>
+              <button class="on">★</button>
+              <button class="on">★</button>
+              <button class="on">★</button>
+              <button>★</button>
+              <span class="label">★★★★ Velmi dobré</span>
+            </div>
+          </div>
+          <div class="field" style="margin-top: 28px">
+            <label>Komentář</label>
+            <textarea placeholder="Co jste cítili, k čemu jste pili, co stojí za zapamatování…">Voní po višních a kořeněném dřevě. V ústech kulaté, taniny už změkly, dlouhý dozvuk s tóny tabáku.</textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="sticky-footer">
+        <div class="sticky-footer-inner">
+          <span class="summary"><em>Frankovka 2021 · Vincúr Tesařík · 4 láhve</em></span>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost">Zrušit</button>
+            <button class="btn btn-primary btn-arrow">Uložit záznam</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!--  VIEW · ADMIN                                -->
+  <!-- ════════════════════════════════════════════ -->
+  <section id="admin" class="view">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="#" onclick="showView('cellar', null);return false">
+          <span class="num-mark">№ 003</span>
+          <span class="name">Vin<em>ora</em></span>
+        </a>
+        <nav class="topbar-nav">
+          <a href="#" onclick="showView('cellar', null);return false">Sklep</a>
+          <a href="#" class="active">Správa</a>
+        </nav>
+        <div class="topbar-user">
+          <div class="avatar">K</div>
+          <div class="name">Kamil <span>Admin</span></div>
+        </div>
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="add-hero">
+        <span class="kicker">Správa · Admin</span>
+        <h1 style="margin-top: 14px">Lidé <em>v archivu.</em></h1>
+        <p>Schvalte nové žadatele, spravujte přístupy a sledujte historii akcí.</p>
+      </div>
+
+      <div class="admin-grid">
+        <div>
+          <span class="kicker">Čekají na schválení</span>
+          <h3 style="font-size: 28px; margin: 12px 0 24px">2 noví žadatelé</h3>
+
+          <div class="user-row">
+            <div class="avatar">P</div>
+            <div class="info">
+              <h5>Petr Novák</h5>
+              <div class="email">petr.novak@example.com · registrace 23. 4. 2026</div>
+            </div>
+            <span class="status pending">Čeká</span>
+            <div class="row-actions">
+              <button class="btn-tiny">Schválit</button>
+              <button class="btn-tiny danger">Zamítnout</button>
+            </div>
+          </div>
+          <div class="user-row">
+            <div class="avatar">M</div>
+            <div class="info">
+              <h5>Marie Dvořáková</h5>
+              <div class="email">marie@example.com · registrace 22. 4. 2026</div>
+            </div>
+            <span class="status pending">Čeká</span>
+            <div class="row-actions">
+              <button class="btn-tiny">Schválit</button>
+              <button class="btn-tiny danger">Zamítnout</button>
+            </div>
+          </div>
+
+          <span class="kicker" style="display: block; margin-top: 56px">Schválení uživatelé</span>
+          <h3 style="font-size: 28px; margin: 12px 0 24px">3 v archivu</h3>
+
+          <div class="user-row">
+            <div class="avatar">J</div>
+            <div class="info">
+              <h5>Jan Procházka</h5>
+              <div class="email">jan@example.com · 18 vín</div>
+            </div>
+            <span class="status approved">Schválen</span>
+            <div class="row-actions">
+              <button class="btn-tiny danger">Odebrat</button>
+            </div>
+          </div>
+          <div class="user-row">
+            <div class="avatar">L</div>
+            <div class="info">
+              <h5>Lenka Černá</h5>
+              <div class="email">lenka@example.com · 7 vín</div>
+            </div>
+            <span class="status approved">Schválen</span>
+            <div class="row-actions">
+              <button class="btn-tiny danger">Odebrat</button>
+            </div>
+          </div>
+          <div class="user-row">
+            <div class="avatar">T</div>
+            <div class="info">
+              <h5>Tomáš Veselý</h5>
+              <div class="email">tomas@example.com · 12 vín</div>
+            </div>
+            <span class="status approved">Schválen</span>
+            <div class="row-actions">
+              <button class="btn-tiny danger">Odebrat</button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <span class="kicker">Audit log</span>
+          <h3 style="font-size: 28px; margin: 12px 0 24px">Historie akcí</h3>
+
+          <div class="audit-row">
+            <div class="audit-time">25. 4. · 09:14</div>
+            <div class="audit-text"><span class="audit-action approve">Schválil</span><strong>Jan Procházka</strong></div>
+          </div>
+          <div class="audit-row">
+            <div class="audit-time">23. 4. · 18:42</div>
+            <div class="audit-text"><span class="audit-action approve">Schválil</span><strong>Lenka Černá</strong></div>
+          </div>
+          <div class="audit-row">
+            <div class="audit-time">21. 4. · 14:08</div>
+            <div class="audit-text"><span class="audit-action revoke">Odebral</span><strong>Anonym z webu</strong></div>
+          </div>
+          <div class="audit-row">
+            <div class="audit-time">20. 4. · 11:22</div>
+            <div class="audit-text"><span class="audit-action approve">Schválil</span><strong>Tomáš Veselý</strong></div>
+          </div>
+          <div class="audit-row">
+            <div class="audit-time">18. 4. · 22:01</div>
+            <div class="audit-text"><span class="audit-action delete">Smazal</span><strong>spam@bot.com</strong></div>
+          </div>
+
+          <div style="margin-top: 56px; padding: 28px; background: var(--paper-soft); border: 1px solid var(--hairline);">
+            <span class="kicker">Bezpečnost</span>
+            <h3 style="font-size: 24px; margin: 12px 0 14px">Firestore Rules</h3>
+            <p style="font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--ink-soft); margin-bottom: 18px;">Aktuální verze pravidel: <strong>v3.0</strong> · publikováno 25. 4. 2026.</p>
+            <button class="btn btn-ghost">Zobrazit rules →</button>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer-band">
+        <span class="num-mark">№ 003 · Správa</span>
+        Vinora — vinný deník · Příběh v každé skleničce
+      </footer>
+    </div>
+  </section>
+
+  <script>
+    function showView(id, btn) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.concept-switcher button').forEach(b => b.classList.remove('active'));
+      if (btn && btn.classList) {
+        btn.classList.add('active');
+      } else {
+        // Programmatic switch — mark switcher button by view id
+        const map = {login:0, cellar:1, detail:2, add:3, admin:4};
+        document.querySelectorAll('.concept-switcher button')[map[id]]?.classList.add('active');
+      }
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  </script>
+</body>
+</html>
