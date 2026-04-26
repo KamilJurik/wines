@@ -154,7 +154,227 @@
       pointer-events: none;
     }
 
-    .hero-inner { position: relative; z-index: 1; text-align: center; max-width: 720px; margin: 0 auto; }
+    /* Atmospheric breathing orbs */
+    .hero-orb {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: blur(60px);
+      opacity: 0.5;
+    }
+    .hero-orb-1 {
+      width: 380px; height: 380px;
+      background: radial-gradient(circle, rgba(212,72,93,0.35), transparent 70%);
+      top: 10%; left: 5%;
+      animation: orbBreathe 9s ease-in-out infinite;
+    }
+    .hero-orb-2 {
+      width: 460px; height: 460px;
+      background: radial-gradient(circle, rgba(220,179,120,0.22), transparent 70%);
+      bottom: 5%; right: 5%;
+      animation: orbBreathe 11s ease-in-out infinite reverse;
+    }
+    .hero-orb-3 {
+      width: 280px; height: 280px;
+      background: radial-gradient(circle, rgba(123,31,46,0.28), transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation: orbBreathe 13s ease-in-out infinite 1s;
+    }
+    @keyframes orbBreathe {
+      0%, 100% { opacity: 0.4; transform: translate(0, 0) scale(1); }
+      50%      { opacity: 0.65; transform: translate(20px, -10px) scale(1.08); }
+    }
+    .hero-orb-3 {
+      animation-name: orbBreatheCenter;
+    }
+    @keyframes orbBreatheCenter {
+      0%, 100% { opacity: 0.35; transform: translate(-50%, -50%) scale(1); }
+      50%      { opacity: 0.55; transform: translate(-48%, -52%) scale(1.1); }
+    }
+
+    /* Wine glass silhouette behind headline */
+    .hero-glass-bg {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -52%);
+      width: 320px;
+      height: auto;
+      color: rgba(220,179,120,0.12);
+      pointer-events: none;
+      z-index: 0;
+      filter: drop-shadow(0 0 40px rgba(220,179,120,0.05));
+    }
+
+    /* Floating wine cards (decorative previews) */
+    .hero-float {
+      position: absolute;
+      background: rgba(22,21,27,0.78);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border-2);
+      border-radius: var(--r-md);
+      padding: 12px 16px;
+      box-shadow:
+        0 16px 40px rgba(0,0,0,0.5),
+        0 0 0 1px rgba(220,179,120,0.04);
+      pointer-events: none;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 200px;
+    }
+
+    .hero-float-1 {
+      top: 22%; left: 4%;
+      transform: rotate(-5deg);
+      animation: floatA 7s ease-in-out infinite;
+    }
+    .hero-float-2 {
+      top: 14%; right: 5%;
+      transform: rotate(4deg);
+      animation: floatB 8s ease-in-out infinite 1s;
+    }
+    .hero-float-3 {
+      bottom: 18%; right: 8%;
+      transform: rotate(-3deg);
+      animation: floatC 9s ease-in-out infinite 0.5s;
+    }
+    @keyframes floatA {
+      0%, 100% { transform: rotate(-5deg) translateY(0); }
+      50%      { transform: rotate(-5deg) translateY(-14px); }
+    }
+    @keyframes floatB {
+      0%, 100% { transform: rotate(4deg) translateY(0); }
+      50%      { transform: rotate(4deg) translateY(-18px); }
+    }
+    @keyframes floatC {
+      0%, 100% { transform: rotate(-3deg) translateY(0); }
+      50%      { transform: rotate(-3deg) translateY(-10px); }
+    }
+
+    .hf-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .hf-dot-red { background: var(--wine); box-shadow: 0 0 0 2px rgba(212,72,93,0.18); }
+    .hf-dot-white { background: var(--gold); box-shadow: 0 0 0 2px rgba(220,179,120,0.2); }
+
+    .hf-info { min-width: 0; }
+    .hf-name {
+      font-size: 13.5px;
+      font-weight: 500;
+      letter-spacing: -0.005em;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .hf-name em {
+      font-family: var(--serif-italic);
+      font-style: italic;
+      color: var(--wine);
+      font-weight: 500;
+    }
+    .hf-year { color: var(--text-3); font-weight: 400; margin-left: 3px; }
+    .hf-meta {
+      font-size: 11.5px;
+      color: var(--text-3);
+      margin-top: 2px;
+      white-space: nowrap;
+    }
+    .hf-stars {
+      color: var(--gold);
+      font-size: 11px;
+      letter-spacing: 1px;
+      margin-top: 3px;
+    }
+    .hf-stars .off { color: var(--text-4); }
+
+    /* Pít dnes — special card */
+    .hero-float-pick {
+      background:
+        linear-gradient(135deg, rgba(212,72,93,0.18) 0%, rgba(22,21,27,0.85) 100%);
+      border-color: rgba(212,72,93,0.35);
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .hf-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 9.5px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--wine);
+      margin-bottom: 4px;
+    }
+    .hf-pulse {
+      width: 5px; height: 5px;
+      background: var(--wine);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--wine);
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    .hero-inner {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    /* Decorative ornament */
+    .hero-ornament {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      color: var(--gold);
+      opacity: 0.55;
+    }
+    .ornament-line {
+      width: 60px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+    .hero-ornament svg {
+      width: 14px; height: 14px;
+      flex-shrink: 0;
+    }
+
+    /* Scroll indicator */
+    .hero-scroll {
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-3);
+      transition: color .15s;
+      animation: scrollHint 2.4s ease-in-out infinite;
+      z-index: 2;
+    }
+    .hero-scroll:hover { color: var(--gold); }
+    .hero-scroll-text {
+      font-size: 12.5px;
+      letter-spacing: 0.04em;
+    }
+    .hero-scroll svg {
+      width: 16px; height: 16px;
+    }
+    @keyframes scrollHint {
+      0%, 100% { transform: translate(-50%, 0); opacity: 0.5; }
+      50%      { transform: translate(-50%, 6px); opacity: 1; }
+    }
 
     .hero-kicker {
       display: inline-flex;
@@ -1475,14 +1695,23 @@
     }
 
     /* ──── Responsive ──── */
+    @media (max-width: 1200px) {
+      .hero-float { display: none; }
+      .hero-glass-bg { width: 240px; }
+    }
     @media (max-width: 700px) {
       .pricing-grid { grid-template-columns: 1fr; }
       .form-row { flex-direction: column; }
       .form-row input[type=email] { width: 100%; }
       .form-cta { width: 100%; justify-content: center; }
       .mock-stats { grid-template-columns: 1fr 1fr; }
-      .hero { padding: 100px 0 80px; }
+      .hero { padding: 100px 0 100px; }
       section { padding: 60px 0; }
+      .hero-glass-bg { width: 180px; opacity: 0.7; }
+      .hero-orb { filter: blur(50px); }
+      .hero-scroll { bottom: 18px; }
+      .hero-orb-1 { width: 240px; height: 240px; }
+      .hero-orb-2 { width: 280px; height: 280px; }
     }
   </style>
 </head>
@@ -1504,8 +1733,68 @@
   <!-- HERO -->
   <section class="hero">
     <div class="hero-grid-lines"></div>
+
+    <!-- Atmospheric breathing orbs -->
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-orb hero-orb-3"></div>
+
+    <!-- Decorative wine glass silhouette behind headline -->
+    <svg class="hero-glass-bg" viewBox="0 0 200 320" fill="none" stroke="currentColor" stroke-width="0.5" preserveAspectRatio="xMidYMid meet">
+      <!-- Bowl outline -->
+      <path d="M30 0 Q100 110 100 145 Q100 110 170 0" />
+      <!-- Wine fill -->
+      <path d="M55 30 Q100 100 100 135 Q100 100 145 30 Z" fill="rgba(212,72,93,0.05)" stroke="none"/>
+      <!-- Subtle wine highlight -->
+      <ellipse cx="100" cy="80" rx="22" ry="6" fill="rgba(220,179,120,0.08)" stroke="none"/>
+      <!-- Stem -->
+      <line x1="100" y1="145" x2="100" y2="280" />
+      <!-- Base curve -->
+      <path d="M60 280 Q100 290 140 280" />
+    </svg>
+
+    <!-- Floating wine card · Frankovka -->
+    <div class="hero-float hero-float-1" aria-hidden="true">
+      <span class="hf-dot hf-dot-red"></span>
+      <div class="hf-info">
+        <div class="hf-name"><em>Frankovka</em> <span class="hf-year">2021</span></div>
+        <div class="hf-meta">Vincúr Tesařík · 4 láhve</div>
+        <div class="hf-stars">★★★★<span class="off">★</span></div>
+      </div>
+    </div>
+
+    <!-- Floating wine card · Pít dnes (highlight) -->
+    <div class="hero-float hero-float-2 hero-float-pick" aria-hidden="true">
+      <div class="hf-kicker">
+        <span class="hf-pulse"></span>
+        PÍT DNES
+      </div>
+      <div class="hf-name"><em>Pinot blanc</em> Reserva</div>
+      <div class="hf-meta">Vrchol pití · zítra otevřít</div>
+    </div>
+
+    <!-- Floating wine card · Veltlín (top rated) -->
+    <div class="hero-float hero-float-3" aria-hidden="true">
+      <span class="hf-dot hf-dot-white"></span>
+      <div class="hf-info">
+        <div class="hf-name"><em>Veltlín</em> <span class="hf-year">2018</span></div>
+        <div class="hf-meta">Sonberk · vypito 28. 2.</div>
+        <div class="hf-stars" style="color:var(--gold)">★★★★★</div>
+      </div>
+    </div>
+
     <div class="container">
       <div class="hero-inner">
+
+        <!-- Decorative ornament -->
+        <div class="hero-ornament" aria-hidden="true">
+          <span class="ornament-line"></span>
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2 L13.5 9 L20 10 L13.5 11 L12 18 L10.5 11 L4 10 L10.5 9 Z" opacity="0.6"/>
+          </svg>
+          <span class="ornament-line"></span>
+        </div>
+
         <div class="hero-kicker">
           <span class="hero-kicker-dot"></span>
           Spuštění Q3 2026
@@ -1541,11 +1830,19 @@
           <span>Prvních <strong>100 přihlášených</strong> dostane Pro za <strong>495 Kč/rok</strong> navždy <span style="color:var(--text-3);text-decoration:line-through">990 Kč</span></span>
         </div>
       </div>
+
+      <!-- Scroll indicator -->
+      <a href="#problem" class="hero-scroll" aria-label="Posunout dolů">
+        <span class="hero-scroll-text italic">zjistit víc</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M12 5v14M19 12l-7 7-7-7"/>
+        </svg>
+      </a>
     </div>
   </section>
 
   <!-- PROBLEM -->
-  <section>
+  <section id="problem">
     <div class="container">
       <div class="problem">
         <span class="section-kicker">Důvod</span>
