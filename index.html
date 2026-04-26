@@ -730,7 +730,7 @@
       font-style: italic;
       color: var(--wine);
       font-weight: 500;
-      font-size: 1.05em;
+      font-size: 1.15em;
     }
     .features-head p {
       font-family: var(--serif-italic);
@@ -1846,10 +1846,15 @@
       gap: 18px;
     }
     .footer-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
       font-size: 18px;
       letter-spacing: -0.015em;
+      line-height: 1;
     }
-    .footer-brand em { font-family: var(--serif-italic); font-style: italic; color: var(--wine); }
+    .footer-brand-leaf { width: 1.1em; height: 1.1em; color: var(--wine); flex-shrink: 0; }
+    .footer-brand em { font-family: var(--serif-italic); font-style: italic; color: var(--wine); font-size: 1.20em; margin-left: 1px; }
     .footer-links {
       display: flex;
       gap: 18px;
@@ -2749,7 +2754,13 @@
   <!-- FOOTER -->
   <footer class="footer">
     <div class="footer-inner">
-      <div class="footer-brand">Vin<em>ora</em></div>
+      <div class="footer-brand">
+        <svg class="footer-brand-leaf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M11 21A8 8 0 0 1 9.6 5.4C15.5 4.3 17 3.7 19.5 3 19.5 3 19.5 17.5 11 21z"/>
+          <path d="M2 22c0-3 2-5.5 5.4-6"/>
+        </svg>
+        <span>Vin<em>ora</em></span>
+      </div>
       <div class="footer-links">
         <a href="privacy.html">Soukromí</a>
         <span style="color:var(--text-4)">·</span>
