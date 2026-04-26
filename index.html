@@ -22,6 +22,16 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 
+  <!-- MailerLite Universal -->
+  <script>
+  (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[])
+  .push(arguments);},l=d.createElement(e),l.async=1,l.src=u,
+  n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})
+  (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
+  ml('account', '2294529');
+  </script>
+  <!-- End MailerLite Universal -->
+
   <style>
     :root {
       --bg:           #0E0D12;
@@ -478,6 +488,145 @@
       color: var(--text-3);
     }
     .form-foot svg { color: var(--gold); width: 14px; height: 14px; }
+
+    /* ──── MailerLite form override (Vinora dark/gold) ──── */
+    .ml-embedded { background: transparent !important; }
+    .ml-form-embedContent,
+    .ml-form-embedContainer,
+    .ml-form-embedWrapper,
+    .ml-form-embedBody,
+    .ml-form-formContent,
+    .ml-form-align-center { background: transparent !important; box-shadow: none !important; padding: 0 !important; border: none !important; }
+    /* Email input */
+    .ml-embedded input[type=email],
+    .ml-embedded input[type=text] {
+      width: 100% !important;
+      padding: 12px 16px !important;
+      background: var(--bg) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: var(--r-sm) !important;
+      color: var(--text) !important;
+      font-family: var(--sans) !important;
+      font-size: 15px !important;
+      box-shadow: none !important;
+      transition: border-color .15s !important;
+    }
+    .ml-embedded input[type=email]:focus,
+    .ml-embedded input[type=text]:focus {
+      outline: none !important;
+      border-color: var(--gold) !important;
+    }
+    .ml-embedded input::placeholder { color: var(--text-3) !important; opacity: 1 !important; }
+
+    /* Submit button */
+    .ml-embedded .ml-form-embedSubmit button[type=submit],
+    .ml-embedded button[type=submit].primary,
+    .ml-embedded button.primary {
+      width: 100% !important;
+      padding: 12px 22px !important;
+      background: var(--wine) !important;
+      color: white !important;
+      border: none !important;
+      border-radius: var(--r-sm) !important;
+      font-family: var(--sans) !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      letter-spacing: -0.005em !important;
+      cursor: pointer !important;
+      transition: background .15s !important;
+      box-shadow: none !important;
+    }
+    .ml-embedded button[type=submit]:hover { background: #B73C50 !important; }
+
+    /* Loading spinner button */
+    .ml-embedded .loadingMessage,
+    .ml-embedded button.loading { background: var(--bg-elev-2) !important; }
+
+    /* Field rows + labels */
+    .ml-embedded .ml-form-fieldRow,
+    .ml-embedded .ml-form-formContent .ml-form-fieldRow { margin-bottom: 10px !important; padding: 0 !important; }
+    .ml-embedded label,
+    .ml-embedded .label-description {
+      color: var(--text-2) !important;
+      font-family: var(--sans) !important;
+      font-size: 13px !important;
+      line-height: 1.5 !important;
+    }
+    .ml-embedded label a, .ml-embedded p a {
+      color: var(--gold) !important;
+      text-decoration: underline !important;
+      text-decoration-color: rgba(220,179,120,0.4) !important;
+    }
+    .ml-embedded label a:hover { text-decoration-color: var(--gold) !important; }
+
+    /* Checkboxes (privacy + confirmation) */
+    .ml-embedded .ml-form-checkboxRow {
+      display: flex !important;
+      align-items: flex-start !important;
+      gap: 10px !important;
+      margin: 8px 0 !important;
+      padding: 10px 12px !important;
+      background: var(--bg) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: var(--r-sm) !important;
+    }
+    .ml-embedded .ml-form-checkboxRow input[type=checkbox] {
+      accent-color: var(--gold) !important;
+      width: 16px !important;
+      height: 16px !important;
+      margin-top: 2px !important;
+      cursor: pointer !important;
+    }
+    .ml-embedded .ml-form-checkboxRow label {
+      font-size: 12.5px !important;
+      cursor: pointer !important;
+      color: var(--text-2) !important;
+    }
+
+    /* Success / error states */
+    .ml-embedded .ml-form-successBody,
+    .ml-embedded .ml-form-successContent {
+      background: rgba(125,181,138,0.06) !important;
+      border: 1px solid rgba(125,181,138,0.3) !important;
+      border-radius: var(--r-sm) !important;
+      padding: 16px 20px !important;
+      color: var(--text) !important;
+      text-align: center !important;
+    }
+    .ml-embedded .ml-form-successBody h4 {
+      color: var(--success) !important;
+      font-family: var(--sans) !important;
+      font-size: 17px !important;
+      font-weight: 500 !important;
+      margin-bottom: 6px !important;
+    }
+    .ml-embedded .ml-form-successBody p {
+      color: var(--text-2) !important;
+      font-family: var(--sans) !important;
+      font-size: 14px !important;
+    }
+
+    /* Error/validation */
+    .ml-embedded .ml-error-message,
+    .ml-embedded .ml-form-error {
+      color: var(--wine) !important;
+      font-size: 12px !important;
+      margin-top: 4px !important;
+    }
+
+    /* Hide MailerLite default heading (we have our own context) */
+    .ml-embedded .ml-form-embedContent h1,
+    .ml-embedded .ml-form-embedContent h2,
+    .ml-embedded .ml-form-embedContent h4 { display: none !important; }
+    .ml-embedded .ml-form-embedContent p:not(.ml-form-successBody p) { display: none !important; }
+
+    /* Powered by MailerLite — necháme, ale zdecentníme */
+    .ml-form-embedFooter {
+      opacity: 0.4 !important;
+      font-size: 11px !important;
+      margin-top: 16px !important;
+      text-align: center !important;
+    }
 
     .hero-discount {
       margin-top: 28px;
@@ -1809,16 +1958,8 @@
 
         <!-- Waitlist form -->
         <div class="form-card" id="waitlist">
-          <!-- ▼▼▼ MAILERLITE EMBED START ▼▼▼ -->
-          <!-- Po vytvoření formuláře v MailerLite vyměň tento blok za jejich embed kód -->
-          <form class="form-row" onsubmit="event.preventDefault(); alert('Po napojení MailerLite tady proběhne odeslání. Zatím placeholder.');">
-            <input type="email" required placeholder="vas@email.cz" autocomplete="email">
-            <button type="submit" class="form-cta">
-              Dej mi vědět
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-            </button>
-          </form>
-          <!-- ▲▲▲ MAILERLITE EMBED END ▲▲▲ -->
+          <!-- MailerLite embedded form -->
+          <div class="ml-embedded" data-form="T9Fcbg"></div>
           <div class="form-foot">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             Žádný spam. Jeden e-mail při launchi a hotovo.
@@ -2485,15 +2626,8 @@
       </p>
 
       <div class="form-card">
-        <!-- ▼▼▼ MAILERLITE EMBED START (duplicate) ▼▼▼ -->
-        <form class="form-row" onsubmit="event.preventDefault(); alert('Po napojení MailerLite tady proběhne odeslání. Zatím placeholder.');">
-          <input type="email" required placeholder="vas@email.cz" autocomplete="email">
-          <button type="submit" class="form-cta">
-            Dej mi vědět
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-          </button>
-        </form>
-        <!-- ▲▲▲ MAILERLITE EMBED END ▲▲▲ -->
+        <!-- MailerLite embedded form -->
+        <div class="ml-embedded" data-form="T9Fcbg"></div>
         <div class="form-foot">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
           Bez kreditky · Žádný závazek
