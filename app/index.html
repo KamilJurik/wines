@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vinora — Vinný deník</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --wine:      #722F37;
+      --wine-dark: #3D1219;
+      --gold:      #C9963A;
+      --gold-lt:   #E8C47A;
+      --cream:     #F8F0E3;
+      --text:      #2C1810;
+      --border:    #D4C0A8;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      background: var(--wine-dark);
+    }
+
+    /* ── Levý panel ── */
+    .hero {
+      flex: 1;
+      background:
+        linear-gradient(160deg, rgba(61,18,25,0.92) 0%, rgba(114,47,55,0.75) 60%, rgba(61,18,25,0.95) 100%),
+        repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 40px,
+          rgba(201,150,58,0.04) 40px,
+          rgba(201,150,58,0.04) 41px
+        );
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 56px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Dekorativní kruh v pozadí */
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      border: 1px solid rgba(201,150,58,0.12);
+      top: -120px;
+      right: -160px;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      border: 1px solid rgba(201,150,58,0.08);
+      bottom: -80px;
+      left: -60px;
+    }
+
+    .hero-icon {
+      font-size: 52px;
+      margin-bottom: 20px;
+      display: block;
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+    }
+
+    .hero-title {
+      font-size: 48px;
+      font-weight: 800;
+      color: var(--gold-lt);
+      letter-spacing: -1px;
+      line-height: 1.05;
+      margin-bottom: 12px;
+    }
+
+    .hero-sub {
+      font-size: 16px;
+      color: rgba(248,240,227,0.65);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      font-weight: 500;
+      margin-bottom: 48px;
+    }
+
+    .hero-divider {
+      width: 48px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+      margin-bottom: 40px;
+    }
+
+    .hero-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .hero-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      color: rgba(248,240,227,0.75);
+      font-size: 15px;
+      line-height: 1.4;
+    }
+
+    .feat-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(201,150,58,0.15);
+      border: 1px solid rgba(201,150,58,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .feat-text strong {
+      display: block;
+      color: var(--cream);
+      font-size: 14px;
+      margin-bottom: 1px;
+    }
+    .feat-text span {
+      font-size: 13px;
+      opacity: 0.7;
+    }
+
+    /* Facts strip */
+    .facts-strip {
+      border-top: 1px solid rgba(201,150,58,0.2);
+      margin-top: 36px;
+      padding-top: 22px;
+    }
+    .facts-strip-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: rgba(232,196,122,0.6);
+      margin-bottom: 10px;
+    }
+    .fact-box {
+      background: rgba(201,150,58,0.09);
+      border: 1px solid rgba(201,150,58,0.22);
+      border-radius: 10px;
+      padding: 13px 15px;
+      display: flex;
+      gap: 11px;
+      align-items: flex-start;
+    }
+    .fact-emoji { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+    .fact-text { font-size: 13px; color: rgba(248,240,227,0.75); line-height: 1.55; }
+    .fact-text strong {
+      display: block;
+      color: #E8C47A;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 3px;
+    }
+
+    .hero-quote {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid rgba(201,150,58,0.15);
+      color: rgba(248,240,227,0.4);
+      font-size: 13px;
+      font-style: italic;
+      line-height: 1.6;
+    }
+
+    /* ── Pravý panel — formulář ── */
+    .form-panel {
+      width: 420px;
+      flex-shrink: 0;
+      background: var(--cream);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 48px 44px;
+      box-shadow: -8px 0 40px rgba(0,0,0,0.4);
+    }
+
+    .form-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 36px;
+    }
+
+    .form-logo-icon {
+      font-size: 28px;
+    }
+
+    .form-logo-text {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--wine);
+      letter-spacing: -0.5px;
+    }
+
+    .form-heading {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .form-heading-sub {
+      font-size: 14px;
+      color: #7A6560;
+      margin-bottom: 28px;
+    }
+
+    .form-group { margin-bottom: 16px; }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #5A4540;
+      margin-bottom: 7px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 15px;
+      color: var(--text);
+      background: white;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--wine);
+      box-shadow: 0 0 0 3px rgba(114,47,55,0.08);
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 13px;
+      background: var(--wine);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .btn-login:hover:not(:disabled) { background: var(--wine-dark); }
+    .btn-login:disabled { opacity: 0.6; cursor: default; }
+
+    .divider {
+      text-align: center;
+      color: #9A8A84;
+      font-size: 12px;
+      margin: 16px 0;
+      position: relative;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 44%;
+      height: 1px;
+      background: var(--border);
+    }
+    .divider::before { left: 0; }
+    .divider::after  { right: 0; }
+
+    .btn-register {
+      width: 100%;
+      padding: 11px;
+      background: transparent;
+      color: var(--wine);
+      border: 1.5px solid var(--wine);
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-family: inherit;
+    }
+    .btn-register:hover { background: rgba(114,47,55,0.05); }
+
+    .btn-back {
+      width: 100%;
+      padding: 9px;
+      background: transparent;
+      color: #7A6560;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: inherit;
+      margin-top: 8px;
+    }
+    .btn-back:hover { color: var(--wine); }
+
+    .msg {
+      padding: 10px 14px;
+      border-radius: 7px;
+      margin-bottom: 14px;
+      font-size: 13px;
+      display: none;
+    }
+    .msg.error   { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+    .msg.success { background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0; }
+
+    .spinner {
+      display: inline-block;
+      width: 15px;
+      height: 15px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      body { flex-direction: column; }
+      .hero {
+        padding: 40px 28px 36px;
+        flex: none;
+      }
+      .hero-title { font-size: 34px; }
+      .hero-features { display: none; }
+      .hero-quote { display: none; }
+      .form-panel {
+        width: 100%;
+        padding: 36px 28px;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Levý dekorativní panel -->
+  <div class="hero">
+    <span class="hero-icon">🍷</span>
+    <h1 class="hero-title">Vinora</h1>
+    <p class="hero-sub">Příběh v každé skleničce.</p>
+    <div class="hero-divider"></div>
+
+    <ul class="hero-features">
+      <li>
+        <div class="feat-icon">📖</div>
+        <div class="feat-text">
+          <strong>Osobní sbírka</strong>
+          <span>Evidujte každou láhev — odrůda, vinařství, ročník a 15 dalších parametrů</span>
+        </div>
+      </li>
+      <li>
+        <div class="feat-icon">⭐</div>
+        <div class="feat-text">
+          <strong>Hodnocení a komentáře</strong>
+          <span>Zaznamenejte si dojmy z každé degustace vlastními slovy</span>
+        </div>
+      </li>
+      <li>
+        <div class="feat-icon">🔍</div>
+        <div class="feat-text">
+          <strong>Inteligentní vyhledávání</strong>
+          <span>Načtěte detaily vína z internetu nebo přímo z URL stránky e-shopu</span>
+        </div>
+      </li>
+      <li>
+        <div class="feat-icon">👨‍👩‍👧</div>
+        <div class="feat-text">
+          <strong>Sdílení v rodině</strong>
+          <span>Každý člen rodiny má svou sbírku, všichni mohou listovat celým archivem</span>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Vinná zajímavost -->
+    <div class="facts-strip">
+      <div class="facts-strip-label">Věděli jste, že…</div>
+      <div class="fact-box" id="factBox">
+        <span class="fact-emoji" id="factEmoji"></span>
+        <div class="fact-text">
+          <strong id="factTitle"></strong>
+          <span id="factBody"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pravý panel — formulář -->
+  <div class="form-panel">
+    <div class="form-logo">
+      <span class="form-logo-icon">🍷</span>
+      <span class="form-logo-text">Vinora</span>
+    </div>
+
+    <!-- Přihlášení -->
+    <div id="loginForm">
+      <h2 class="form-heading">Přihlášení</h2>
+      <p class="form-heading-sub">Vítejte zpět ve Vinoře</p>
+
+      <div id="loginMsg" class="msg error"></div>
+
+      <div class="form-group">
+        <label for="loginEmail">E-mail</label>
+        <input type="email" id="loginEmail" placeholder="vas@email.cz" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label for="loginPassword">Heslo</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+      </div>
+
+      <button class="btn-login" id="loginBtn" onclick="prihlasit()">Přihlásit se</button>
+      <div class="divider">nebo</div>
+      <button class="btn-register" onclick="prepnout('registerForm')">Vytvořit nový účet</button>
+    </div>
+
+    <!-- Registrace -->
+    <div id="registerForm" style="display:none">
+      <h2 class="form-heading">Nový účet</h2>
+      <p class="form-heading-sub">Začněte svůj příběh s vínem</p>
+
+      <div id="registerMsg" class="msg error"></div>
+
+      <div class="form-group">
+        <label for="regName">Vaše jméno</label>
+        <input type="text" id="regName" placeholder="např. Kamil" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label for="regEmail">E-mail</label>
+        <input type="email" id="regEmail" placeholder="vas@email.cz" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label for="regPassword">Heslo</label>
+        <input type="password" id="regPassword" placeholder="Minimálně 6 znaků" autocomplete="new-password">
+      </div>
+
+      <button class="btn-login" id="regBtn" onclick="registrovat()">Vytvořit účet</button>
+      <button class="btn-back" onclick="prepnout('loginForm')">← Zpět na přihlášení</button>
+    </div>
+
+    <div style="text-align:center;margin-top:28px;padding-top:16px;border-top:1px solid #D4C0A8;font-size:11px;color:#9A8A84;line-height:2">
+      <strong style="color:#722F37">🍷 Vinora</strong>
+      &nbsp;·&nbsp; <span id="footerVersion"></span>
+      &nbsp;·&nbsp; © Kamil Juřík, 2026
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="js/config.js"></script>
+  <script>
+    document.getElementById('footerVersion').textContent = 'v' + APP_VERSION;
+
+    // ── Vinné zajímavosti ─────────────────────────────────────
+    const FAKTA = [
+      { e:'🍇', t:'Kolik hroznů na láhev?', b:'Na výrobu jedné láhve vína (0,75 l) je potřeba přibližně 600–800 hroznů, tedy asi 1,2 kg ovoce.' },
+      { e:'🌍', t:'Nejstarší víno světa', b:'Nejstarší dochované víno pochází z Gruzie — nálezy svědčí o výrobě vína již před 8 000 lety.' },
+      { e:'🥃', t:'Proč burgundské sklenice?', b:'Širší tvar burgundské sklenice zvyšuje kontakt vína se vzduchem, čímž se uvolňují aromatické látky a víno "dýchá".' },
+      { e:'🌡️', t:'Teplota skladování', b:'Ideální teplota pro dlouhodobé skladování vína je 12–14 °C s vlhkostí 70 %. Výkyvy teplot poškozují víno více než samotná teplota.' },
+      { e:'🍾', t:'Tlak v šampaňském', b:'V láhvi šampaňského je tlak přibližně 5–6 atmosfér — stejný jako v pneumatice autobusu.' },
+      { e:'🌿', t:'Biodynamické vinařství', b:'Biodynamické vinařství se řídí lunárním kalendářem. "Ovocné dny" jsou považovány za ideální pro degustaci, "kořenové dny" méně příznivé.' },
+      { e:'🎨', t:'Barva červeného vína', b:'Barvu červenému vínu dávají antokyaniny z hroznových slupek. Čím déle mošt na slupkách maceruje, tím je víno tmavší.' },
+      { e:'🔬', t:'Zbytkový cukr', b:'Suché víno má méně než 4 g/l zbytkového cukru. Sladké dezertní víno může mít i přes 200 g/l — cukr přirozeně konzervuje víno.' },
+      { e:'🧪', t:'Siřičitany a příroda', b:'Siřičitany (SO₂) se přirozeně tvoří při fermentaci každého vína. Přídavek SO₂ jako konzervant je v EU povolen a regulován.' },
+      { e:'🕰️', t:'Taniny a čas', b:'Taniny v červeném víně se časem polymerizují a víno získává hebčí, zakulacenější charakter — proto ročníky z dobrých let zrají desítky let.' },
+      { e:'🌸', t:'Rosé není směs', b:'Kvalitní rosé se nevyrábí mícháním červeného a bílého vína (výjimkou je šampaňské). Vzniká krátkou macerací červených hroznů — jen několik hodin.' },
+      { e:'🇨🇿', t:'Česká vinařská oblast', b:'Česká republika má dvě vinařské oblasti: Moravskou (94 % produkce) a Českou. Moravská se dělí na 4 podoblasti: Slováckou, Velkopavlovickou, Znojemskou a Mikulovskou.' },
+      { e:'💧', t:'Oranžové víno', b:'Oranžové víno je bílé víno vyrobené jako červené — mošt fermentuje na slupkách týdny až měsíce. Vznikají tak taniny a výrazná zlatooranžová barva.' },
+      { e:'🦴', t:'Kyseliny ve víně', b:'Víno obsahuje hlavně kyselinu vinnou, jablečnou a citronovou. Kyselost (pH 2,9–3,9) přirozeně konzervuje víno a dodává mu svěžest.' },
+      { e:'📏', t:'Proč 0,75 l?', b:'Objem 0,75 l se ustálil jako standard, protože odpovídá přibližně šesti sklenicím a původně byl kompromisem mezi anglickými galony a francouzskými litry.' },
+    ];
+
+    (function zobrazFakt() {
+      const f = FAKTA[Math.floor(Math.random() * FAKTA.length)];
+      document.getElementById('factEmoji').textContent = f.e;
+      document.getElementById('factTitle').textContent = f.t;
+      document.getElementById('factBody').textContent  = f.b;
+    })();
+
+    // ── Auth + schválení ──────────────────────────────────────
+    // ADMIN_EMAIL je definován v js/config.js
+    auth.onAuthStateChanged(async user => {
+      if (!user) return;
+      // Admin se dostane vždy — vina.html mu případně vytvoří doc
+      if (user.email === ADMIN_EMAIL) {
+        window.location.href = 'vina.html';
+        return;
+      }
+      // Zkontroluj schválení
+      const snap = await db.collection('uzivatele').doc(user.uid).get();
+      if (snap.exists && snap.data().schvaleno) {
+        window.location.href = 'vina.html';
+      } else {
+        // Čeká na schválení (nebo doc neexistuje) — odhlásit a zobrazit zprávu
+        await auth.signOut();
+        zobrazMsg(document.getElementById('loginMsg'),
+          'Váš účet čeká na schválení administrátorem. Zkuste to prosím později.');
+      }
+    });
+
+    function prepnout(zobrazit) {
+      document.getElementById('loginForm').style.display    = 'none';
+      document.getElementById('registerForm').style.display = 'none';
+      document.getElementById(zobrazit).style.display       = 'block';
+    }
+
+    async function prihlasit() {
+      const email    = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const msg      = document.getElementById('loginMsg');
+      const btn      = document.getElementById('loginBtn');
+
+      if (!email || !password) { zobrazMsg(msg, 'Vyplňte e-mail a heslo.'); return; }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Přihlašuji…';
+
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+      } catch (err) {
+        zobrazMsg(msg, prevestChybu(err.code));
+        btn.disabled = false;
+        btn.textContent = 'Přihlásit se';
+      }
+    }
+
+    async function registrovat() {
+      const name     = document.getElementById('regName').value.trim();
+      const email    = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const msg      = document.getElementById('registerMsg');
+      const btn      = document.getElementById('regBtn');
+
+      if (!name)     { zobrazMsg(msg, 'Zadejte prosím své jméno.');  return; }
+      if (!email)    { zobrazMsg(msg, 'Zadejte prosím e-mail.');      return; }
+      if (!password) { zobrazMsg(msg, 'Zadejte prosím heslo.');       return; }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Vytvářím účet…';
+
+      try {
+        const cred = await auth.createUserWithEmailAndPassword(email, password);
+        await cred.user.updateProfile({ displayName: name });
+        // Uložit uživatele do Firestore — čeká na schválení
+        await db.collection('uzivatele').doc(cred.user.uid).set({
+          jmeno:        name,
+          email:        email,
+          schvaleno:    false,
+          datumRegistrace: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+        await auth.signOut();
+        prepnout('loginForm');
+        zobrazMsg(document.getElementById('loginMsg'),
+          '✓ Účet vytvořen! Vyčkejte prosím na schválení administrátorem.');
+        document.getElementById('loginMsg').className = 'msg success';
+        document.getElementById('loginMsg').style.display = 'block';
+      } catch (err) {
+        zobrazMsg(msg, prevestChybu(err.code));
+        btn.disabled = false;
+        btn.textContent = 'Vytvořit účet';
+      }
+    }
+
+    function zobrazMsg(el, text) {
+      el.textContent = text;
+      el.style.display = 'block';
+    }
+
+    function prevestChybu(code) {
+      const map = {
+        'auth/user-not-found':         'Uživatel s tímto e-mailem neexistuje.',
+        'auth/wrong-password':         'Nesprávné heslo.',
+        'auth/invalid-email':          'Neplatný formát e-mailu.',
+        'auth/email-already-in-use':   'Tento e-mail je již registrován.',
+        'auth/weak-password':          'Heslo musí mít alespoň 6 znaků.',
+        'auth/too-many-requests':      'Příliš mnoho pokusů. Zkuste to za chvíli.',
+        'auth/invalid-credential':     'Nesprávný e-mail nebo heslo.',
+        'auth/network-request-failed': 'Chyba sítě. Zkontrolujte připojení.',
+      };
+      return map[code] || 'Nastala chyba. Zkuste to znovu.';
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return;
+      document.getElementById('registerForm').style.display !== 'none'
+        ? registrovat()
+        : prihlasit();
+    });
+  </script>
+</body>
+</html>
