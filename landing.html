@@ -57,7 +57,7 @@
       font-family: var(--sans);
       background: var(--bg);
       color: var(--text);
-      font-size: 15px;
+      font-size: 16px;
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
@@ -160,7 +160,7 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      font-size: 11.5px;
+      font-size: 12.5px;
       letter-spacing: 0.22em;
       text-transform: uppercase;
       color: var(--gold);
@@ -276,7 +276,7 @@
       font-weight: 600;
     }
     .hero-discount-label {
-      font-size: 9.5px;
+      font-size: 10.5px;
       letter-spacing: 0.18em;
       text-transform: uppercase;
       font-weight: 700;
@@ -294,7 +294,7 @@
     }
     .section-kicker {
       display: inline-block;
-      font-size: 11px;
+      font-size: 12px;
       letter-spacing: 0.22em;
       text-transform: uppercase;
       color: var(--gold);
@@ -388,9 +388,103 @@
       margin-bottom: 6px;
     }
     .feature p {
-      font-size: 13.5px;
+      font-size: 14.5px;
+      color: var(--text-2);
+      line-height: 1.6;
+    }
+
+    /* ──── Pillar feature cards (richer) ──── */
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .pillar-card {
+      padding: 26px 28px;
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      transition: border-color .18s;
+    }
+    .pillar-card:hover {
+      border-color: var(--border-2);
+    }
+    .pillar-card-wide {
+      grid-column: 1 / -1;
+    }
+    .pillar-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding-bottom: 18px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .pillar-icon {
+      width: 44px; height: 44px;
+      border-radius: var(--r-sm);
+      background: var(--gold-soft);
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .pillar-icon svg {
+      width: 22px; height: 22px;
+      stroke: currentColor; stroke-width: 1.6; fill: none;
+    }
+    .pillar-header h3 {
+      font-size: 22px;
+      font-weight: 500;
+      letter-spacing: -0.015em;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+    .pillar-sub {
+      font-family: var(--serif-italic);
+      font-style: italic;
+      font-size: 15px;
+      color: var(--text-2);
+      line-height: 1.5;
+    }
+    .pillar-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .pillar-list li {
+      padding: 8px 0 8px 22px;
+      font-size: 14.5px;
       color: var(--text-2);
       line-height: 1.55;
+      position: relative;
+      border-bottom: 1px dashed var(--border);
+    }
+    .pillar-list li:last-child { border-bottom: none; }
+    .pillar-list li::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 16px;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 6px rgba(220,179,120,0.4);
+    }
+    .pillar-list li strong {
+      color: var(--text);
+      font-weight: 600;
+      font-size: 14.5px;
+    }
+    .pillar-list-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 32px;
+    }
+
+    @media (max-width: 800px) {
+      .pillars-grid { grid-template-columns: 1fr; }
+      .pillar-list-cols { grid-template-columns: 1fr; gap: 0; }
     }
 
     /* ──── Showcase (mock cellar dashboard) ──── */
@@ -503,7 +597,7 @@
       padding: 12px 14px;
     }
     .mock-stat-label {
-      font-size: 9.5px;
+      font-size: 10.5px;
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -511,7 +605,7 @@
       margin-bottom: 4px;
     }
     .mock-stat-v { font-size: 22px; font-weight: 600; letter-spacing: -0.015em; }
-    .mock-stat-v small { font-size: 11px; color: var(--text-3); margin-left: 3px; font-weight: 500; }
+    .mock-stat-v small { font-size: 12px; color: var(--text-3); margin-left: 3px; font-weight: 500; }
 
     .mock-list {
       background: var(--bg);
@@ -534,10 +628,574 @@
     .mock-row-name { font-size: 13px; font-weight: 500; }
     .mock-row-name em { font-family: var(--serif-italic); font-style: italic; color: var(--wine); }
     .mock-row-name small { color: var(--text-3); margin-left: 4px; font-weight: 400; }
-    .mock-row-meta { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
-    .mock-row-stars { color: var(--gold); font-size: 11px; letter-spacing: 1px; }
+    .mock-row-meta { font-size: 12.5px; color: var(--text-3); margin-top: 2px; }
+    .mock-row-stars { color: var(--gold); font-size: 12px; letter-spacing: 1px; }
     .mock-row-stars .off { color: var(--text-4); }
     .mock-row-bottles { font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+
+    /* ──── Mobile section (phone frames) ──── */
+    .mobile-section {
+      background: linear-gradient(180deg, transparent, rgba(22,21,27,0.5));
+    }
+    .phone-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+    .phone-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .phone-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .phone {
+      width: 280px;
+      height: 580px;
+      border-radius: 32px;
+      background: var(--bg-elev-2);
+      border: 7px solid #1A191F;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.04),
+        0 24px 60px rgba(0,0,0,0.6),
+        0 0 0 11px rgba(0,0,0,0.3);
+      overflow: hidden;
+      position: relative;
+    }
+    .phone::before {
+      content: '';
+      position: absolute;
+      top: 6px; left: 50%;
+      transform: translateX(-50%);
+      width: 90px; height: 18px;
+      background: #0A0A0E;
+      border-radius: 0 0 12px 12px;
+      z-index: 10;
+    }
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      overflow: hidden;
+      position: relative;
+      padding-top: 26px;
+      font-size: 13px;
+    }
+
+    .ph-topbar {
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .ph-brand {
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: -0.015em;
+    }
+    .ph-brand em { font-family: var(--serif-italic); font-style: italic; color: var(--wine); }
+    .ph-icons { display: flex; gap: 4px; }
+    .ph-icon-btn {
+      width: 22px; height: 22px;
+      border-radius: 4px;
+      background: var(--bg-elev);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-2);
+    }
+    .ph-icon-btn svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 1.6; fill: none; }
+
+    .ph-back {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--text-3);
+    }
+    .ph-back svg { width: 12px; height: 12px; stroke: var(--text-2); fill: none; }
+
+    .ph-content {
+      padding: 12px 14px 80px;
+    }
+    .ph-greeting {
+      font-size: 12px;
+      color: var(--text-2);
+      margin-bottom: 3px;
+    }
+    .ph-h1 {
+      font-size: 19px;
+      font-weight: 500;
+      letter-spacing: -0.015em;
+      margin-bottom: 14px;
+    }
+
+    .ph-pick {
+      padding: 12px 14px;
+      background: linear-gradient(135deg, rgba(212,72,93,0.16) 0%, transparent 100%);
+      border: 1px solid rgba(212,72,93,0.3);
+      border-radius: var(--r-md);
+      margin-bottom: 12px;
+    }
+    .ph-pick-kicker {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--wine);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .ph-pick-kicker svg {
+      width: 10px; height: 10px;
+      stroke: currentColor; fill: none;
+    }
+    .ph-pick-name {
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: -0.005em;
+    }
+    .ph-pick-meta {
+      font-size: 11px;
+      color: var(--text-2);
+      font-family: var(--serif-italic);
+      font-style: italic;
+      margin-top: 2px;
+    }
+    .ph-pick-cta {
+      margin-top: 10px;
+      padding: 7px 0;
+      background: var(--wine);
+      color: white;
+      border-radius: 5px;
+      font-size: 11.5px;
+      font-weight: 500;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+    .ph-pick-cta svg { width: 10px; height: 10px; stroke: currentColor; fill: none; }
+
+    .ph-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .ph-stat {
+      padding: 8px 10px;
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+    }
+    .ph-stat .v {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+    }
+    .ph-stat .v small { font-size: 10px; color: var(--text-3); margin-left: 2px; }
+    .ph-stat .l {
+      font-size: 9.5px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-top: 2px;
+    }
+
+    .ph-section-h {
+      font-size: 9.5px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin: 14px 0 6px;
+    }
+    .ph-row {
+      display: grid;
+      grid-template-columns: 10px 1fr auto;
+      gap: 10px;
+      padding: 8px 10px;
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      margin-bottom: 5px;
+      align-items: center;
+    }
+    .ph-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .ph-dot-red { background: var(--wine); }
+    .ph-dot-white { background: var(--gold); }
+    .ph-row-info { min-width: 0; }
+    .ph-row-name {
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .ph-row-name em { font-family: var(--serif-italic); font-style: italic; color: var(--wine); }
+    .ph-row-meta {
+      font-size: 10px;
+      color: var(--text-3);
+      margin-top: 1px;
+    }
+    .ph-row-right { text-align: right; }
+    .ph-stars {
+      color: var(--gold);
+      font-size: 9.5px;
+      letter-spacing: 0.5px;
+    }
+    .ph-stars .off { color: var(--text-4); }
+    .ph-bottles {
+      font-size: 9.5px;
+      color: var(--text-3);
+      margin-top: 1px;
+    }
+
+    .ph-bottomnav {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(22,21,27,0.95);
+      backdrop-filter: blur(8px);
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+      padding: 4px 0 12px;
+    }
+    .ph-bn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 6px 2px 2px;
+      color: var(--text-3);
+      font-size: 8.5px;
+      letter-spacing: 0.04em;
+    }
+    .ph-bn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+    .ph-bn.active { color: var(--gold); }
+    .ph-bn-add { color: var(--wine); }
+    .ph-bn-add-bg {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--wine) 0%, var(--wine-deep) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      margin-top: -10px;
+      box-shadow: 0 4px 12px rgba(123,31,46,0.5);
+    }
+    .ph-bn-add-bg svg { width: 14px; height: 14px; }
+
+    /* Detail */
+    .ph-detail-h {
+      padding: 16px 14px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .ph-color-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-2);
+      padding: 3px 9px;
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      margin-bottom: 8px;
+    }
+    .ph-detail-h h2 {
+      font-size: 22px;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    .ph-detail-h h2 em { font-family: var(--serif-italic); font-style: italic; color: var(--wine); }
+    .ph-vintage {
+      font-family: var(--serif-italic);
+      font-style: italic;
+      color: var(--gold);
+      font-size: 56px;
+      line-height: 0.9;
+      letter-spacing: -0.02em;
+      margin: 4px 0;
+    }
+    .ph-winery {
+      font-family: var(--serif-italic);
+      font-style: italic;
+      color: var(--wine);
+      font-size: 13px;
+    }
+    .ph-region {
+      font-size: 9.5px;
+      color: var(--text-3);
+      letter-spacing: 0.04em;
+      margin-top: 3px;
+    }
+    .ph-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+      margin-top: 10px;
+    }
+    .ph-act {
+      padding: 7px;
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-size: 11px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    .ph-act svg { width: 11px; height: 11px; stroke: currentColor; fill: none; }
+    .ph-act-primary {
+      background: var(--wine);
+      color: white;
+      border-color: var(--wine);
+    }
+
+    .ph-stock {
+      padding: 12px 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .ph-stock-cell {
+      padding: 8px 10px;
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+    }
+    .ph-stock-l {
+      font-size: 9px;
+      color: var(--text-3);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .ph-stock-v {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+    }
+    .ph-stock-v .italic {
+      font-family: var(--serif-italic);
+      font-size: 10px;
+      color: var(--text-3);
+      font-weight: 400;
+      margin-left: 2px;
+    }
+
+    .ph-rating {
+      margin: 10px 14px;
+      padding: 10px 12px;
+      background: linear-gradient(135deg, rgba(220,179,120,0.06), var(--bg-elev));
+      border: 1px solid rgba(220,179,120,0.2);
+      border-left: 3px solid var(--gold);
+      border-radius: 5px;
+    }
+    .ph-rating-stars {
+      font-size: 16px;
+      color: var(--gold);
+      letter-spacing: 1.5px;
+      line-height: 1;
+      margin-bottom: 5px;
+    }
+    .ph-rating-stars .off { color: var(--text-4); }
+    .ph-rating-comment {
+      font-size: 10.5px;
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .ph-specs {
+      padding: 0 14px 80px;
+    }
+    .ph-spec-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 7px 10px;
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      font-size: 10.5px;
+    }
+    .ph-spec-row:first-child { border-radius: 5px 5px 0 0; }
+    .ph-spec-row:last-child { border-bottom: 1px solid var(--border); border-radius: 0 0 5px 5px; }
+    .ph-spec-l { color: var(--text-3); }
+
+    /* Bottom sheet */
+    .ph-blur {
+      filter: blur(2px);
+      opacity: 0.5;
+      height: 100%;
+    }
+    .ph-sheet {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      background: var(--bg-elev);
+      border-radius: 16px 16px 0 0;
+      padding: 6px 0 0;
+      max-height: 80%;
+      box-shadow: 0 -16px 48px rgba(0,0,0,0.5);
+    }
+    .ph-sheet-handle {
+      width: 30px; height: 3px;
+      background: var(--text-4);
+      border-radius: 2px;
+      margin: 0 auto 10px;
+    }
+    .ph-sheet-content {
+      padding: 6px 14px 18px;
+    }
+    .ph-sheet-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+    .ph-sheet-kicker .dot-pulse {
+      width: 5px; height: 5px;
+      background: var(--gold);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--gold);
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    .ph-sheet-title {
+      font-size: 17px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      margin-bottom: 2px;
+    }
+    .ph-sheet-sub {
+      color: var(--text-2);
+      font-size: 11px;
+      margin-bottom: 12px;
+    }
+
+    .ph-bottle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px;
+      background: var(--bg);
+      border-radius: 5px;
+      margin-bottom: 12px;
+    }
+    .ph-bottle-side { text-align: center; flex: 1; }
+    .ph-bottles-mini {
+      display: flex;
+      gap: 2px;
+      justify-content: center;
+      margin-bottom: 5px;
+    }
+    .ph-bm {
+      width: 7px; height: 20px;
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: 1px 1px 2px 2px;
+    }
+    .ph-bm.filled {
+      background: linear-gradient(180deg, var(--bg-elev-2) 0%, rgba(212,72,93,0.6) 100%);
+      border-color: rgba(212,72,93,0.4);
+    }
+    .ph-bm.opened {
+      background: var(--bg);
+      opacity: 0.4;
+    }
+    .ph-bottle-lbl {
+      font-size: 9.5px;
+      color: var(--text-3);
+    }
+    .ph-arrow {
+      color: var(--text-3);
+      font-size: 16px;
+    }
+
+    .ph-sheet-stars {
+      display: flex;
+      gap: 3px;
+      margin-bottom: 12px;
+      font-size: 20px;
+    }
+
+    .ph-sheet-note {
+      margin-bottom: 14px;
+    }
+    .ph-sheet-note-l {
+      font-size: 10px;
+      color: var(--text-2);
+      letter-spacing: 0.04em;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .ph-sheet-note-v {
+      padding: 7px 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-2);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .ph-sheet-cta {
+      padding: 10px;
+      background: var(--wine);
+      color: white;
+      border-radius: 5px;
+      font-size: 12.5px;
+      font-weight: 500;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .ph-sheet-cta svg { width: 12px; height: 12px; stroke: currentColor; fill: none; }
+
+    .mobile-note {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 15px;
+      color: var(--text-2);
+    }
+
+    @media (max-width: 1100px) {
+      .phone-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+      .phone-wrap-third { grid-column: 1 / -1; max-width: 280px; margin: 0 auto; }
+    }
+    @media (max-width: 700px) {
+      .phone-grid { grid-template-columns: 1fr; }
+      .phone-wrap-third { max-width: none; }
+      .phone { width: 100%; max-width: 280px; }
+    }
 
     /* ──── Why Vinora ──── */
     .why {
@@ -557,7 +1215,7 @@
     }
     .why-card-tag {
       display: inline-block;
-      font-size: 10.5px;
+      font-size: 11.5px;
       font-weight: 600;
       letter-spacing: 0.18em;
       text-transform: uppercase;
@@ -575,7 +1233,7 @@
       margin-bottom: 8px;
     }
     .why-card h4 em { font-family: var(--serif-italic); font-style: italic; color: var(--wine); }
-    .why-card p { font-size: 13.5px; color: var(--text-2); line-height: 1.55; }
+    .why-card p { font-size: 15px; color: var(--text-2); line-height: 1.6; }
 
     /* ──── Pricing ──── */
     .pricing-head {
@@ -615,7 +1273,7 @@
     .plan-badge {
       position: absolute;
       top: 14px; right: 14px;
-      font-size: 9.5px;
+      font-size: 10.5px;
       letter-spacing: 0.22em;
       text-transform: uppercase;
       font-weight: 700;
@@ -805,12 +1463,12 @@
     .footer-links {
       display: flex;
       gap: 18px;
-      font-size: 12.5px;
+      font-size: 13.5px;
       color: var(--text-3);
     }
     .footer-links a:hover { color: var(--text); }
     .footer-meta {
-      font-size: 11.5px;
+      font-size: 12.5px;
       color: var(--text-4);
       font-family: var(--serif-italic);
       font-style: italic;
@@ -907,58 +1565,121 @@
     <div class="container">
       <div class="features-head">
         <span class="section-kicker">Co Vinora umí</span>
-        <h2>Vše, co od vinného <em>deníku</em> čekáte.</h2>
+        <h2>Všechno, co od vinného <em>deníku</em> čekáte.<br>A pár věcí navíc.</h2>
         <p>Bez sociálního feedu. Bez nutnosti začít používat ještě další app.</p>
       </div>
 
-      <div class="features-grid">
-        <div class="feature">
-          <div class="feature-icon">
-            <svg viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></svg>
+      <!-- 5 pillar cards -->
+      <div class="pillars-grid">
+
+        <!-- 1. Capture -->
+        <div class="pillar-card">
+          <div class="pillar-header">
+            <div class="pillar-icon">
+              <svg viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            </div>
+            <div>
+              <h3>Přidání vína</h3>
+              <p class="pillar-sub">Pět cest, jak zachytit láhev — vyber, co je rychlejší.</p>
+            </div>
           </div>
-          <h3>Sken etikety</h3>
-          <p>Vyfoťte etiketu telefonem nebo screenshot z e-shopu — Vinora vyplní pole sama.</p>
+          <ul class="pillar-list">
+            <li><strong>Sken etikety</strong> — Claude Vision (přesný) nebo Tesseract (offline)</li>
+            <li><strong>Čárový kód</strong> — EAN/UPC kamerou nebo zadáním</li>
+            <li><strong>Online vyhledávání</strong> — mojelahve.cz (57 000+ vín) + Open Food Facts</li>
+            <li><strong>Načtení z URL</strong> — odkaz z e-shopu nebo katalogu</li>
+            <li><strong>Ruční zápis</strong> — když to znáte zpaměti</li>
+          </ul>
         </div>
 
-        <div class="feature">
-          <div class="feature-icon">
-            <svg viewBox="0 0 24 24"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <!-- 2. Cellar -->
+        <div class="pillar-card">
+          <div class="pillar-header">
+            <div class="pillar-icon">
+              <svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V8l7-4 7 4v13"/><path d="M9 12h6M9 16h6"/></svg>
+            </div>
+            <div>
+              <h3>Vedení sklepa</h3>
+              <p class="pillar-sub">Nezapomenete, co máte, kdy to otevřít, ani jak to chutnalo.</p>
+            </div>
           </div>
-          <h3>Hodnocení a vzpomínky</h3>
-          <p>Hvězdičky, komentář, datum. Pamatuje si, co a s kým jste pili — i deset let zpět.</p>
+          <ul class="pillar-list">
+            <li><strong>Hodnocení &amp; komentáře</strong> — pět hvězdiček a literární prostor pro vzpomínky</li>
+            <li><strong>Historie degustací</strong> — každé otevření láhve s datem, párováním a s kým</li>
+            <li><strong>Okno pití</strong> — od/do, vizuální časová osa zrání</li>
+            <li><strong>„Pít dnes"</strong> — chytré doporučení na večer (vrchol pití × dostupnost)</li>
+            <li><strong>Štítky &amp; tagy</strong> — vlastní (svatba 2024, dárek od Pavla, k masu…)</li>
+            <li><strong>Wishlist</strong> — co chcete ochutnat / koupit</li>
+          </ul>
         </div>
 
-        <div class="feature">
-          <div class="feature-icon">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <!-- 3. Insights -->
+        <div class="pillar-card">
+          <div class="pillar-header">
+            <div class="pillar-icon">
+              <svg viewBox="0 0 24 24"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
+            </div>
+            <div>
+              <h3>Pochopení sbírky</h3>
+              <p class="pillar-sub">Co o vašem vkusu vědí čísla — a kam se nejvíc oblékáte.</p>
+            </div>
           </div>
-          <h3>Sklep s rytmem</h3>
-          <p>Vyplňte počet láhví a okno pití. Vinora vám připomene, když má víno otevírat.</p>
+          <ul class="pillar-list">
+            <li><strong>Statistika</strong> — počet, hodnota, průměrné hodnocení, ročníky</li>
+            <li><strong>Mapa původu</strong> — vidíte, odkud vaše vína přicházejí</li>
+            <li><strong>Kalendář degustací</strong> — heatmapa, kdy jste co pili</li>
+            <li><strong>Párování s jídlem</strong> — z komentářů extrahuje, co k čemu sedne</li>
+            <li><strong>Mood / příležitost</strong> — sólo večer × s rodinou × speciální</li>
+            <li><strong>Podobná vína</strong> — z vašeho archivu, podle odrůdy/regionu/vinařství</li>
+          </ul>
         </div>
 
-        <div class="feature">
-          <div class="feature-icon">
-            <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+        <!-- 4. Sharing & privacy -->
+        <div class="pillar-card">
+          <div class="pillar-header">
+            <div class="pillar-icon">
+              <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+            </div>
+            <div>
+              <h3>Sdílení &amp; soukromí</h3>
+              <p class="pillar-sub">Sdílíte cíleně, ne sociálně. Co je vaše, zůstává vaše.</p>
+            </div>
           </div>
-          <h3>Veřejné sdílení</h3>
-          <p>Pošlete kamarádovi odkaz na vaše hodnocení. Bez registrace, bez aplikace, bez stažení.</p>
+          <ul class="pillar-list">
+            <li><strong>Veřejné read-only odkazy</strong> — kamarád vidí víno bez registrace</li>
+            <li><strong>Soukromé ze své povahy</strong> — vaše vína vidíte výhradně vy, ani admin ne</li>
+            <li><strong>QR kód k vínu</strong> — pošlete fyzicky, když jdete s lahví na návštěvu</li>
+            <li><strong>Vypršení odkazu</strong> — 7 dní / 30 dní / bez vypršení</li>
+            <li><strong>Export sbírky</strong> — JSON nebo CSV, kdykoli, ke stažení</li>
+            <li><strong>GDPR-compliant smazání</strong> — vše do 30 dní zmizí, včetně záloh</li>
+          </ul>
         </div>
 
-        <div class="feature">
-          <div class="feature-icon">
-            <svg viewBox="0 0 24 24"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
+        <!-- 5. Comfort / Power user -->
+        <div class="pillar-card pillar-card-wide">
+          <div class="pillar-header">
+            <div class="pillar-icon">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.5 9.5 12 12l3.5-3.5M12 12v6"/></svg>
+            </div>
+            <div>
+              <h3>Komfort denního použití</h3>
+              <p class="pillar-sub">Drobnosti, které dělají rozdíl mezi „používám" a „mám rád".</p>
+            </div>
           </div>
-          <h3>Statistika &amp; mapa</h3>
-          <p>Kalendář degustací, párování s jídlem, vinařské oblasti — vše, co se dá z vašich vín spočítat.</p>
+          <div class="pillar-list-cols">
+            <ul class="pillar-list">
+              <li><strong>PWA install</strong> — jako nativní app, i offline</li>
+              <li><strong>Sync mezi zařízeními</strong> — telefon i počítač zároveň</li>
+              <li><strong>Notifikace „vrchol pití"</strong> — i e-mailem, ne push spam</li>
+            </ul>
+            <ul class="pillar-list">
+              <li><strong>Klávesové zkratky</strong> — ⌘K hledat, ⌘N přidat, ⌘O sken</li>
+              <li><strong>Rychlé filtry</strong> — barva, ročník, hodnocení, region, tag</li>
+              <li><strong>Tmavý režim</strong> — defaultní (svítí míň ve vínovém světle)</li>
+            </ul>
+          </div>
         </div>
 
-        <div class="feature">
-          <div class="feature-icon">
-            <svg viewBox="0 0 24 24"><path d="M12 22s-8-7.58-8-13a8 8 0 0 1 16 0c0 5.42-8 13-8 13z"/><circle cx="12" cy="9" r="2.5"/></svg>
-          </div>
-          <h3>Soukromé. Vaše.</h3>
-          <p>Vaše vína vidíte jen vy. Žádný sociální feed. Žádné reklamy. Žádné prodávání dat.</p>
-        </div>
       </div>
     </div>
   </section>
@@ -1045,6 +1766,312 @@
     </div>
   </section>
 
+  <!-- MOBILE -->
+  <section class="mobile-section">
+    <div class="container">
+      <div class="showcase-head">
+        <span class="section-kicker">V kapse</span>
+        <h2>Sklep <em>v telefonu.</em><br>Etiketa kamerou, hodnocení u vína.</h2>
+        <p>Vinora je z 80 % o mobilním použití — zápis u večeře, sken etikety v restauraci, otevření láhve doma.</p>
+      </div>
+
+      <div class="phone-grid">
+        <!-- Phone 1: Cellar -->
+        <div class="phone-wrap">
+          <div class="phone-label">Sklep · Dashboard</div>
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="ph-topbar">
+                <div class="ph-brand">Vin<em>ora</em></div>
+                <div class="ph-icons">
+                  <span class="ph-icon-btn">
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                  </span>
+                  <span class="ph-icon-btn">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+                  </span>
+                </div>
+              </div>
+
+              <div class="ph-content">
+                <div class="ph-greeting">Dobrý večer, Kamile</div>
+                <div class="ph-h1">3 láhve čekají</div>
+
+                <!-- Pick today -->
+                <div class="ph-pick">
+                  <div class="ph-pick-kicker">
+                    <svg viewBox="0 0 24 24" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                    PÍT DNES
+                  </div>
+                  <div class="ph-pick-name">Frankovka 2021</div>
+                  <div class="ph-pick-meta">Vincúr Tesařík · vrchol pití</div>
+                  <div class="ph-pick-cta">
+                    Otevřít láhev
+                    <svg viewBox="0 0 24 24" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                  </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="ph-stats">
+                  <div class="ph-stat">
+                    <div class="v">5</div>
+                    <div class="l">láhví</div>
+                  </div>
+                  <div class="ph-stat">
+                    <div class="v">650<small>Kč</small></div>
+                    <div class="l">hodnota</div>
+                  </div>
+                  <div class="ph-stat">
+                    <div class="v">3.0<small style="color:var(--gold)">★</small></div>
+                    <div class="l">průměr</div>
+                  </div>
+                </div>
+
+                <div class="ph-section-h">Moje vína · 3</div>
+                <div class="ph-row">
+                  <span class="ph-dot ph-dot-red"></span>
+                  <div class="ph-row-info">
+                    <div class="ph-row-name"><em>Frankovka</em> 2021</div>
+                    <div class="ph-row-meta">Vincúr Tesařík</div>
+                  </div>
+                  <div class="ph-row-right">
+                    <div class="ph-stars">★★★★<span class="off">★</span></div>
+                    <div class="ph-bottles">4 láhve</div>
+                  </div>
+                </div>
+                <div class="ph-row">
+                  <span class="ph-dot ph-dot-white"></span>
+                  <div class="ph-row-info">
+                    <div class="ph-row-name"><em>Pinot blanc</em> 2023</div>
+                    <div class="ph-row-meta">Vincúr Tesařík</div>
+                  </div>
+                  <div class="ph-row-right">
+                    <div class="ph-stars">★★★<span class="off">★</span><span class="off">★</span></div>
+                    <div class="ph-bottles">1 láhev</div>
+                  </div>
+                </div>
+                <div class="ph-row" style="opacity:0.6">
+                  <span class="ph-dot ph-dot-red"></span>
+                  <div class="ph-row-info">
+                    <div class="ph-row-name"><em>Frankovka</em> 2018</div>
+                    <div class="ph-row-meta">vypito 28. 2.</div>
+                  </div>
+                  <div class="ph-row-right">
+                    <div class="ph-stars">★★★★★</div>
+                    <div class="ph-bottles">—</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="ph-bottomnav">
+                <a class="ph-bn active">
+                  <svg viewBox="0 0 24 24" stroke-width="1.6"><path d="M3 21h18"/><path d="M5 21V8l7-4 7 4v13"/></svg>
+                  Sklep
+                </a>
+                <a class="ph-bn">
+                  <svg viewBox="0 0 24 24" stroke-width="1.6"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  Wishlist
+                </a>
+                <a class="ph-bn ph-bn-add">
+                  <span class="ph-bn-add-bg">
+                    <svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                  </span>
+                  Přidat
+                </a>
+                <a class="ph-bn">
+                  <svg viewBox="0 0 24 24" stroke-width="1.6"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
+                  Stats
+                </a>
+                <a class="ph-bn">
+                  <svg viewBox="0 0 24 24" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+                  Profil
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone 2: Detail -->
+        <div class="phone-wrap">
+          <div class="phone-label">Detail vína</div>
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="ph-topbar">
+                <div class="ph-back">
+                  <svg viewBox="0 0 24 24" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+                  <span>FRANKOVKA</span>
+                </div>
+                <div class="ph-icons">
+                  <span class="ph-icon-btn">
+                    <svg viewBox="0 0 24 24" stroke-width="1.6"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                  </span>
+                </div>
+              </div>
+
+              <div class="ph-detail-h">
+                <div class="ph-color-tag">
+                  <span class="ph-dot ph-dot-red"></span>
+                  ČERVENÉ
+                </div>
+                <h2><em>Frankovka</em></h2>
+                <div class="ph-vintage">2021</div>
+                <div class="ph-winery">Vincúr Tesařík</div>
+                <div class="ph-region">Slovácká · Morava · ČR</div>
+
+                <div class="ph-actions">
+                  <div class="ph-act ph-act-primary">
+                    <svg viewBox="0 0 24 24" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                    Otevřít
+                  </div>
+                  <div class="ph-act">
+                    <svg viewBox="0 0 24 24" stroke-width="1.6"><path d="M18 2l4 4-10 10H8v-4z"/></svg>
+                    Upravit
+                  </div>
+                </div>
+              </div>
+
+              <div class="ph-stock">
+                <div class="ph-stock-cell">
+                  <div class="ph-stock-l">Sklad</div>
+                  <div class="ph-stock-v">4 <span class="italic">láhve</span></div>
+                </div>
+                <div class="ph-stock-cell">
+                  <div class="ph-stock-l">Pití</div>
+                  <div class="ph-stock-v" style="font-size:15px">2024–2030</div>
+                </div>
+              </div>
+
+              <div class="ph-rating">
+                <div class="ph-rating-stars">★★★★<span class="off">★</span></div>
+                <div class="ph-rating-comment italic">
+                  „Voní po višních a kořeněném dřevě. Kulaté, taniny změkly, dlouhý dozvuk s tóny tabáku."
+                </div>
+              </div>
+
+              <div class="ph-section-h" style="margin-top:14px">Specifikace</div>
+              <div class="ph-specs">
+                <div class="ph-spec-row">
+                  <span class="ph-spec-l">Odrůda</span><span>Frankovka</span>
+                </div>
+                <div class="ph-spec-row">
+                  <span class="ph-spec-l">Alkohol</span><span>13,0 %</span>
+                </div>
+                <div class="ph-spec-row">
+                  <span class="ph-spec-l">Cena</span><span>180 Kč</span>
+                </div>
+              </div>
+
+              <div class="ph-bottomnav">
+                <a class="ph-bn active">
+                  <svg viewBox="0 0 24 24" stroke-width="1.6"><path d="M3 21h18"/><path d="M5 21V8l7-4 7 4v13"/></svg>
+                  Sklep
+                </a>
+                <a class="ph-bn">
+                  <svg viewBox="0 0 24 24" stroke-width="1.6"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  Wishlist
+                </a>
+                <a class="ph-bn ph-bn-add">
+                  <span class="ph-bn-add-bg">
+                    <svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                  </span>
+                  Přidat
+                </a>
+                <a class="ph-bn">
+                  <svg viewBox="0 0 24 24" stroke-width="1.6"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
+                  Stats
+                </a>
+                <a class="ph-bn">
+                  <svg viewBox="0 0 24 24" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+                  Profil
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone 3: Open bottle bottom sheet -->
+        <div class="phone-wrap phone-wrap-third">
+          <div class="phone-label">Otevřít láhev · Bottom sheet</div>
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="ph-blur">
+                <div class="ph-topbar">
+                  <div class="ph-brand">Vin<em>ora</em></div>
+                </div>
+                <div class="ph-content">
+                  <div class="ph-greeting">Dobrý večer, Kamile</div>
+                  <div class="ph-h1">3 láhve čekají</div>
+                  <div class="ph-pick">
+                    <div class="ph-pick-kicker">PÍT DNES</div>
+                    <div class="ph-pick-name">Frankovka 2021</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="ph-sheet">
+                <div class="ph-sheet-handle"></div>
+                <div class="ph-sheet-content">
+                  <div class="ph-sheet-kicker">
+                    <span class="dot-pulse"></span>
+                    DEGUSTACE
+                  </div>
+                  <div class="ph-sheet-title">Otevřít láhev</div>
+                  <div class="ph-sheet-sub italic">Frankovka · 2021 · Vincúr</div>
+
+                  <div class="ph-bottle-row">
+                    <div class="ph-bottle-side">
+                      <div class="ph-bottles-mini">
+                        <span class="ph-bm filled"></span>
+                        <span class="ph-bm filled"></span>
+                        <span class="ph-bm filled"></span>
+                        <span class="ph-bm filled"></span>
+                        <span class="ph-bm filled"></span>
+                      </div>
+                      <div class="ph-bottle-lbl">5 láhví</div>
+                    </div>
+                    <span class="ph-arrow italic">→</span>
+                    <div class="ph-bottle-side">
+                      <div class="ph-bottles-mini">
+                        <span class="ph-bm filled"></span>
+                        <span class="ph-bm filled"></span>
+                        <span class="ph-bm filled"></span>
+                        <span class="ph-bm filled"></span>
+                        <span class="ph-bm opened"></span>
+                      </div>
+                      <div class="ph-bottle-lbl" style="color:var(--gold)">4 láhve</div>
+                    </div>
+                  </div>
+
+                  <div class="ph-sheet-stars">
+                    <span style="color:var(--gold)">★</span>
+                    <span style="color:var(--gold)">★</span>
+                    <span style="color:var(--gold)">★</span>
+                    <span style="color:var(--gold)">★</span>
+                    <span style="color:var(--text-4)">★</span>
+                  </div>
+
+                  <div class="ph-sheet-note">
+                    <div class="ph-sheet-note-l">Krátká poznámka</div>
+                    <div class="ph-sheet-note-v italic">První dojem — taniny změkly, krásně dlouhý dozvuk…</div>
+                  </div>
+
+                  <div class="ph-sheet-cta">
+                    Otevřít láhev
+                    <svg viewBox="0 0 24 24" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mobile-note italic">
+        Funguje jako PWA — instaluj na plochu telefonu, používej offline, fotka rovnou z kamery.
+      </div>
+    </div>
+  </section>
+
   <!-- WHY VINORA -->
   <section class="why">
     <div class="container">
@@ -1068,9 +2095,9 @@
         </div>
 
         <div class="why-card">
-          <span class="why-card-tag">Lokální</span>
-          <h4>Pro <em>moravský</em> i světový sklep.</h4>
-          <p>Slovácká, Mikulovská, Velkopavlovická, Znojemská — i Bordeaux, Toskánsko, Rioja. Plnohodnotně, bez ústupků.</p>
+          <span class="why-card-tag">Plnohodnotná</span>
+          <h4>Pro <em>každý</em> sklep — domácí i světový.</h4>
+          <p>Bordeaux, Toskánsko, Mosel, Rioja, Mendoza, Marlborough — i Slovácká, Mikulovská, Znojemská. Bez ústupků, bez „tohle nepatří".</p>
         </div>
       </div>
     </div>
@@ -1141,11 +2168,13 @@
         <h3>Kamil Juřík</h3>
         <div class="about-role">Sběratel · Vývojář</div>
         <p class="about-text">
-          Začal jsem stavět <em>pro sebe</em> — sbírám moravské víno a chtěl jsem appku,
-          která mi pomůže držet ve sklepě pořádek.
+          Začal jsem stavět <em>pro sebe.</em>
+          Sbírám vína — moravská, italská, francouzská, novozélandská.
+          Chtěl jsem appku, která se mnou drží sklep v pořádku
+          a&nbsp;pamatuje, čím <em>každá</em> láhev překvapila.
         </p>
         <p class="about-text">
-          Sběratelé z mého okolí říkali, že chybí. Tak ji teď otevírám i ostatním.
+          Sběratelé z mého okolí říkali, že taková appka chybí. Tak ji teď otevírám i ostatním.
         </p>
       </div>
     </div>
